@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/account_screen.dart';
+import '../../features/auth/presentation/reset_password_screen.dart';
+import '../../features/auth/presentation/sign_in_screen.dart';
+import '../../features/auth/presentation/sign_up_screen.dart';
 import '../../features/countries/presentation/country_details_screen.dart';
 import '../../features/countries/presentation/explore_screen.dart';
 import '../../features/onboarding/presentation/welcome_screen.dart';
@@ -99,18 +102,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'sign-in',
-            builder: (context, state) =>
-                AuthPlaceholderScreen(title: (l10n) => l10n.signInTitle),
+            builder: (context, state) => const SignInScreen(),
           ),
           GoRoute(
             path: 'sign-up',
-            builder: (context, state) =>
-                AuthPlaceholderScreen(title: (l10n) => l10n.signUpTitle),
+            builder: (context, state) => const SignUpScreen(),
           ),
           GoRoute(
             path: 'reset',
-            builder: (context, state) =>
-                AuthPlaceholderScreen(title: (l10n) => l10n.resetPasswordTitle),
+            builder: (context, state) => const ResetPasswordScreen(),
           ),
         ],
       ),

@@ -5,6 +5,8 @@ import 'package:battuta/core/database/database_provider.dart';
 import 'package:battuta/core/network/connectivity.dart';
 import 'package:battuta/core/platform/link_launcher.dart';
 import 'package:battuta/core/router/app_router.dart';
+import 'package:battuta/features/auth/domain/auth_repository.dart';
+import 'package:battuta/features/auth/presentation/auth_providers.dart';
 import 'package:battuta/features/countries/presentation/country_providers.dart';
 import 'package:battuta/features/settings/presentation/settings_controller.dart';
 import 'package:flutter/widgets.dart';
@@ -24,6 +26,8 @@ class TestApp {
     this.connectivity,
     this.refresher,
     this.launchedLinks,
+    this.auth,
+    this.cloud,
   );
 
   final ProviderContainer container;
@@ -33,6 +37,9 @@ class TestApp {
 
   /// Links the app asked to open, such as Open in Maps.
   final List<Uri> launchedLinks;
+
+  final FakeAuthRepository auth;
+  final FakeCloudEntries cloud;
 
   Future<void> goTo(WidgetTester tester, String location) async {
     container.read(routerProvider).go(location);
@@ -45,6 +52,8 @@ Future<TestApp> pumpApp(
   Map<String, Object> prefs = const {},
   Size size = const Size(412, 915),
   bool online = true,
+  AuthUser? signedIn,
+  FakeCloudEntries? cloud,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -56,6 +65,8 @@ Future<TestApp> pumpApp(
   final connectivity = FakeConnectivity(online: online);
   final refresher = FakeRefresher();
   final launchedLinks = <Uri>[];
+  final auth = FakeAuthRepository(signedIn: signedIn);
+  final cloudEntries = cloud ?? FakeCloudEntries();
 
   final container = ProviderContainer(
     overrides: [
@@ -71,6 +82,8 @@ Future<TestApp> pumpApp(
         launchedLinks.add(uri);
         return true;
       }),
+      authRepositoryProvider.overrideWithValue(auth),
+      cloudEntriesProvider.overrideWithValue(cloudEntries),
     ],
   );
   addTearDown(container.dispose);
@@ -79,7 +92,15 @@ Future<TestApp> pumpApp(
     UncontrolledProviderScope(container: container, child: const BattutaApp()),
   );
   await tester.pumpAndSettle();
-  return TestApp._(container, db, connectivity, refresher, launchedLinks);
+  return TestApp._(
+    container,
+    db,
+    connectivity,
+    refresher,
+    launchedLinks,
+    auth,
+    cloudEntries,
+  );
 }
 
 /// "Now" in widget tests, so date rules don't depend on the day tests run.

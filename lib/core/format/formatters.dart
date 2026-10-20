@@ -21,4 +21,8 @@ extension LocaleFormatting on BuildContext {
   /// 14 March 2026, or 14 مارس 2026.
   String formatDate(DateTime date) =>
       DateFormat.yMMMMd(_localeTag).format(date);
+
+  /// Mar 14, 2026 2:05 PM, in the app language.
+  String formatDateTime(DateTime dateTime) =>
+      DateFormat.yMMMd(_localeTag).add_jm().format(dateTime);
 }

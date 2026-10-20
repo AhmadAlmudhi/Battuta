@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/presentation/auth_providers.dart';
 import 'features/settings/domain/app_settings.dart';
 import 'features/settings/presentation/settings_controller.dart';
 import 'l10n/app_localizations.dart';
@@ -14,6 +15,9 @@ class BattutaApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
+    // Sync follows the signed-in account for the whole session, whichever
+    // screen is open (PRD section 6.7).
+    ref.listen(syncControllerProvider, (_, _) {});
 
     return MaterialApp.router(
       routerConfig: ref.watch(routerProvider),

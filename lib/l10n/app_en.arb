@@ -330,5 +330,53 @@
   "statsFirstTrip": "First trip",
   "statsNoDates": "Add visit dates to see this.",
   "statsEmptyTitle": "No countries visited yet",
-  "statsEmptyBody": "Mark your first country as visited to see your progress here."
+  "statsEmptyBody": "Mark your first country as visited to see your progress here.",
+  "authEmail": "Email",
+  "authPassword": "Password",
+  "authConfirmPassword": "Confirm password",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "authForgotPassword": "Forgot password?",
+  "authNoAccount": "Don't have an account?",
+  "authCreateAccount": "Create account",
+  "authHaveAccount": "Already have an account?",
+  "authSignUpIntro": "Back up your travels and see them on all your devices.",
+  "authResetIntro": "Enter your email and we'll send you a link to reset your password.",
+  "authSendResetLink": "Send reset link",
+  "authResetSent": "If an account exists for this email, a reset link is on its way.",
+  "authBackToSignIn": "Back to sign in",
+  "validationEmail": "Enter a valid email address.",
+  "validationPasswordRequired": "Enter your password.",
+  "validationPasswordLength": "Password must be at least 8 characters.",
+  "validationPasswordsMatch": "Passwords don't match.",
+  "authErrorInvalidCredentials": "Email or password is incorrect.",
+  "authErrorEmailInUse": "An account already exists for this email.",
+  "authErrorTooManyRequests": "Too many attempts. Try again in a few minutes.",
+  "authErrorNetwork": "No connection. Check your network and try again.",
+  "authErrorUnknown": "Something went wrong. Please try again.",
+  "accountSignedInAs": "Signed in as",
+  "accountSyncNow": "Sync now",
+  "accountSignOut": "Sign out",
+  "accountLastSynced": "Backed up. Last synced {time}.",
+  "@accountLastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "accountNotSyncedYet": "Not synced yet.",
+  "accountSyncing": "Syncing…",
+  "accountSyncOffline": "You're offline. Changes will upload when you're back online.",
+  "accountSyncFailed": "Couldn't sync. We'll try again.",
+  "accountSignOutTitle": "Sign out?",
+  "accountSignOutBody": "Your travels stay backed up in your account and are removed from this device.",
+  "accountSignOutUnsynced": "{count, plural, =1{1 change hasn't been backed up yet and will be lost.} other{{count} changes haven't been backed up yet and will be lost.}}",
+  "@accountSignOutUnsynced": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

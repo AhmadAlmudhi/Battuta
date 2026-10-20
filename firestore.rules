@@ -1,8 +1,36 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{uid}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    // Each user reads and writes only their own entries (PRD 8.4, NFR-06).
+    match /users/{uid}/entries/{countryCode} {
+      function isOwner() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+
+      // Last write wins (D-6): an entry's updatedAt never moves backwards,
+      // so a stale upload from another device can't overwrite a newer
+      // entry. The app then downloads the newer copy instead.
+      function isValidEntry() {
+        let entry = request.resource.data;
+        return entry.countryCode == countryCode
+          && entry.status in ['visited', 'wishlist']
+          && entry.createdAt is int
+          && entry.updatedAt is int
+          && entry.isDeleted is bool
+          && entry.notes is string
+          // A safety cap, not the 500-character rule: the app counts
+          // characters as people see them, and an emoji can be several
+          // code points here.
+          && entry.notes.size() <= 5000;
+      }
+
+      allow read: if isOwner();
+      allow create: if isOwner() && isValidEntry();
+      allow update: if isOwner() && isValidEntry()
+        && request.resource.data.updatedAt >= resource.data.updatedAt;
+      // Only for deleting an account (FR-AUTH-10); entries are otherwise
+      // soft-deleted so the deletion can sync (FR-SYNC-06).
+      allow delete: if isOwner();
     }
   }
 }
