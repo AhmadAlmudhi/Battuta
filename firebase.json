@@ -1,0 +1,60 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "battuta-b8451",
+          "appId": "1:444420486149:android:dfabc922917a0376ccd86c",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "battuta-b8451",
+          "appId": "1:444420486149:ios:410d2c4682b14068ccd86c",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "battuta-b8451",
+          "configurations": {
+            "android": "1:444420486149:android:dfabc922917a0376ccd86c",
+            "ios": "1:444420486149:ios:410d2c4682b14068ccd86c",
+            "web": "1:444420486149:web:35bb1278de0e4f52ccd86c"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "site": "battuta-travel",
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.wasm",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/wasm"
+          }
+        ]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}
