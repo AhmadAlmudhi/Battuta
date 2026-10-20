@@ -18,7 +18,8 @@ Guidance for Claude Code when working in this repository.
   - `TravelRepository` saves, removes (soft delete), and restores entries.
   - My travels is complete: Visited and Wishlist tabs with counts and their own URLs, sorting, search, region filter, swipe and menu Edit/Delete with Undo, and empty states.
   - Stats is complete: headline (visited of the dataset total, one decimal), a bar per region, highlights, count-up animation, and the zero state.
-  - The whole guest app is done. Not started: accounts and sign-in, cloud sync, the app icon, and CI.
+  - Accounts and cloud sync are complete: sign in, create account, reset password, Account screen with sync status, Sync now, and Sign out; guest merge on first sign-in, live two-way sync, and server-enforced last write wins.
+  - Not started: the Settings About section (FR-SET-04), the app icon and favicon, the Arabic iOS home-screen name, CI, and the first production deploy.
 
 ## Commands
 
@@ -40,6 +41,10 @@ flutter build ios --no-codesign --dart-define-from-file=env.json
 firebase deploy --only firestore:rules                     # after editing firestore.rules
 firebase deploy --only hosting                             # production deploy; only when asked
 flutterfire configure --project=battuta-b8451              # regenerate configs after adding a Firebase plugin/platform
+
+# Firebase emulators (need Java: Homebrew openjdk@21, not on the system PATH)
+PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH" firebase emulators:start --only auth,firestore --project battuta-b8451
+flutter run -d chrome --dart-define-from-file=env.json --dart-define=USE_FIREBASE_EMULATORS=true
 ```
 
 `env.json` (git-ignored) holds the REST Countries API key; `env.example.json` documents the keys. Never commit secrets (NFR-06).
@@ -124,6 +129,15 @@ Routes: `/welcome`, `/explore`, `/country/:code` (3-letter ISO), `/travels` (`?t
 
 Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must survive refresh and deep linking; browser Back/Forward must work. Explore search/filter/sort state persists across navigation for the session (FR-EXP-09). Web tab title: `Japan · Battuta` / `اليابان · بطوطة`.
 
+## Accounts and sync
+
+- `lib/features/auth/`: `AuthRepository` (Firebase Auth), `CloudEntries` (Firestore at `users/{uid}/entries/{code}`), `LocalSyncStore` (sync-level access to `travel_entries`), `SyncEngine` (merge and live sync), and `SyncController` (follows the signed-in account; kept alive by `BattutaApp`).
+- One conflict rule everywhere, `SyncRules.cloudWins`: the newer `updatedAt` wins, the cloud wins ties. The first sign-in on a device runs `merge` (download from the server, apply in one transaction, upload local winners in one batch); afterwards live sync applies server-confirmed cloud changes and uploads pending rows (`synced_at` null or older than `updated_at`) whenever online.
+- The live listener ignores documents with pending writes: only server-confirmed copies count as synced.
+- `firestore.rules` refuses updates that move `updatedAt` backwards; the engine handles that rejection by downloading and re-applying, then uploading what is still newer.
+- Sign-out: `SyncController.signOut` signs out, then `forgetUser` clears the device. `stop()` waits for in-flight sync work, so nothing writes after the device is cleared; `claimDevice` removes another account's entries before a merge (`local_data_owner`).
+- Tests use `FakeAuthRepository` and `FakeCloudEntries` (`test/helpers/fakes.dart`). The fake cloud enforces the same last-write-wins rule as the security rules.
+
 ## Navigation conventions
 
 - `GoRouter.optionURLReflectsImperativeAPIs` is on. Open detail screens (`/country/:code`, `/account`, `/settings`, sign-in) with `context.push` so in-app Back works; the URL still updates. Switch tabs with the shell (`goBranch`); use `context.go` only to reset the stack (Welcome → Explore, not-found → Explore).
@@ -151,6 +165,8 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 - `firebase.json` rewrites all paths to `/index.html`.
 - Flags are bundled (`assets/flags/{alpha2}.png`, 320 px) because the flag CDN sends no CORS headers. Use `FlagImage`, which decodes at display size and falls back to the 2-letter code. Hero tag: `flagHeroTag(code)`.
 - The REST Countries key only answers browsers from its allowed origins; until `localhost` is added in the REST Countries dashboard, Refresh data on `flutter run -d chrome` gets 403 (handled: "Couldn't refresh").
+- Emulator testing on web: use a debug build (`flutter run`). FlutterFire re-applies the Auth emulator after a reload only in debug builds; a release build restores the session against production, gets a 400, and signs out. The emulator setting is also per tab, so reload the same tab rather than opening a new one.
+- Chrome DevTools offline emulation (`Network.emulateNetworkConditions`) ends when the DevTools session disconnects, so do offline checks within one connected session.
 - To check web persistence, restart the browser, not just the page: drift's shared worker keeps the database in memory across reloads in one session, which hides unsaved writes. Launch headless Chrome with a fixed `--user-data-dir`, save, close it, start it again with the same directory, and check the data.
 - Headless Chrome has no WebGL by default, and Flutter's CPU fallback doesn't paint images. For screenshots, launch Chrome with `--use-angle=swiftshader --enable-unsafe-swiftshader`.
 - The API key is visible in the browser; it is restricted by allowed origins (`localhost`, `battuta-travel.web.app`, `battuta-travel.firebaseapp.com`).

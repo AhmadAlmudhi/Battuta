@@ -1153,6 +1153,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark your first country as visited to see your progress here.'**
   String get statsEmptyBody;
+
+  /// No description provided for @authEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get authEmail;
+
+  /// No description provided for @authPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPassword;
+
+  /// No description provided for @authConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get authConfirmPassword;
+
+  /// No description provided for @authShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get authShowPassword;
+
+  /// No description provided for @authHidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get authHidePassword;
+
+  /// No description provided for @authForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get authForgotPassword;
+
+  /// No description provided for @authNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get authNoAccount;
+
+  /// No description provided for @authCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get authCreateAccount;
+
+  /// No description provided for @authHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get authHaveAccount;
+
+  /// No description provided for @authSignUpIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your travels and see them on all your devices.'**
+  String get authSignUpIntro;
+
+  /// No description provided for @authResetIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email and we\'ll send you a link to reset your password.'**
+  String get authResetIntro;
+
+  /// No description provided for @authSendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reset link'**
+  String get authSendResetLink;
+
+  /// No description provided for @authResetSent.
+  ///
+  /// In en, this message translates to:
+  /// **'If an account exists for this email, a reset link is on its way.'**
+  String get authResetSent;
+
+  /// No description provided for @authBackToSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to sign in'**
+  String get authBackToSignIn;
+
+  /// No description provided for @validationEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get validationEmail;
+
+  /// No description provided for @validationPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password.'**
+  String get validationPasswordRequired;
+
+  /// No description provided for @validationPasswordLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters.'**
+  String get validationPasswordLength;
+
+  /// No description provided for @validationPasswordsMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords don\'t match.'**
+  String get validationPasswordsMatch;
+
+  /// No description provided for @authErrorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or password is incorrect.'**
+  String get authErrorInvalidCredentials;
+
+  /// No description provided for @authErrorEmailInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'An account already exists for this email.'**
+  String get authErrorEmailInUse;
+
+  /// No description provided for @authErrorTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again in a few minutes.'**
+  String get authErrorTooManyRequests;
+
+  /// No description provided for @authErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Check your network and try again.'**
+  String get authErrorNetwork;
+
+  /// No description provided for @authErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get authErrorUnknown;
+
+  /// No description provided for @accountSignedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as'**
+  String get accountSignedInAs;
+
+  /// No description provided for @accountSyncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get accountSyncNow;
+
+  /// No description provided for @accountSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get accountSignOut;
+
+  /// No description provided for @accountLastSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Backed up. Last synced {time}.'**
+  String accountLastSynced(String time);
+
+  /// No description provided for @accountNotSyncedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced yet.'**
+  String get accountNotSyncedYet;
+
+  /// No description provided for @accountSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get accountSyncing;
+
+  /// No description provided for @accountSyncOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Changes will upload when you\'re back online.'**
+  String get accountSyncOffline;
+
+  /// No description provided for @accountSyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t sync. We\'ll try again.'**
+  String get accountSyncFailed;
+
+  /// No description provided for @accountSignOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out?'**
+  String get accountSignOutTitle;
+
+  /// No description provided for @accountSignOutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your travels stay backed up in your account and are removed from this device.'**
+  String get accountSignOutBody;
+
+  /// No description provided for @accountSignOutUnsynced.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change hasn\'t been backed up yet and will be lost.} other{{count} changes haven\'t been backed up yet and will be lost.}}'**
+  String accountSignOutUnsynced(int count);
 }
 
 class _AppLocalizationsDelegate

@@ -613,4 +613,126 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get statsEmptyBody => 'سجّل زيارتك لأول دولة لترى تقدّمك هنا.';
+
+  @override
+  String get authEmail => 'البريد الإلكتروني';
+
+  @override
+  String get authPassword => 'كلمة المرور';
+
+  @override
+  String get authConfirmPassword => 'تأكيد كلمة المرور';
+
+  @override
+  String get authShowPassword => 'إظهار كلمة المرور';
+
+  @override
+  String get authHidePassword => 'إخفاء كلمة المرور';
+
+  @override
+  String get authForgotPassword => 'نسيت كلمة المرور؟';
+
+  @override
+  String get authNoAccount => 'ليس لديك حساب؟';
+
+  @override
+  String get authCreateAccount => 'إنشاء حساب';
+
+  @override
+  String get authHaveAccount => 'لديك حساب بالفعل؟';
+
+  @override
+  String get authSignUpIntro =>
+      'احفظ رحلاتك احتياطيًا وشاهدها على جميع أجهزتك.';
+
+  @override
+  String get authResetIntro =>
+      'أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.';
+
+  @override
+  String get authSendResetLink => 'إرسال رابط إعادة التعيين';
+
+  @override
+  String get authResetSent =>
+      'إذا كان هناك حساب بهذا البريد، فسيصلك رابط إعادة التعيين قريبًا.';
+
+  @override
+  String get authBackToSignIn => 'العودة إلى تسجيل الدخول';
+
+  @override
+  String get validationEmail => 'أدخل بريدًا إلكترونيًا صحيحًا.';
+
+  @override
+  String get validationPasswordRequired => 'أدخل كلمة المرور.';
+
+  @override
+  String get validationPasswordLength => 'يجب ألا تقل كلمة المرور عن 8 أحرف.';
+
+  @override
+  String get validationPasswordsMatch => 'كلمتا المرور غير متطابقتين.';
+
+  @override
+  String get authErrorInvalidCredentials =>
+      'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+
+  @override
+  String get authErrorEmailInUse => 'يوجد حساب بهذا البريد الإلكتروني بالفعل.';
+
+  @override
+  String get authErrorTooManyRequests =>
+      'محاولات كثيرة. حاول مرة أخرى بعد بضع دقائق.';
+
+  @override
+  String get authErrorNetwork =>
+      'لا يوجد اتصال. تحقّق من الشبكة وحاول مرة أخرى.';
+
+  @override
+  String get authErrorUnknown => 'حدث خطأ ما. حاول مرة أخرى.';
+
+  @override
+  String get accountSignedInAs => 'مسجّل الدخول باسم';
+
+  @override
+  String get accountSyncNow => 'مزامنة الآن';
+
+  @override
+  String get accountSignOut => 'تسجيل الخروج';
+
+  @override
+  String accountLastSynced(String time) {
+    return 'تم الحفظ الاحتياطي. آخر مزامنة $time.';
+  }
+
+  @override
+  String get accountNotSyncedYet => 'لم تتم المزامنة بعد.';
+
+  @override
+  String get accountSyncing => 'جارٍ المزامنة…';
+
+  @override
+  String get accountSyncOffline =>
+      'أنت غير متصل. ستُرفع التغييرات عند عودة الاتصال.';
+
+  @override
+  String get accountSyncFailed => 'تعذّرت المزامنة. سنحاول مرة أخرى.';
+
+  @override
+  String get accountSignOutTitle => 'تسجيل الخروج؟';
+
+  @override
+  String get accountSignOutBody =>
+      'تبقى رحلاتك محفوظة في حسابك، وستُزال من هذا الجهاز.';
+
+  @override
+  String accountSignOutUnsynced(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count تغييرًا لم تُحفظ احتياطيًا بعد وستُفقد.',
+      few: '$count تغييرات لم تُحفظ احتياطيًا بعد وستُفقد.',
+      two: 'تغييران لم يُحفظا احتياطيًا بعد وسيُفقدان.',
+      one: 'تغيير واحد لم يُحفظ احتياطيًا بعد وسيُفقد.',
+    );
+    return '$_temp0';
+  }
 }

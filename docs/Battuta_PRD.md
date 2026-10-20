@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.6 |
+| Version | 1.7 |
 | Status | Ready for development |
 | Date | 20 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.7 | 20 Oct 2026 | Accounts and sync built. Security rules now also enforce last write wins and the entry shape. A new `local_data_owner` setting makes sure one account's entries never merge into another's after a session ends without Sign out. Sync is tested against the Firebase emulators. |
 | 1.6 | 20 Oct 2026 | Flutter upgraded to 3.47.7. Drift 2.35.2 or newer is required on web, because older versions don't save transactions to IndexedDB. The web database worker is compiled from source. iOS builds with CocoaPods until Xcode 26.2 or later is available. |
 | 1.5 | 20 Oct 2026 | Flags are bundled as assets because the flag CDN sends no CORS headers. A newer bundled snapshot replaces older local data. Search runs in memory, so `search_en` and `search_ar` are removed; `name_official_ar` is added (schema 2). Refresh attempt times are stored in `auto_refresh_at` and `manual_refresh_at`. `connectivity_plus` added; `cached_network_image` removed. |
 | 1.4 | 20 Oct 2026 | Firebase project created as `battuta-b8451`. Production URL changed to `battuta-travel.web.app` because the `battuta` Hosting name was taken; the app name stays Battuta. App ID set to `com.ahmadalmudhi.battuta`. Firestore location set to `eur3`. |
@@ -532,6 +533,8 @@ The merge compares the local and cloud entry for each country code and applies t
 
 > **Note:** Soft-deleted entries take part in the merge like any other entry, so a newer deletion wins over an older edit. "Older" and "newer" compare the updatedAt field.
 
+> **Another account's entries:** if a session ends without Sign out (for example after a password change on another device), its entries stay on the device and the app continues as a guest. When a different account then signs in, those entries are removed before the merge (`local_data_owner`, section 8.5), so one account's travels never merge into another's. The same account signing back in keeps them, including changes not yet uploaded.
+
 ### 7.4 Offline behavior
 
 | Situation | Behavior |
@@ -666,16 +669,15 @@ Screens never show rows where `is_deleted` is 1. Soft-deleted rows are purged af
 
 Each entry is a Firestore document at `users/{uid}/entries/{countryCode}`. It holds the same fields as `travel_entries` except `synced_at`, in camelCase (for example `visitedOn`, `updatedAt`, `isDeleted`). Using the country code as the document ID makes duplicates impossible.
 
-Security rules allow each user to read and write only their own documents:
+Security rules (`firestore.rules`) allow each user to read and write only their own entries. They also check each entry's shape and enforce last write wins (D-6) on the server: an update may not move `updatedAt` backwards, so a stale upload from another device is refused. The app then downloads the newer copy instead.
 
 ```text
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{uid}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-    }
-  }
+match /users/{uid}/entries/{countryCode} {
+  allow read: if isOwner();
+  allow create: if isOwner() && isValidEntry();
+  allow update: if isOwner() && isValidEntry()
+    && request.resource.data.updatedAt >= resource.data.updatedAt;
+  allow delete: if isOwner();
 }
 ```
 
@@ -691,6 +693,7 @@ Settings are stored with shared_preferences, which uses the browser's local stor
 | `auto_refresh_at` | Integer | none | Last automatic refresh attempt; limits attempts to once every 7 days (NFR-13) |
 | `manual_refresh_at` | Integer | none | Last manual refresh API call; enforces the 60-minute limit |
 | `merged_uids` | String list | empty | Users whose guest merge finished on this device |
+| `local_data_owner` | String | none | The account whose entries are on the device; none for guest entries |
 | `last_sync_at` | Integer | none | Shown on the Account screen |
 
 ### 8.6 Validation rules and messages
@@ -884,6 +887,7 @@ test/                   mirrors lib/
 - **API key:** stored in `env.json`, which is git-ignored, and passed at build time with `--dart-define-from-file=env.json`. A committed `env.example.json` documents the expected keys. CI receives it from an encrypted GitHub secret.
 - **Allowed origins:** the REST Countries key must list `localhost` for development and both production hostnames, `battuta-travel.web.app` and `battuta-travel.firebaseapp.com`. Without them, browsers block the refresh calls. Preview builds don't need the API because they use the bundled snapshot.
 - **Firebase:** configured for web, Android, and iOS with the FlutterFire CLI. Email and password is the only sign-in provider enabled.
+- **Firebase emulators:** `firebase.json` configures the Auth (port 9099) and Firestore (port 8080) emulators for testing accounts, sync, and security rules locally. A build made with `--dart-define=USE_FIREBASE_EMULATORS=true` connects to them instead of the real project.
 - **Web routing:** the app calls `usePathUrlStrategy()` before `runApp`, and `firebase.json` rewrites every path to `/index.html` so direct links and refreshes work.
 - **Database on web:** `web/` contains `drift_worker.js`, compiled from `tool/drift_worker.dart` with the drift and sqlite3 versions the app uses, and `sqlite3.wasm` (served as `application/wasm`) from the matching sqlite3 release. Drift picks the best storage the browser supports. Leave COOP and COEP headers off for 1.0: they can block cross-origin resources such as flag images, and drift works without them. Drift must be 2.35.1 or newer: earlier versions don't save transactions to IndexedDB, so entries would be lost when the browser closes (NFR-05).
 - **Flags:** Flutter web draws images through the canvas, which needs CORS headers from the image server, and the flag CDN sends none. The HTML image fallback would place a separate HTML element over the canvas for every flag in the scrolling grid, which risks stutter (NFR-03). So flags are bundled: `tool/fetch_flags.dart` saves a 320 px PNG per country in `assets/flags/` (about 3 MB in total), and the app shows them with `Image.asset`, decoded at display size. On web they load from the app's own host only when shown. They also work offline from the first launch. A country without a bundled flag shows its 2-letter code.

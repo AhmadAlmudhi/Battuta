@@ -603,4 +603,124 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get statsEmptyBody =>
       'Mark your first country as visited to see your progress here.';
+
+  @override
+  String get authEmail => 'Email';
+
+  @override
+  String get authPassword => 'Password';
+
+  @override
+  String get authConfirmPassword => 'Confirm password';
+
+  @override
+  String get authShowPassword => 'Show password';
+
+  @override
+  String get authHidePassword => 'Hide password';
+
+  @override
+  String get authForgotPassword => 'Forgot password?';
+
+  @override
+  String get authNoAccount => 'Don\'t have an account?';
+
+  @override
+  String get authCreateAccount => 'Create account';
+
+  @override
+  String get authHaveAccount => 'Already have an account?';
+
+  @override
+  String get authSignUpIntro =>
+      'Back up your travels and see them on all your devices.';
+
+  @override
+  String get authResetIntro =>
+      'Enter your email and we\'ll send you a link to reset your password.';
+
+  @override
+  String get authSendResetLink => 'Send reset link';
+
+  @override
+  String get authResetSent =>
+      'If an account exists for this email, a reset link is on its way.';
+
+  @override
+  String get authBackToSignIn => 'Back to sign in';
+
+  @override
+  String get validationEmail => 'Enter a valid email address.';
+
+  @override
+  String get validationPasswordRequired => 'Enter your password.';
+
+  @override
+  String get validationPasswordLength =>
+      'Password must be at least 8 characters.';
+
+  @override
+  String get validationPasswordsMatch => 'Passwords don\'t match.';
+
+  @override
+  String get authErrorInvalidCredentials => 'Email or password is incorrect.';
+
+  @override
+  String get authErrorEmailInUse => 'An account already exists for this email.';
+
+  @override
+  String get authErrorTooManyRequests =>
+      'Too many attempts. Try again in a few minutes.';
+
+  @override
+  String get authErrorNetwork =>
+      'No connection. Check your network and try again.';
+
+  @override
+  String get authErrorUnknown => 'Something went wrong. Please try again.';
+
+  @override
+  String get accountSignedInAs => 'Signed in as';
+
+  @override
+  String get accountSyncNow => 'Sync now';
+
+  @override
+  String get accountSignOut => 'Sign out';
+
+  @override
+  String accountLastSynced(String time) {
+    return 'Backed up. Last synced $time.';
+  }
+
+  @override
+  String get accountNotSyncedYet => 'Not synced yet.';
+
+  @override
+  String get accountSyncing => 'Syncing…';
+
+  @override
+  String get accountSyncOffline =>
+      'You\'re offline. Changes will upload when you\'re back online.';
+
+  @override
+  String get accountSyncFailed => 'Couldn\'t sync. We\'ll try again.';
+
+  @override
+  String get accountSignOutTitle => 'Sign out?';
+
+  @override
+  String get accountSignOutBody =>
+      'Your travels stay backed up in your account and are removed from this device.';
+
+  @override
+  String accountSignOutUnsynced(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes haven\'t been backed up yet and will be lost.',
+      one: '1 change hasn\'t been backed up yet and will be lost.',
+    );
+    return '$_temp0';
+  }
 }
