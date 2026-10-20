@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.5 |
+| Version | 1.6 |
 | Status | Ready for development |
 | Date | 20 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.6 | 20 Oct 2026 | Flutter upgraded to 3.47.7. Drift 2.35.2 or newer is required on web, because older versions don't save transactions to IndexedDB. The web database worker is compiled from source. iOS builds with CocoaPods until Xcode 26.2 or later is available. |
 | 1.5 | 20 Oct 2026 | Flags are bundled as assets because the flag CDN sends no CORS headers. A newer bundled snapshot replaces older local data. Search runs in memory, so `search_en` and `search_ar` are removed; `name_official_ar` is added (schema 2). Refresh attempt times are stored in `auto_refresh_at` and `manual_refresh_at`. `connectivity_plus` added; `cached_network_image` removed. |
 | 1.4 | 20 Oct 2026 | Firebase project created as `battuta-b8451`. Production URL changed to `battuta-travel.web.app` because the `battuta` Hosting name was taken; the app name stays Battuta. App ID set to `com.ahmadalmudhi.battuta`. Firestore location set to `eur3`. |
 | 1.3 | 20 Oct 2026 | Product renamed بطوطة (Battuta). Production URL changed to `battuta.web.app`. |
@@ -873,7 +874,7 @@ assets/data/countries_snapshot.json
 assets/fonts/           Inter and IBM Plex Sans Arabic, with their licenses
 assets/flags/           320 px PNG flag per country (about 3 MB)
 web/                    index.html, icons, sqlite3.wasm, drift_worker.js
-tool/                   snapshot and flag scripts
+tool/                   snapshot and flag scripts, web database worker source
 firebase.json           Hosting configuration
 test/                   mirrors lib/
 ```
@@ -884,9 +885,9 @@ test/                   mirrors lib/
 - **Allowed origins:** the REST Countries key must list `localhost` for development and both production hostnames, `battuta-travel.web.app` and `battuta-travel.firebaseapp.com`. Without them, browsers block the refresh calls. Preview builds don't need the API because they use the bundled snapshot.
 - **Firebase:** configured for web, Android, and iOS with the FlutterFire CLI. Email and password is the only sign-in provider enabled.
 - **Web routing:** the app calls `usePathUrlStrategy()` before `runApp`, and `firebase.json` rewrites every path to `/index.html` so direct links and refreshes work.
-- **Database on web:** `web/` contains `sqlite3.wasm` (served as `application/wasm`) and `drift_worker.js`, both downloaded from the same drift GitHub release as the `drift` package version in use. Drift picks the best storage the browser supports. Leave COOP and COEP headers off for 1.0: they can block cross-origin resources such as flag images, and drift works without them. Drift 2.34 does not flush transactions to IndexedDB on web (fixed in drift 2.35.1); until the app can use 2.35.1, `AppDatabase` runs one statement after each transaction to make drift flush, so saved entries survive closing the browser (NFR-05).
+- **Database on web:** `web/` contains `drift_worker.js`, compiled from `tool/drift_worker.dart` with the drift and sqlite3 versions the app uses, and `sqlite3.wasm` (served as `application/wasm`) from the matching sqlite3 release. Drift picks the best storage the browser supports. Leave COOP and COEP headers off for 1.0: they can block cross-origin resources such as flag images, and drift works without them. Drift must be 2.35.1 or newer: earlier versions don't save transactions to IndexedDB, so entries would be lost when the browser closes (NFR-05).
 - **Flags:** Flutter web draws images through the canvas, which needs CORS headers from the image server, and the flag CDN sends none. The HTML image fallback would place a separate HTML element over the canvas for every flag in the scrolling grid, which risks stutter (NFR-03). So flags are bundled: `tool/fetch_flags.dart` saves a 320 px PNG per country in `assets/flags/` (about 3 MB in total), and the app shows them with `Image.asset`, decoded at display size. On web they load from the app's own host only when shown. They also work offline from the first launch. A country without a bundled flag shows its 2-letter code.
-- **iOS:** building and testing needs a Mac with Xcode. The CI pipeline compiles iOS without code signing on a macOS runner.
+- **iOS:** building and testing needs a Mac with Xcode. The CI pipeline compiles iOS without code signing on a macOS runner. iOS uses CocoaPods for now, because Firebase's Swift Package Manager release needs Xcode 26.2 or later. Firebase no longer publishes new CocoaPods releases, so the project moves to Swift Package Manager once Xcode 26.2 or later is available locally.
 
 > **Constraint:** On web, the API key is visible in the browser. Allowed origins stop other websites from using it in their pages, but not scripts running outside a browser. This is accepted for 1.0 because the app falls back to bundled data if the key is blocked. A later release can move API calls to a backend, such as a Cloud Function, which requires Firebase's pay-as-you-go plan.
 
@@ -939,7 +940,7 @@ A requirement is done when:
 - REST Countries returns Arabic names under the `ara` translation key. Confirmed: every record has one except Somaliland, which the app skips for missing codes.
 - Flag images from the CDN display in Flutter web. Not true: the CDN sends no CORS headers, so flags are bundled (section 11.4).
 - The REST Countries free plan and Firebase's free plan, including Hosting, are enough for release 1.0.
-- A Mac with Xcode is available to build and test the iOS app.
+- A Mac with Xcode is available to build and test the iOS app; Xcode 26.2 or later is needed to switch iOS to Swift Package Manager.
 
 #### Dependencies
 

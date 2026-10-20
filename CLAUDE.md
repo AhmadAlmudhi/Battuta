@@ -71,8 +71,9 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 
 ## Dependency constraints
 
-- The Flutter SDK (3.41.9) pins `meta` 1.17.0. That holds `drift` below 2.35 (`>=2.34.0 <2.35.0`, because newer `drift_dev` needs a newer analyzer) and `flutter_riverpod` at 2.x. Use Riverpod 2 APIs (`Provider`, `FutureProvider`, `StreamProvider`, `Notifier`), without code generation.
-- **drift 2.34.x web bug (#3864):** a transaction's COMMIT is never flushed to IndexedDB, so its writes are lost when the browser closes. `AppDatabase.transaction` is overridden to run `SELECT 1` after the outermost transaction on web, which makes drift flush. Keep all writes going through `AppDatabase` (not a raw executor). Remove the override after upgrading Flutter and drift to 2.35.1+ (also update `web/drift_worker.js` and `web/sqlite3.wasm` from that release).
+- Flutter 3.47.7 (Dart 3.13.5). Code generation: drift 2.35.2 with drift_dev 2.35.1, freezed 4, json_serializable 6.15, on analyzer 14.
+- drift must stay at **2.35.1 or newer**: older versions never flush transactions to IndexedDB on web, so saved entries are lost when the browser closes (drift #3864).
+- The app still uses Riverpod 2.x (`flutter_riverpod` 2.6.1) and go_router 17. Riverpod 3 and go_router 18 now resolve, but each is a separate migration. Until then, use Riverpod 2 APIs (`Provider`, `FutureProvider`, `StreamProvider`, `Notifier`), without code generation.
 
 ## Country data facts
 
@@ -134,11 +135,15 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 - After adding or removing a plugin, run `flutter clean` if the web app throws `MissingPluginException`: the web plugin registrant in `.dart_tool/flutter_build/` can go stale. Widget tests won't catch it because they mock plugins.
 - Android uses Kotlin Gradle plugin 2.3.20 (Firebase Android SDK metadata is Kotlin 2.4) and the `kotlin { compilerOptions { ... } }` DSL.
 - The iOS deployment target is 15.0 (required by `cloud_firestore`, and the PRD minimum). If `pod install` says the specs repo is out of date, run `cd ios && pod install --repo-update`.
-- Firebase is moving iOS from CocoaPods to Swift Package Manager; new Firebase pods stop after October 2026. Plan to switch Flutter's iOS build to SwiftPM.
+- iOS builds with CocoaPods: `pubspec.yaml` sets `flutter: config: enable-swift-package-manager: false`, because Firebase's Swift Package Manager release (13.x) needs Xcode 26.2 or later and this Mac has Xcode 26.1. Firebase stopped publishing new CocoaPods releases after 12.19.0 (October 2026), so after updating Xcode, remove that setting to move iOS to Swift Package Manager.
+- Gradle 8.14 and Android Gradle Plugin 8.11 work but Flutter warns their support will be dropped; moving to AGP 9 is a pending, separate change.
 
 ## Web platform gotchas
 
-- Drift on web needs `web/sqlite3.wasm` and `web/drift_worker.js`, both downloaded from the drift GitHub release that matches the `drift` version in `pubspec.lock` (`gh release download drift-<version> -R simolus3/drift -p drift_worker.js -p sqlite3.wasm -D web --clobber`). Update them whenever drift is upgraded. Don't add COOP/COEP headers; without them drift uses IndexedDB storage, which is expected.
+- Drift on web needs `web/drift_worker.js` and `web/sqlite3.wasm`. Regenerate both whenever drift or sqlite3 changes in `pubspec.lock`:
+  - `dart compile js -O4 --no-source-maps -o web/drift_worker.js tool/drift_worker.dart` (compiled from the locked drift and sqlite3 versions, so the worker always matches the app; delete the `web/drift_worker.js.deps` it leaves behind).
+  - `gh release download sqlite3-<version> -R simolus3/sqlite3.dart -p sqlite3.wasm -D web --clobber`, with the `sqlite3` version from `pubspec.lock`.
+- Don't add COOP/COEP headers; without them drift uses IndexedDB storage, which is expected.
 - `firebase.json` rewrites all paths to `/index.html`.
 - Flags are bundled (`assets/flags/{alpha2}.png`, 320 px) because the flag CDN sends no CORS headers. Use `FlagImage`, which decodes at display size and falls back to the 2-letter code. Hero tag: `flagHeroTag(code)`.
 - The REST Countries key only answers browsers from its allowed origins; until `localhost` is added in the REST Countries dashboard, Refresh data on `flutter run -d chrome` gets 403 (handled: "Couldn't refresh").

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'country.dart';
@@ -9,6 +9,7 @@ part of 'country.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
@@ -29,16 +30,21 @@ $CountryCopyWith<Country> get copyWith => _$CountryCopyWithImpl<Country>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Country&&(identical(other.code, code) || other.code == code)&&(identical(other.alpha2, alpha2) || other.alpha2 == alpha2)&&(identical(other.nameEn, nameEn) || other.nameEn == nameEn)&&(identical(other.nameOfficialEn, nameOfficialEn) || other.nameOfficialEn == nameOfficialEn)&&(identical(other.nameAr, nameAr) || other.nameAr == nameAr)&&(identical(other.nameOfficialAr, nameOfficialAr) || other.nameOfficialAr == nameOfficialAr)&&(identical(other.region, region) || other.region == region)&&(identical(other.subregion, subregion) || other.subregion == subregion)&&(identical(other.capital, capital) || other.capital == capital)&&(identical(other.population, population) || other.population == population)&&(identical(other.areaKm2, areaKm2) || other.areaKm2 == areaKm2)&&const DeepCollectionEquality().equals(other.languages, languages)&&const DeepCollectionEquality().equals(other.currencies, currencies)&&const DeepCollectionEquality().equals(other.borders, borders)&&const DeepCollectionEquality().equals(other.timezones, timezones)&&(identical(other.mapsUrl, mapsUrl) || other.mapsUrl == mapsUrl)&&(identical(other.flagAlt, flagAlt) || other.flagAlt == flagAlt)&&(identical(other.flagColor, flagColor) || other.flagColor == flagColor));
+  final _this = this as Country;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Country&&(identical(other.code, _this.code) || other.code == _this.code)&&(identical(other.alpha2, _this.alpha2) || other.alpha2 == _this.alpha2)&&(identical(other.nameEn, _this.nameEn) || other.nameEn == _this.nameEn)&&(identical(other.nameOfficialEn, _this.nameOfficialEn) || other.nameOfficialEn == _this.nameOfficialEn)&&(identical(other.nameAr, _this.nameAr) || other.nameAr == _this.nameAr)&&(identical(other.nameOfficialAr, _this.nameOfficialAr) || other.nameOfficialAr == _this.nameOfficialAr)&&(identical(other.region, _this.region) || other.region == _this.region)&&(identical(other.subregion, _this.subregion) || other.subregion == _this.subregion)&&(identical(other.capital, _this.capital) || other.capital == _this.capital)&&(identical(other.population, _this.population) || other.population == _this.population)&&(identical(other.areaKm2, _this.areaKm2) || other.areaKm2 == _this.areaKm2)&&const DeepCollectionEquality().equals(other.languages, _this.languages)&&const DeepCollectionEquality().equals(other.currencies, _this.currencies)&&const DeepCollectionEquality().equals(other.borders, _this.borders)&&const DeepCollectionEquality().equals(other.timezones, _this.timezones)&&(identical(other.mapsUrl, _this.mapsUrl) || other.mapsUrl == _this.mapsUrl)&&(identical(other.flagAlt, _this.flagAlt) || other.flagAlt == _this.flagAlt)&&(identical(other.flagColor, _this.flagColor) || other.flagColor == _this.flagColor));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,code,alpha2,nameEn,nameOfficialEn,nameAr,nameOfficialAr,region,subregion,capital,population,areaKm2,const DeepCollectionEquality().hash(languages),const DeepCollectionEquality().hash(currencies),const DeepCollectionEquality().hash(borders),const DeepCollectionEquality().hash(timezones),mapsUrl,flagAlt,flagColor);
+int get hashCode {
+  final _this = this as Country;
+  return Object.hash(runtimeType,_this.code,_this.alpha2,_this.nameEn,_this.nameOfficialEn,_this.nameAr,_this.nameOfficialAr,_this.region,_this.subregion,_this.capital,_this.population,_this.areaKm2,const DeepCollectionEquality().hash(_this.languages),const DeepCollectionEquality().hash(_this.currencies),const DeepCollectionEquality().hash(_this.borders),const DeepCollectionEquality().hash(_this.timezones),_this.mapsUrl,_this.flagAlt,_this.flagColor);
+}
 
 @override
 String toString() {
-  return 'Country(code: $code, alpha2: $alpha2, nameEn: $nameEn, nameOfficialEn: $nameOfficialEn, nameAr: $nameAr, nameOfficialAr: $nameOfficialAr, region: $region, subregion: $subregion, capital: $capital, population: $population, areaKm2: $areaKm2, languages: $languages, currencies: $currencies, borders: $borders, timezones: $timezones, mapsUrl: $mapsUrl, flagAlt: $flagAlt, flagColor: $flagColor)';
+  final _this = this as Country;
+  return 'Country(code: ${_this.code}, alpha2: ${_this.alpha2}, nameEn: ${_this.nameEn}, nameOfficialEn: ${_this.nameOfficialEn}, nameAr: ${_this.nameAr}, nameOfficialAr: ${_this.nameOfficialAr}, region: ${_this.region}, subregion: ${_this.subregion}, capital: ${_this.capital}, population: ${_this.population}, areaKm2: ${_this.areaKm2}, languages: ${_this.languages}, currencies: ${_this.currencies}, borders: ${_this.borders}, timezones: ${_this.timezones}, mapsUrl: ${_this.mapsUrl}, flagAlt: ${_this.flagAlt}, flagColor: ${_this.flagColor})';
 }
 
 
@@ -67,7 +73,7 @@ class _$CountryCopyWithImpl<$Res>
 /// Create a copy of Country
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? code = null,Object? alpha2 = null,Object? nameEn = null,Object? nameOfficialEn = null,Object? nameAr = freezed,Object? nameOfficialAr = freezed,Object? region = null,Object? subregion = freezed,Object? capital = freezed,Object? population = null,Object? areaKm2 = freezed,Object? languages = null,Object? currencies = null,Object? borders = null,Object? timezones = null,Object? mapsUrl = freezed,Object? flagAlt = freezed,Object? flagColor = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(Country(
 code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,alpha2: null == alpha2 ? _self.alpha2 : alpha2 // ignore: cast_nullable_to_non_nullable
 as String,nameEn: null == nameEn ? _self.nameEn : nameEn // ignore: cast_nullable_to_non_nullable
@@ -227,7 +233,7 @@ return $default(_that.code,_that.alpha2,_that.nameEn,_that.nameOfficialEn,_that.
 
 
 class _Country extends Country {
-  const _Country({required this.code, required this.alpha2, required this.nameEn, required this.nameOfficialEn, this.nameAr, this.nameOfficialAr, required this.region, this.subregion, this.capital, required this.population, this.areaKm2, final  List<String> languages = const [], final  List<Currency> currencies = const [], final  List<String> borders = const [], final  List<String> timezones = const [], this.mapsUrl, this.flagAlt, this.flagColor}): _languages = languages,_currencies = currencies,_borders = borders,_timezones = timezones,super._();
+  const _Country({required this.code, required this.alpha2, required this.nameEn, required this.nameOfficialEn, this.nameAr, this.nameOfficialAr, required this.region, this.subregion, this.capital, required this.population, this.areaKm2,  List<String> languages = const [],  List<Currency> currencies = const [],  List<String> borders = const [],  List<String> timezones = const [], this.mapsUrl, this.flagAlt, this.flagColor}): _languages = languages,_currencies = currencies,_borders = borders,_timezones = timezones,super._();
   
 
 /// 3-letter ISO code, for example SAU. Primary key and route parameter.
@@ -288,16 +294,18 @@ _$CountryCopyWith<_Country> get copyWith => __$CountryCopyWithImpl<_Country>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Country&&(identical(other.code, code) || other.code == code)&&(identical(other.alpha2, alpha2) || other.alpha2 == alpha2)&&(identical(other.nameEn, nameEn) || other.nameEn == nameEn)&&(identical(other.nameOfficialEn, nameOfficialEn) || other.nameOfficialEn == nameOfficialEn)&&(identical(other.nameAr, nameAr) || other.nameAr == nameAr)&&(identical(other.nameOfficialAr, nameOfficialAr) || other.nameOfficialAr == nameOfficialAr)&&(identical(other.region, region) || other.region == region)&&(identical(other.subregion, subregion) || other.subregion == subregion)&&(identical(other.capital, capital) || other.capital == capital)&&(identical(other.population, population) || other.population == population)&&(identical(other.areaKm2, areaKm2) || other.areaKm2 == areaKm2)&&const DeepCollectionEquality().equals(other._languages, _languages)&&const DeepCollectionEquality().equals(other._currencies, _currencies)&&const DeepCollectionEquality().equals(other._borders, _borders)&&const DeepCollectionEquality().equals(other._timezones, _timezones)&&(identical(other.mapsUrl, mapsUrl) || other.mapsUrl == mapsUrl)&&(identical(other.flagAlt, flagAlt) || other.flagAlt == flagAlt)&&(identical(other.flagColor, flagColor) || other.flagColor == flagColor));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Country&&(identical(other.code, code) || other.code == code)&&(identical(other.alpha2, alpha2) || other.alpha2 == alpha2)&&(identical(other.nameEn, nameEn) || other.nameEn == nameEn)&&(identical(other.nameOfficialEn, nameOfficialEn) || other.nameOfficialEn == nameOfficialEn)&&(identical(other.nameAr, nameAr) || other.nameAr == nameAr)&&(identical(other.nameOfficialAr, nameOfficialAr) || other.nameOfficialAr == nameOfficialAr)&&(identical(other.region, region) || other.region == region)&&(identical(other.subregion, subregion) || other.subregion == subregion)&&(identical(other.capital, capital) || other.capital == capital)&&(identical(other.population, population) || other.population == population)&&(identical(other.areaKm2, areaKm2) || other.areaKm2 == areaKm2)&&const DeepCollectionEquality().equals(other.languages, _languages)&&const DeepCollectionEquality().equals(other.currencies, _currencies)&&const DeepCollectionEquality().equals(other.borders, _borders)&&const DeepCollectionEquality().equals(other.timezones, _timezones)&&(identical(other.mapsUrl, mapsUrl) || other.mapsUrl == mapsUrl)&&(identical(other.flagAlt, flagAlt) || other.flagAlt == flagAlt)&&(identical(other.flagColor, flagColor) || other.flagColor == flagColor));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,code,alpha2,nameEn,nameOfficialEn,nameAr,nameOfficialAr,region,subregion,capital,population,areaKm2,const DeepCollectionEquality().hash(_languages),const DeepCollectionEquality().hash(_currencies),const DeepCollectionEquality().hash(_borders),const DeepCollectionEquality().hash(_timezones),mapsUrl,flagAlt,flagColor);
+int get hashCode {
+    return Object.hash(runtimeType,code,alpha2,nameEn,nameOfficialEn,nameAr,nameOfficialAr,region,subregion,capital,population,areaKm2,const DeepCollectionEquality().hash(_languages),const DeepCollectionEquality().hash(_currencies),const DeepCollectionEquality().hash(_borders),const DeepCollectionEquality().hash(_timezones),mapsUrl,flagAlt,flagColor);
+}
 
 @override
 String toString() {
-  return 'Country(code: $code, alpha2: $alpha2, nameEn: $nameEn, nameOfficialEn: $nameOfficialEn, nameAr: $nameAr, nameOfficialAr: $nameOfficialAr, region: $region, subregion: $subregion, capital: $capital, population: $population, areaKm2: $areaKm2, languages: $languages, currencies: $currencies, borders: $borders, timezones: $timezones, mapsUrl: $mapsUrl, flagAlt: $flagAlt, flagColor: $flagColor)';
+    return 'Country(code: $code, alpha2: $alpha2, nameEn: $nameEn, nameOfficialEn: $nameOfficialEn, nameAr: $nameAr, nameOfficialAr: $nameOfficialAr, region: $region, subregion: $subregion, capital: $capital, population: $population, areaKm2: $areaKm2, languages: $languages, currencies: $currencies, borders: $borders, timezones: $timezones, mapsUrl: $mapsUrl, flagAlt: $flagAlt, flagColor: $flagColor)';
 }
 
 
@@ -369,16 +377,21 @@ $CurrencyCopyWith<Currency> get copyWith => _$CurrencyCopyWithImpl<Currency>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Currency&&(identical(other.code, code) || other.code == code)&&(identical(other.name, name) || other.name == name)&&(identical(other.symbol, symbol) || other.symbol == symbol));
+  final _this = this as Currency;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Currency&&(identical(other.code, _this.code) || other.code == _this.code)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.symbol, _this.symbol) || other.symbol == _this.symbol));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,code,name,symbol);
+int get hashCode {
+  final _this = this as Currency;
+  return Object.hash(runtimeType,_this.code,_this.name,_this.symbol);
+}
 
 @override
 String toString() {
-  return 'Currency(code: $code, name: $name, symbol: $symbol)';
+  final _this = this as Currency;
+  return 'Currency(code: ${_this.code}, name: ${_this.name}, symbol: ${_this.symbol})';
 }
 
 
@@ -407,7 +420,7 @@ class _$CurrencyCopyWithImpl<$Res>
 /// Create a copy of Currency
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? code = null,Object? name = null,Object? symbol = freezed,}) {
-  return _then(_self.copyWith(
+  return _then(Currency(
 code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,symbol: freezed == symbol ? _self.symbol : symbol // ignore: cast_nullable_to_non_nullable
@@ -572,16 +585,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Currency&&(identical(other.code, code) || other.code == code)&&(identical(other.name, name) || other.name == name)&&(identical(other.symbol, symbol) || other.symbol == symbol));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Currency&&(identical(other.code, code) || other.code == code)&&(identical(other.name, name) || other.name == name)&&(identical(other.symbol, symbol) || other.symbol == symbol));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,code,name,symbol);
+int get hashCode {
+    return Object.hash(runtimeType,code,name,symbol);
+}
 
 @override
 String toString() {
-  return 'Currency(code: $code, name: $name, symbol: $symbol)';
+    return 'Currency(code: $code, name: $name, symbol: $symbol)';
 }
 
 

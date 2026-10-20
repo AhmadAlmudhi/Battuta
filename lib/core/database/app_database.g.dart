@@ -2236,7 +2236,16 @@ class $$CountriesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$CountriesTable, CountryRow>(table),
+                  BaseReferences<_$AppDatabase, $CountriesTable, CountryRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2553,7 +2562,16 @@ class $$TravelEntriesTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$TravelEntriesTable, TravelEntryRow>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $TravelEntriesTable,
+                    TravelEntryRow
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

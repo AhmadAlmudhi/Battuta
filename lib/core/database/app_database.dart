@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../features/countries/domain/country.dart';
 import '../../features/travels/domain/travel_entry.dart';
@@ -95,21 +94,6 @@ class AppDatabase extends _$AppDatabase {
       }
     },
   );
-
-  /// Workaround for drift 2.34.x on web: a transaction's COMMIT is never
-  /// flushed to IndexedDB, so its writes live only in memory and are lost when
-  /// the browser closes (drift #3864, fixed in 2.35.1). Drift does flush after
-  /// any statement outside a transaction, so one runs after the outermost
-  /// transaction. Remove once drift is 2.35.1 or newer.
-  @override
-  Future<T> transaction<T>(
-    Future<T> Function() action, {
-    bool requireNew = false,
-  }) async {
-    final result = await super.transaction(action, requireNew: requireNew);
-    if (kIsWeb) await customStatement('SELECT 1');
-    return result;
-  }
 
   static QueryExecutor _open() => driftDatabase(
     name: 'battuta',
