@@ -1,4 +1,4 @@
-package com.example.battuta
+package com.ahmadalmudhi.battuta
 
 import io.flutter.embedding.android.FlutterActivity
 
