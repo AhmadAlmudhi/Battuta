@@ -23,6 +23,7 @@ Country? parseCountry(Map<String, Object?> json) {
     nameEn: nameEn,
     nameOfficialEn: _string(names['official']) ?? nameEn,
     nameAr: _string(arabic['common']),
+    nameOfficialAr: _string(arabic['official']),
     region: _string(json['region']) ?? 'Other',
     subregion: _string(json['subregion']),
     capital: _primaryCapital(json['capitals']),

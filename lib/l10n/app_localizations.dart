@@ -307,6 +307,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'العربية'**
   String get settingsLanguageArabic;
+
+  /// No description provided for @exploreSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search countries'**
+  String get exploreSearchHint;
+
+  /// No description provided for @exploreClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get exploreClearSearch;
+
+  /// No description provided for @exploreFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get exploreFilters;
+
+  /// Screen-reader label for the Filters button when filters are active.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Filters, 1 active} other{Filters, {count} active}}'**
+  String exploreFiltersActive(int count);
+
+  /// No description provided for @exploreSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get exploreSort;
+
+  /// No description provided for @exploreSortNameAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, A to Z'**
+  String get exploreSortNameAsc;
+
+  /// No description provided for @exploreSortNameDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, Z to A'**
+  String get exploreSortNameDesc;
+
+  /// No description provided for @exploreSortPopulationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Population, high to low'**
+  String get exploreSortPopulationDesc;
+
+  /// No description provided for @exploreSortPopulationAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Population, low to high'**
+  String get exploreSortPopulationAsc;
+
+  /// No description provided for @exploreSortAreaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Area, largest first'**
+  String get exploreSortAreaDesc;
+
+  /// No description provided for @exploreSortAreaAsc.
+  ///
+  /// In en, this message translates to:
+  /// **'Area, smallest first'**
+  String get exploreSortAreaAsc;
+
+  /// No description provided for @exploreMoreOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get exploreMoreOptions;
+
+  /// No description provided for @exploreRefreshData.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh data'**
+  String get exploreRefreshData;
+
+  /// No description provided for @exploreOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Showing saved data.'**
+  String get exploreOffline;
+
+  /// No description provided for @exploreRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t refresh. Showing saved data.'**
+  String get exploreRefreshFailed;
+
+  /// No description provided for @exploreUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Data is up to date.'**
+  String get exploreUpToDate;
+
+  /// No description provided for @exploreRefreshed.
+  ///
+  /// In en, this message translates to:
+  /// **'Country data updated.'**
+  String get exploreRefreshed;
+
+  /// No description provided for @exploreEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No countries match.'**
+  String get exploreEmptyTitle;
+
+  /// No description provided for @exploreEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search or fewer filters.'**
+  String get exploreEmptyBody;
+
+  /// No description provided for @exploreClearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get exploreClearFilters;
+
+  /// No description provided for @exploreVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited'**
+  String get exploreVisited;
+
+  /// No description provided for @exploreOnWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'On wishlist'**
+  String get exploreOnWishlist;
+
+  /// No description provided for @flagLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag of {country}'**
+  String flagLabel(String country);
+
+  /// No description provided for @filtersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get filtersTitle;
+
+  /// No description provided for @filtersRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get filtersRegion;
+
+  /// No description provided for @filtersSubregion.
+  ///
+  /// In en, this message translates to:
+  /// **'Subregion'**
+  String get filtersSubregion;
+
+  /// No description provided for @filtersLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get filtersLanguage;
+
+  /// No description provided for @filtersCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get filtersCurrency;
+
+  /// No description provided for @filtersAnyLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Any language'**
+  String get filtersAnyLanguage;
+
+  /// No description provided for @filtersAnyCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Any currency'**
+  String get filtersAnyCurrency;
+
+  /// No description provided for @filtersClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get filtersClearAll;
+
+  /// No description provided for @filtersShowResults.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No matches} =1{Show 1 country} other{Show {count} countries}}'**
+  String filtersShowResults(int count);
+
+  /// No description provided for @filtersClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get filtersClose;
+
+  /// No description provided for @regionAfrica.
+  ///
+  /// In en, this message translates to:
+  /// **'Africa'**
+  String get regionAfrica;
+
+  /// No description provided for @regionAmericas.
+  ///
+  /// In en, this message translates to:
+  /// **'Americas'**
+  String get regionAmericas;
+
+  /// No description provided for @regionAntarctic.
+  ///
+  /// In en, this message translates to:
+  /// **'Antarctic'**
+  String get regionAntarctic;
+
+  /// No description provided for @regionAsia.
+  ///
+  /// In en, this message translates to:
+  /// **'Asia'**
+  String get regionAsia;
+
+  /// No description provided for @regionEurope.
+  ///
+  /// In en, this message translates to:
+  /// **'Europe'**
+  String get regionEurope;
+
+  /// No description provided for @regionOceania.
+  ///
+  /// In en, this message translates to:
+  /// **'Oceania'**
+  String get regionOceania;
+
+  /// No description provided for @subregionEasternAfrica.
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern Africa'**
+  String get subregionEasternAfrica;
+
+  /// No description provided for @subregionMiddleAfrica.
+  ///
+  /// In en, this message translates to:
+  /// **'Middle Africa'**
+  String get subregionMiddleAfrica;
+
+  /// No description provided for @subregionNorthernAfrica.
+  ///
+  /// In en, this message translates to:
+  /// **'Northern Africa'**
+  String get subregionNorthernAfrica;
+
+  /// No description provided for @subregionSouthernAfrica.
+  ///
+  /// In en, this message translates to:
+  /// **'Southern Africa'**
+  String get subregionSouthernAfrica;
+
+  /// No description provided for @subregionWesternAfrica.
+  ///
+  /// In en, this message translates to:
+  /// **'Western Africa'**
+  String get subregionWesternAfrica;
+
+  /// No description provided for @subregionCaribbean.
+  ///
+  /// In en, this message translates to:
+  /// **'Caribbean'**
+  String get subregionCaribbean;
+
+  /// No description provided for @subregionCentralAmerica.
+  ///
+  /// In en, this message translates to:
+  /// **'Central America'**
+  String get subregionCentralAmerica;
+
+  /// No description provided for @subregionNorthAmerica.
+  ///
+  /// In en, this message translates to:
+  /// **'North America'**
+  String get subregionNorthAmerica;
+
+  /// No description provided for @subregionSouthAmerica.
+  ///
+  /// In en, this message translates to:
+  /// **'South America'**
+  String get subregionSouthAmerica;
+
+  /// No description provided for @subregionCentralAsia.
+  ///
+  /// In en, this message translates to:
+  /// **'Central Asia'**
+  String get subregionCentralAsia;
+
+  /// No description provided for @subregionEasternAsia.
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern Asia'**
+  String get subregionEasternAsia;
+
+  /// No description provided for @subregionSouthEasternAsia.
+  ///
+  /// In en, this message translates to:
+  /// **'South-Eastern Asia'**
+  String get subregionSouthEasternAsia;
+
+  /// No description provided for @subregionSouthernAsia.
+  ///
+  /// In en, this message translates to:
+  /// **'Southern Asia'**
+  String get subregionSouthernAsia;
+
+  /// No description provided for @subregionWesternAsia.
+  ///
+  /// In en, this message translates to:
+  /// **'Western Asia'**
+  String get subregionWesternAsia;
+
+  /// No description provided for @subregionCentralEurope.
+  ///
+  /// In en, this message translates to:
+  /// **'Central Europe'**
+  String get subregionCentralEurope;
+
+  /// No description provided for @subregionEasternEurope.
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern Europe'**
+  String get subregionEasternEurope;
+
+  /// No description provided for @subregionNorthernEurope.
+  ///
+  /// In en, this message translates to:
+  /// **'Northern Europe'**
+  String get subregionNorthernEurope;
+
+  /// No description provided for @subregionSoutheastEurope.
+  ///
+  /// In en, this message translates to:
+  /// **'Southeast Europe'**
+  String get subregionSoutheastEurope;
+
+  /// No description provided for @subregionSouthernEurope.
+  ///
+  /// In en, this message translates to:
+  /// **'Southern Europe'**
+  String get subregionSouthernEurope;
+
+  /// No description provided for @subregionWesternEurope.
+  ///
+  /// In en, this message translates to:
+  /// **'Western Europe'**
+  String get subregionWesternEurope;
+
+  /// No description provided for @subregionAustraliaNewZealand.
+  ///
+  /// In en, this message translates to:
+  /// **'Australia and New Zealand'**
+  String get subregionAustraliaNewZealand;
+
+  /// No description provided for @subregionMelanesia.
+  ///
+  /// In en, this message translates to:
+  /// **'Melanesia'**
+  String get subregionMelanesia;
+
+  /// No description provided for @subregionMicronesia.
+  ///
+  /// In en, this message translates to:
+  /// **'Micronesia'**
+  String get subregionMicronesia;
+
+  /// No description provided for @subregionPolynesia.
+  ///
+  /// In en, this message translates to:
+  /// **'Polynesia'**
+  String get subregionPolynesia;
 }
 
 class _AppLocalizationsDelegate

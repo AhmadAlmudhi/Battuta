@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.4 |
+| Version | 1.5 |
 | Status | Ready for development |
 | Date | 20 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.5 | 20 Oct 2026 | Flags are bundled as assets because the flag CDN sends no CORS headers. A newer bundled snapshot replaces older local data. Search runs in memory, so `search_en` and `search_ar` are removed; `name_official_ar` is added (schema 2). Refresh attempt times are stored in `auto_refresh_at` and `manual_refresh_at`. `connectivity_plus` added; `cached_network_image` removed. |
 | 1.4 | 20 Oct 2026 | Firebase project created as `battuta-b8451`. Production URL changed to `battuta-travel.web.app` because the `battuta` Hosting name was taken; the app name stays Battuta. App ID set to `com.ahmadalmudhi.battuta`. Firestore location set to `eur3`. |
 | 1.3 | 20 Oct 2026 | Product renamed بطوطة (Battuta). Production URL changed to `battuta.web.app`. |
 | 1.2 | 18 Oct 2026 | Product named Wanderstamp, with icon, colors, and typography. Production URL set to the free Firebase address. Release plan removed and open questions resolved. |
@@ -560,7 +561,7 @@ Country data comes from the REST Countries Countries API, version 5. Versions 1 
 | Field selection | `response_fields` (allowlist) and `response_fields_omit` (blocklist) |
 | Order | Always ascending by `names.common`. Custom sorting is not supported. |
 | Other errors | 400 bad parameters, 401 invalid key, 410 retired version |
-| Flag images | Free CDN, no key: `https://flags.restcountries.com/v5/w320/{alpha2}.png` (widths from w160 to w2560). The documentation shows plain image tags and does not mention CORS headers (see section 11.4). |
+| Flag images | Free CDN, no key: `https://flags.restcountries.com/v5/w320/{alpha2}.png` (widths from w160 to w2560). The CDN sends no CORS headers (confirmed), so the app bundles the flags instead (section 11.4). |
 
 #### Request
 
@@ -585,6 +586,7 @@ Authorization: Bearer <RC_API_KEY>
 | `names.common` | `nameEn` | Cards, search, sort |
 | `names.official` | `nameOfficialEn` | Details, search |
 | `names.translations.ara.common` | `nameAr` | Arabic UI, search |
+| `names.translations.ara.official` | `nameOfficialAr` | Arabic UI |
 | `capitals` (primary, else first) | `capital` | Details |
 | `region`, `subregion` | `region`, `subregion` | Filters, Stats |
 | `borders` | `borders` (3-letter codes) | Neighbor chips |
@@ -601,8 +603,8 @@ Authorization: Bearer <RC_API_KEY>
 
 ### 8.2 Snapshot and refresh rules
 
-1. Every build bundles `assets/data/countries_snapshot.json`, produced by a script that runs the request above and records when it ran.
-2. On first launch, or a first visit to the website, the app imports the snapshot into the local database. No API call is made.
+1. Every build bundles `assets/data/countries_snapshot.json`, produced by `tool/fetch_snapshot.dart`, which runs the request above and records when it ran. It keeps only the Arabic translation to stay small. `tool/fetch_flags.dart` downloads a 320 px flag for each country into `assets/flags/`.
+2. On first launch, or a first visit to the website, the app imports the snapshot into the local database. No API call is made. On later launches, a bundled snapshot newer than the local data (after an app update or a redeploy) replaces it the same way.
 3. On later launches, the app reads from the local database. If the data is older than 7 days and the device is online, it refreshes in the background.
 4. A refresh is all or nothing: if any page fails, keep the previous data. On success, replace all rows in one transaction.
 5. Manual refresh (FR-EXP-11) calls the API at most once per 60 minutes per device. Otherwise it ends immediately with: Data is up to date.
@@ -624,8 +626,7 @@ The local database uses Drift (SQLite) on every platform. On web, Drift runs SQL
 | `name_en` | TEXT | No | Common English name |
 | `name_official_en` | TEXT | No | Official English name |
 | `name_ar` | TEXT | Yes | Arabic common name; fall back to name_en |
-| `search_en` | TEXT | No | Normalized English names for search (section 10.4) |
-| `search_ar` | TEXT | Yes | Normalized Arabic name for search |
+| `name_official_ar` | TEXT | Yes | Arabic official name; fall back to name_official_en |
 | `region` | TEXT | No | Indexed; used by filters and Stats |
 | `subregion` | TEXT | Yes |  |
 | `capital` | TEXT | Yes | Primary capital name |
@@ -658,6 +659,8 @@ The local database uses Drift (SQLite) on every platform. On web, Drift runs SQL
 
 Screens never show rows where `is_deleted` is 1. Soft-deleted rows are purged after they have been synced and are older than 30 days.
 
+> **Schema 2:** Search, filter, and sort run in memory over the parsed names (NFR-04), so the countries table keeps no search columns. The countries table is a cache of the snapshot or the last refresh, so upgrading from schema 1 rebuilds it and the next launch imports the bundled snapshot. Travel entries are kept.
+
 ### 8.4 Cloud data model
 
 Each entry is a Firestore document at `users/{uid}/entries/{countryCode}`. It holds the same fields as `travel_entries` except `synced_at`, in camelCase (for example `visitedOn`, `updatedAt`, `isDeleted`). Using the country code as the document ID makes duplicates impossible.
@@ -684,8 +687,8 @@ Settings are stored with shared_preferences, which uses the browser's local stor
 | `theme_mode` | String | system | system, light, or dark |
 | `locale` | String | system | system, en, or ar |
 | `onboarding_done` | Boolean | false | Hides Welcome after the first choice |
-| `countries_refreshed_at` | Integer | none | Time of the snapshot import or last successful refresh |
-| `manual_refresh_at` | Integer | none | Enforces the 60-minute manual refresh limit |
+| `auto_refresh_at` | Integer | none | Last automatic refresh attempt; limits attempts to once every 7 days (NFR-13) |
+| `manual_refresh_at` | Integer | none | Last manual refresh API call; enforces the 60-minute limit |
 | `merged_uids` | String list | empty | Users whose guest merge finished on this device |
 | `last_sync_at` | Integer | none | Shown on the Account screen |
 
@@ -842,7 +845,8 @@ flowchart TB
 | Cloud data | `cloud_firestore` | Per-user backup with live updates |
 | Hosting | Firebase Hosting | Serves the production web app and pull-request previews |
 | Localization | `flutter_localizations`, `intl` | Strings, RTL, date and number formats |
-| Images | `cached_network_image` on mobile; `Image.network` on web | Flags cached on disk on mobile; browser cache on web |
+| Images | `Image.asset` with bundled flags | Same on every platform; no network or CORS needed (section 11.4) |
+| Connectivity | `connectivity_plus` | Offline banner and refresh checks; browser online and offline events on web |
 | Animation | `flutter_animate` | Staggered and chained effects |
 | External links | `url_launcher` | Open in Maps |
 | Settings storage | `shared_preferences` | Theme, language, and timestamps |
@@ -867,8 +871,9 @@ lib/
   main.dart
 assets/data/countries_snapshot.json
 assets/fonts/           Inter and IBM Plex Sans Arabic, with their licenses
+assets/flags/           320 px PNG flag per country (about 3 MB)
 web/                    index.html, icons, sqlite3.wasm, drift_worker.js
-tool/                   snapshot script
+tool/                   snapshot and flag scripts
 firebase.json           Hosting configuration
 test/                   mirrors lib/
 ```
@@ -880,7 +885,7 @@ test/                   mirrors lib/
 - **Firebase:** configured for web, Android, and iOS with the FlutterFire CLI. Email and password is the only sign-in provider enabled.
 - **Web routing:** the app calls `usePathUrlStrategy()` before `runApp`, and `firebase.json` rewrites every path to `/index.html` so direct links and refreshes work.
 - **Database on web:** `web/` contains `sqlite3.wasm` (served as `application/wasm`) and `drift_worker.js`, both downloaded from the same drift GitHub release as the `drift` package version in use. Drift picks the best storage the browser supports. Leave COOP and COEP headers off for 1.0: they can block cross-origin resources such as flag images, and drift works without them.
-- **Flags on web:** Flutter web draws images through the canvas, which needs CORS headers from the image server. Load flags with `Image.network` and `webHtmlElementStrategy: WebHtmlElementStrategy.fallback`, which falls back to an HTML image element when headers are missing. If that is not enough, bundle the flag images as assets.
+- **Flags:** Flutter web draws images through the canvas, which needs CORS headers from the image server, and the flag CDN sends none. The HTML image fallback would place a separate HTML element over the canvas for every flag in the scrolling grid, which risks stutter (NFR-03). So flags are bundled: `tool/fetch_flags.dart` saves a 320 px PNG per country in `assets/flags/` (about 3 MB in total), and the app shows them with `Image.asset`, decoded at display size. On web they load from the app's own host only when shown. They also work offline from the first launch. A country without a bundled flag shows its 2-letter code.
 - **iOS:** building and testing needs a Mac with Xcode. The CI pipeline compiles iOS without code signing on a macOS runner.
 
 > **Constraint:** On web, the API key is visible in the browser. Allowed origins stop other websites from using it in their pages, but not scripts running outside a browser. This is accepted for 1.0 because the app falls back to bundled data if the key is blocked. A later release can move API calls to a backend, such as a Cloud Function, which requires Firebase's pay-as-you-go plan.
@@ -931,8 +936,8 @@ A requirement is done when:
 
 #### Assumptions
 
-- REST Countries returns Arabic names under the `ara` translation key. To be confirmed with a test request before the data models are written.
-- Flag images from the CDN display in Flutter web, directly or through the HTML image fallback. To be confirmed when the Explore grid first runs on web.
+- REST Countries returns Arabic names under the `ara` translation key. Confirmed: every record has one except Somaliland, which the app skips for missing codes.
+- Flag images from the CDN display in Flutter web. Not true: the CDN sends no CORS headers, so flags are bundled (section 11.4).
 - The REST Countries free plan and Firebase's free plan, including Hosting, are enough for release 1.0.
 - A Mac with Xcode is available to build and test the iOS app.
 
@@ -956,7 +961,7 @@ A requirement is done when:
 | Building for three platforms takes longer than expected | Medium | High | Develop and test on web first; check Android and iOS regularly. Mobile-only fixes can follow the web launch, because the mobile apps are not released in 1.0. |
 | Accounts and sync take longer than expected | Medium | High | Finish the complete guest app before starting accounts. If needed, ship a one-time backup and restore instead of live sync. |
 | The web database setup causes problems | Medium | Medium | Set up and test Drift on web before any feature depends on it. |
-| Flag images don't display on web | Low | Medium | Use the HTML image fallback; if needed, bundle the flags as assets. |
+| Flag images don't display on web | Occurred | Medium | Resolved: flags are bundled as assets (section 11.4). |
 | The API key is misused outside a browser | Low | Medium | Allowed origins and quota alerts. If the key is blocked, the app keeps working from bundled data. |
 | API quota runs out | Low | Low | Snapshot-first loading, the weekly redeploy, and the manual refresh limit. |
 | API responses differ from the documentation | Medium | Medium | Inspect real responses before writing the models; parse defensively; cover edge cases in tests. |

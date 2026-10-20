@@ -13,8 +13,9 @@ Guidance for Claude Code when working in this repository.
 - **Current state:** done so far:
   - Firebase, the Drift database, country parsing, search normalization, and the snapshot import.
   - The app shell: theme and fonts, English/Arabic localization, settings (theme, language, onboarding flag), all PRD routes, adaptive navigation, browser tab titles, and a working Welcome and Settings.
-  - Explore is a plain list. Country details, My travels, Stats, Account, and sign-in are routed placeholders.
-  - Not started: the Explore grid/search/filters, details facts and actions, travel entries, stats, auth, sync, flags, the app icon, and CI.
+  - Explore is complete: flag grid, search, filters, sort, badges, offline banner, and pull to refresh / Refresh data with the API refresh rules.
+  - Country details shows only its header (flag hero, names); facts and actions are next. My travels, Stats, Account, and sign-in are routed placeholders. `TravelRepository` only has `watchStatuses()` so far.
+  - Not started: travel entries and forms, stats, auth, sync, the app icon, and CI.
 
 ## Commands
 
@@ -22,6 +23,7 @@ Guidance for Claude Code when working in this repository.
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # freezed, json_serializable, drift; generated files are committed
 dart run tool/fetch_snapshot.dart                          # refresh assets/data/countries_snapshot.json (3 API requests)
+dart run tool/fetch_flags.dart                             # download missing flags into assets/flags/ (no API quota; --force to redo all)
 dart format --set-exit-if-changed .
 flutter analyze                                            # must report zero issues (NFR-12)
 flutter test --coverage
@@ -64,7 +66,7 @@ test/              mirrors lib/
 - **domain:** entities, repository interfaces, pure logic (merge, search normalization, filter, sort). No Flutter or I/O imports.
 - **data:** `CountryRepository`, `TravelRepository`, `SyncService`, `AuthRepository`, implementing domain interfaces.
 
-Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, `drift` + `drift_flutter`, `firebase_auth`, `cloud_firestore`, `shared_preferences`, `flutter_animate`, `url_launcher`, `cached_network_image` (mobile only), `flutter_localizations` + `intl`, `mocktail`.
+Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, `drift` + `drift_flutter`, `firebase_auth`, `cloud_firestore`, `shared_preferences`, `flutter_animate`, `url_launcher`, `connectivity_plus`, `flutter_localizations` + `intl`, `mocktail`.
 
 ## Dependency constraints
 
@@ -74,8 +76,10 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 
 - The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them, leaving **250**, the Stats total (D-3).
 - Missing values arrive as empty strings, not null; the parser maps them to null.
-- The snapshot keeps the raw API record shape (trimmed to the Arabic translation) so one parser serves both the snapshot and the live refresh. Keep `responseFields` in `tool/fetch_snapshot.dart` in step with `country_parser.dart`.
-- `search_en` stores one normalized name per line (common, then official), so prefix ranking can test each line.
+- The snapshot keeps the raw API record shape (trimmed to the Arabic translation) so one parser serves both the snapshot and the live refresh. The request fields live in `lib/features/countries/data/rest_countries.dart` (pure Dart, also imported by the tool); keep them in step with `country_parser.dart`.
+- `ensureSeeded` imports the snapshot when the DB is empty or older than the bundled snapshot (so a redeploy refreshes web visitors for free). Data age is `MAX(countries.fetched_at)`.
+- API refresh goes only through `CountryRefresher`: automatic when data is older than 7 days (attempted at most once per 7 days, `auto_refresh_at`), manual at most once per 60 minutes (`manual_refresh_at`). Overlapping calls share one refresh. Without `RC_API_KEY` the API client is null and refresh fails gracefully.
+- Search/filter/sort run in memory in `CountrySearchIndex` (normalized once per data load). Starts-with matches rank above contains; an Arabic name also counts as starting with the text when ال is dropped. Name sort uses the app language's names.
 
 ## Core invariants
 
@@ -119,6 +123,7 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 - `GoRouter.optionURLReflectsImperativeAPIs` is on. Open detail screens (`/country/:code`, `/account`, `/settings`, sign-in) with `context.push` so in-app Back works; the URL still updates. Switch tabs with the shell (`goBranch`); use `context.go` only to reset the stack (Welcome → Explore, not-found → Explore).
 - Screens that can be opened by URL set `leading: upButton(context, fallback: ...)` so a deep-linked page with nothing underneath still has a way up.
 - Wrap each screen in `ScreenTitle` for the browser tab title.
+- go_router's indexed shell keeps inactive tabs in the tree (Offstage) without disabling their heroes. Before another tab shows flags with `flagHeroTag`, wrap inactive branches in `HeroMode(enabled: false)` (custom `navigatorContainerBuilder`) or hero tags will collide.
 - Until `onboarding_done` is set, `redirectFor` sends every route except `/welcome` and `/account/*` to `/welcome?from=<target>`; Welcome continues to `from`.
 - Theme: `fontFamily: 'Inter'` with `fontFamilyFallback: ['IBMPlexSansArabic']`. Inter has no Arabic glyphs, so Arabic text uses Plex in both languages without switching on locale.
 
@@ -133,7 +138,9 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 
 - Drift on web needs `web/sqlite3.wasm` and `web/drift_worker.js`, both downloaded from the drift GitHub release that matches the `drift` version in `pubspec.lock` (`gh release download drift-<version> -R simolus3/drift -p drift_worker.js -p sqlite3.wasm -D web --clobber`). Update them whenever drift is upgraded. Don't add COOP/COEP headers; without them drift uses IndexedDB storage, which is expected.
 - `firebase.json` rewrites all paths to `/index.html`.
-- Load flags with `Image.network(..., webHtmlElementStrategy: WebHtmlElementStrategy.fallback)` on web (CDN may lack CORS); use `cached_network_image` on mobile. Flag URL: `https://flags.restcountries.com/v5/w320/{alpha2}.png`. Offline fallback: neutral placeholder with the 2-letter code. Hero tag: `flag-{code}`.
+- Flags are bundled (`assets/flags/{alpha2}.png`, 320 px) because the flag CDN sends no CORS headers. Use `FlagImage`, which decodes at display size and falls back to the 2-letter code. Hero tag: `flagHeroTag(code)`.
+- The REST Countries key only answers browsers from its allowed origins; until `localhost` is added in the REST Countries dashboard, Refresh data on `flutter run -d chrome` gets 403 (handled: "Couldn't refresh").
+- Headless Chrome has no WebGL by default, and Flutter's CPU fallback doesn't paint images. For screenshots, launch Chrome with `--use-angle=swiftshader --enable-unsafe-swiftshader`.
 - The API key is visible in the browser; it is restricted by allowed origins (`localhost`, `battuta-travel.web.app`, `battuta-travel.firebaseapp.com`).
 
 ## Testing and done

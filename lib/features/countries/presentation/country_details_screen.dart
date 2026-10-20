@@ -8,10 +8,13 @@ import '../../../core/widgets/placeholder_body.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../core/widgets/up_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../domain/country.dart';
 import 'country_providers.dart';
+import 'widgets/country_card.dart';
+import 'widgets/flag_image.dart';
 
-/// Country details, opened at /country/:code. For now it resolves the code
-/// and shows the name; facts and actions come with the details feature.
+/// Country details, opened at /country/:code. For now it shows the header;
+/// facts and actions come with the details feature.
 class CountryDetailsScreen extends ConsumerWidget {
   const CountryDetailsScreen({super.key, required this.code});
 
@@ -36,10 +39,61 @@ class CountryDetailsScreen extends ConsumerWidget {
               leading: upButton(context, fallback: '/explore'),
               title: Text(name),
             ),
-            body: const ContentWidth(child: PlaceholderBody()),
+            body: ContentWidth(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _Header(country: country),
+                  const SizedBox(height: 24),
+                  const PlaceholderBody(),
+                ],
+              ),
+            ),
           ),
         );
       },
+    );
+  }
+}
+
+/// Large flag, animated in from the Explore card, with the common and
+/// official names (FR-DET-01).
+class _Header extends StatelessWidget {
+  const _Header({required this.country});
+
+  final Country country;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    return Column(
+      children: [
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 320, maxHeight: 214),
+          child: AspectRatio(
+            aspectRatio: 3 / 2,
+            child: Hero(
+              tag: flagHeroTag(country.code),
+              child: FlagImage(country: country),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          country.name(arabic: arabic),
+          style: theme.textTheme.headlineMedium,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          country.officialName(arabic: arabic),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }

@@ -74,10 +74,9 @@ void main() {
       expect(country.mapsUrl, 'https://goo.gl/maps/x');
       expect(country.flagAlt, 'Three vertical bands.');
       expect(country.flagColor, '#d43e34');
-      expect(
-        country.flagUrl(),
-        'https://flags.restcountries.com/v5/w320/af.png',
-      );
+      expect(country.flagAsset, 'assets/flags/af.png');
+      expect(country.nameOfficialAr, 'جمهورية');
+      expect(country.officialName(arabic: true), 'جمهورية');
     });
 
     test('skips records without ISO codes, such as Abkhazia', () {

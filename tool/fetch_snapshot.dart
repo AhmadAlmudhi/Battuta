@@ -8,30 +8,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-const _baseUrl = 'https://api.restcountries.com/countries/v5';
-const _pageSize = 100;
-const _outputPath = 'assets/data/countries_snapshot.json';
+import 'package:battuta/features/countries/data/rest_countries.dart';
 
-/// Must match the fields the app parses in `CountryDto.fromApi`.
-const responseFields = [
-  'codes.alpha_2',
-  'codes.alpha_3',
-  'names.common',
-  'names.official',
-  'names.translations',
-  'capitals',
-  'region',
-  'subregion',
-  'borders',
-  'area.kilometers',
-  'population',
-  'languages',
-  'currencies',
-  'timezones',
-  'links.google_maps',
-  'flag.description',
-  'flag.colors.dominant',
-];
+const _outputPath = 'assets/data/countries_snapshot.json';
 
 Future<void> main() async {
   final apiKey = _readApiKey();
@@ -39,14 +18,9 @@ Future<void> main() async {
   final objects = <Object?>[];
 
   try {
-    var offset = 0;
-    while (true) {
-      final uri = Uri.parse(_baseUrl).replace(
-        queryParameters: {
-          'limit': '$_pageSize',
-          'offset': '$offset',
-          'response_fields': responseFields.join(','),
-        },
+    for (var page = 0; page < restCountriesMaxPages; page++) {
+      final uri = Uri.parse(restCountriesBaseUrl).replace(
+        queryParameters: restCountriesPageQuery(page * restCountriesPageSize),
       );
       final request = await client.getUrl(uri);
       request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $apiKey');
@@ -60,13 +34,12 @@ Future<void> main() async {
       final data =
           (jsonDecode(body) as Map<String, Object?>)['data']
               as Map<String, Object?>;
-      final page = data['objects'] as List<Object?>;
+      final records = data['objects'] as List<Object?>;
       final meta = data['meta'] as Map<String, Object?>;
-      objects.addAll(page.map(_trim));
+      objects.addAll(records.map(_trim));
       stdout.writeln('Fetched ${objects.length} of ${meta['total']}');
 
-      if (meta['more'] != true || page.isEmpty) break;
-      offset += _pageSize;
+      if (meta['more'] != true || records.isEmpty) break;
     }
   } finally {
     client.close();
@@ -74,7 +47,7 @@ Future<void> main() async {
 
   final snapshot = {
     'fetchedAt': DateTime.now().toUtc().millisecondsSinceEpoch,
-    'source': _baseUrl,
+    'source': restCountriesBaseUrl,
     'objects': objects,
   };
   final file = File(_outputPath);
