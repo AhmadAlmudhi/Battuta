@@ -147,5 +147,21 @@
   "wishlistFormTargetYear": "السنة المستهدفة",
   "wishlistFormNoTargetYear": "بدون سنة محددة",
   "validationVisitDateFuture": "لا يمكن أن يكون تاريخ الزيارة في المستقبل.",
-  "validationNotesTooLong": "يمكن أن تصل الملاحظات إلى 500 حرف."
+  "validationNotesTooLong": "يمكن أن تصل الملاحظات إلى 500 حرف.",
+  "travelsVisitedTab": "تمت زيارتها ({count})",
+  "travelsWishlistTab": "قائمة الأمنيات ({count})",
+  "travelsSearchHint": "ابحث في رحلاتك",
+  "travelsSortByDate": "تاريخ الزيارة، الأحدث أولًا",
+  "travelsSortByPriority": "الأولوية، ثم السنة المستهدفة",
+  "travelsNoDate": "بدون تاريخ",
+  "travelsEmptyVisitedTitle": "لا توجد زيارات بعد",
+  "travelsEmptyVisitedBody": "ستظهر هنا الدول التي تسجّل زيارتها.",
+  "travelsEmptyWishlistTitle": "قائمة أمنياتك فارغة",
+  "travelsEmptyWishlistBody": "أضف الدول التي ترغب في زيارتها لاحقًا.",
+  "travelsExplore": "استكشف الدول",
+  "travelsNoMatchesTitle": "لا توجد نتائج مطابقة.",
+  "travelsClearFilters": "مسح البحث وعوامل التصفية",
+  "travelsEntryMenu": "خيارات {country}",
+  "travelsDelete": "حذف",
+  "travelsDeleted": "تم حذف {country}."
 }

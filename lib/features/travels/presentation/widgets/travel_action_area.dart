@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formatters.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../countries/domain/country.dart';
 import '../../domain/travel_entry.dart';
+import '../travel_actions.dart';
 import '../travel_forms.dart';
 import '../travel_providers.dart';
+import 'travel_summary.dart';
 
 /// The country's save actions on its details screen (FR-DET-04): Mark as
 /// visited and Add to wishlist when it isn't saved, otherwise its status
@@ -54,30 +55,6 @@ class _SavedCard extends ConsumerWidget {
   final Country country;
   final TravelEntry entry;
 
-  /// Soft-deletes the entry with a 4-second Undo (FR-TRV-07).
-  Future<void> _remove(BuildContext context, WidgetRef ref) async {
-    final l10n = AppLocalizations.of(context);
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    final messenger = ScaffoldMessenger.of(context);
-    final repository = ref.read(travelRepositoryProvider);
-    final removed = await repository.remove(country.code);
-    if (removed == null) return;
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(l10n.detailsRemoved(country.name(arabic: arabic))),
-          duration: const Duration(seconds: 4),
-          // With an action, snack bars stay until tapped unless told not to.
-          persist: false,
-          action: SnackBarAction(
-            label: l10n.commonUndo,
-            onPressed: () => repository.restore(removed),
-          ),
-        ),
-      );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -85,17 +62,10 @@ class _SavedCard extends ConsumerWidget {
     final scheme = theme.colorScheme;
     final visited = entry.status == TravelStatus.visited;
 
-    final details = <String>[
+    final details = [
       if (visited && entry.visitedOn != null)
         l10n.detailsVisitedOn(context.formatDate(entry.visitedOn!)),
-      if (!visited)
-        switch (entry.priority ?? WishlistPriority.medium) {
-          WishlistPriority.high => l10n.priorityHigh,
-          WishlistPriority.medium => l10n.priorityMedium,
-          WishlistPriority.low => l10n.priorityLow,
-        },
-      if (!visited && entry.targetYear != null)
-        l10n.detailsTargetYear('${entry.targetYear}'),
+      if (!visited) wishlistSummary(l10n, entry),
     ];
 
     return Card(
@@ -144,7 +114,7 @@ class _SavedCard extends ConsumerWidget {
             ),
             if (visited && entry.rating != null) ...[
               const SizedBox(height: 8),
-              _Stars(rating: entry.rating!),
+              RatingStars(rating: entry.rating!),
             ],
             if (entry.notes.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -174,44 +144,17 @@ class _SavedCard extends ConsumerWidget {
                   label: Text(l10n.detailsEdit),
                 ),
                 TextButton.icon(
-                  onPressed: () => _remove(context, ref),
+                  onPressed: () => removeWithUndo(
+                    context,
+                    ref,
+                    country,
+                    message: (l10n, name) => l10n.detailsRemoved(name),
+                  ),
                   icon: const Icon(Icons.delete_outline_rounded),
                   label: Text(l10n.detailsRemove),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Stars extends StatelessWidget {
-  const _Stars({required this.rating});
-
-  final int rating;
-
-  @override
-  Widget build(BuildContext context) {
-    final outline = Theme.of(context).colorScheme.onSurfaceVariant;
-    return Semantics(
-      label: AppLocalizations.of(context).detailsRating(rating),
-      child: ExcludeSemantics(
-        child: Row(
-          children: [
-            for (var star = 1; star <= 5; star++)
-              Stack(
-                children: [
-                  if (star <= rating)
-                    const Icon(
-                      Icons.star_rounded,
-                      size: 20,
-                      color: BrandColors.stampAmber,
-                    ),
-                  Icon(Icons.star_outline_rounded, size: 20, color: outline),
-                ],
-              ),
           ],
         ),
       ),

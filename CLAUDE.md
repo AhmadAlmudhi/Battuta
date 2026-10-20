@@ -16,7 +16,8 @@ Guidance for Claude Code when working in this repository.
   - Explore is complete: flag grid, search, filters, sort, badges, offline banner, and pull to refresh / Refresh data with the API refresh rules.
   - Country details is complete: header with flag hero, tint, and passport stamp; facts; neighbor chips; Open in Maps; and the save actions with the visit and wishlist forms (`lib/features/travels/presentation/travel_forms.dart`), remove with Undo.
   - `TravelRepository` saves, removes (soft delete), and restores entries.
-  - Not started: the My travels list screen, stats, auth, sync, the app icon, and CI.
+  - My travels is complete: Visited and Wishlist tabs with counts and their own URLs, sorting, search, region filter, swipe and menu Edit/Delete with Undo, and empty states.
+  - Not started: Stats, accounts and sign-in, cloud sync, the app icon, and CI.
 
 ## Commands
 
@@ -102,6 +103,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 - Fonts bundled as assets (never fetched at runtime): Inter (Latin), IBM Plex Sans Arabic (Arabic). Stats numbers use tabular figures.
 - 8 dp spacing grid, 12 dp card radius, Material Symbols Rounded, 48 dp minimum touch targets.
 - Window size classes (FR-PLT-02): compact < 600 (bottom bar, 2 cols, bottom sheets), medium 600–839 (bottom bar, 3–4 cols, dialogs), expanded ≥ 840 (nav rail, up to 6 cols, dialogs). Content max width 1,200 dp.
+- List rows use `Dismissible`: swipe toward the end edits, toward the start deletes (both mirror in RTL), and the ⋮ menu offers the same actions. A dismissed row must leave the tree at once, before the database stream catches up, so `TravelsScreen` hides it locally (`_swiped`) until the stream confirms the deletion. Deletes go through `removeWithUndo` (4-second Undo, `persist: false`).
 - Every swipe/long-press action also has a visible control; web needs keyboard focus, hover states, Enter submits, Esc closes.
 - Respect reduced-motion settings for decorative animation (NFR-09). Haptics on Android/iOS only. Motion specs are in PRD section 10.2.
 - Every screen needs loading, empty, error, and offline states per PRD section 10.3.
@@ -126,7 +128,8 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 - `GoRouter.optionURLReflectsImperativeAPIs` is on. Open detail screens (`/country/:code`, `/account`, `/settings`, sign-in) with `context.push` so in-app Back works; the URL still updates. Switch tabs with the shell (`goBranch`); use `context.go` only to reset the stack (Welcome → Explore, not-found → Explore).
 - Screens that can be opened by URL set `leading: upButton(context, fallback: ...)` so a deep-linked page with nothing underneath still has a way up.
 - Wrap each screen in `ScreenTitle` for the browser tab title.
-- go_router's indexed shell keeps inactive tabs in the tree (Offstage) without disabling their heroes. Before another tab shows flags with `flagHeroTag`, wrap inactive branches in `HeroMode(enabled: false)` (custom `navigatorContainerBuilder`) or hero tags will collide.
+- The tab shell uses `BranchStack` (in `app_shell.dart`) as its `navigatorContainerBuilder`: inactive tabs stay alive but have heroes and tickers off. Without it, Explore's hidden flag cards would join flights from My travels and collide on `flagHeroTag`.
+- My travels tabs are URLs (`/travels`, `/travels?tab=wishlist`); `TravelsScreen` syncs its `TabController` with the `tab` parameter in both directions.
 - Until `onboarding_done` is set, `redirectFor` sends every route except `/welcome` and `/account/*` to `/welcome?from=<target>`; Welcome continues to `from`.
 - Theme: `fontFamily: 'Inter'` with `fontFamilyFallback: ['IBMPlexSansArabic']`. Inter has no Arabic glyphs, so Arabic text uses Plex in both languages without switching on locale.
 

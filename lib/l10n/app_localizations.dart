@@ -985,6 +985,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notes can be up to 500 characters.'**
   String get validationNotesTooLong;
+
+  /// No description provided for @travelsVisitedTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited ({count})'**
+  String travelsVisitedTab(int count);
+
+  /// No description provided for @travelsWishlistTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist ({count})'**
+  String travelsWishlistTab(int count);
+
+  /// No description provided for @travelsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search your travels'**
+  String get travelsSearchHint;
+
+  /// No description provided for @travelsSortByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit date, newest first'**
+  String get travelsSortByDate;
+
+  /// No description provided for @travelsSortByPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority, then target year'**
+  String get travelsSortByPriority;
+
+  /// No description provided for @travelsNoDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date not set'**
+  String get travelsNoDate;
+
+  /// No description provided for @travelsEmptyVisitedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No visits yet'**
+  String get travelsEmptyVisitedTitle;
+
+  /// No description provided for @travelsEmptyVisitedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Countries you mark as visited appear here.'**
+  String get travelsEmptyVisitedBody;
+
+  /// No description provided for @travelsEmptyWishlistTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your wishlist is empty'**
+  String get travelsEmptyWishlistTitle;
+
+  /// No description provided for @travelsEmptyWishlistBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the countries you want to visit next.'**
+  String get travelsEmptyWishlistBody;
+
+  /// No description provided for @travelsExplore.
+  ///
+  /// In en, this message translates to:
+  /// **'Explore countries'**
+  String get travelsExplore;
+
+  /// No description provided for @travelsNoMatchesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries match.'**
+  String get travelsNoMatchesTitle;
+
+  /// No description provided for @travelsClearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search and filters'**
+  String get travelsClearFilters;
+
+  /// No description provided for @travelsEntryMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Options for {country}'**
+  String travelsEntryMenu(String country);
+
+  /// No description provided for @travelsDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get travelsDelete;
+
+  /// No description provided for @travelsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{country} deleted.'**
+  String travelsDeleted(String country);
 }
 
 class _AppLocalizationsDelegate
