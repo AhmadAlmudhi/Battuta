@@ -124,4 +124,212 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLanguageArabic => 'العربية';
+
+  @override
+  String get exploreSearchHint => 'Search countries';
+
+  @override
+  String get exploreClearSearch => 'Clear search';
+
+  @override
+  String get exploreFilters => 'Filters';
+
+  @override
+  String exploreFiltersActive(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Filters, $count active',
+      one: 'Filters, 1 active',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exploreSort => 'Sort';
+
+  @override
+  String get exploreSortNameAsc => 'Name, A to Z';
+
+  @override
+  String get exploreSortNameDesc => 'Name, Z to A';
+
+  @override
+  String get exploreSortPopulationDesc => 'Population, high to low';
+
+  @override
+  String get exploreSortPopulationAsc => 'Population, low to high';
+
+  @override
+  String get exploreSortAreaDesc => 'Area, largest first';
+
+  @override
+  String get exploreSortAreaAsc => 'Area, smallest first';
+
+  @override
+  String get exploreMoreOptions => 'More options';
+
+  @override
+  String get exploreRefreshData => 'Refresh data';
+
+  @override
+  String get exploreOffline => 'You\'re offline. Showing saved data.';
+
+  @override
+  String get exploreRefreshFailed => 'Couldn\'t refresh. Showing saved data.';
+
+  @override
+  String get exploreUpToDate => 'Data is up to date.';
+
+  @override
+  String get exploreRefreshed => 'Country data updated.';
+
+  @override
+  String get exploreEmptyTitle => 'No countries match.';
+
+  @override
+  String get exploreEmptyBody => 'Try a different search or fewer filters.';
+
+  @override
+  String get exploreClearFilters => 'Clear filters';
+
+  @override
+  String get exploreVisited => 'Visited';
+
+  @override
+  String get exploreOnWishlist => 'On wishlist';
+
+  @override
+  String flagLabel(String country) {
+    return 'Flag of $country';
+  }
+
+  @override
+  String get filtersTitle => 'Filters';
+
+  @override
+  String get filtersRegion => 'Region';
+
+  @override
+  String get filtersSubregion => 'Subregion';
+
+  @override
+  String get filtersLanguage => 'Language';
+
+  @override
+  String get filtersCurrency => 'Currency';
+
+  @override
+  String get filtersAnyLanguage => 'Any language';
+
+  @override
+  String get filtersAnyCurrency => 'Any currency';
+
+  @override
+  String get filtersClearAll => 'Clear all';
+
+  @override
+  String filtersShowResults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $count countries',
+      one: 'Show 1 country',
+      zero: 'No matches',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filtersClose => 'Close';
+
+  @override
+  String get regionAfrica => 'Africa';
+
+  @override
+  String get regionAmericas => 'Americas';
+
+  @override
+  String get regionAntarctic => 'Antarctic';
+
+  @override
+  String get regionAsia => 'Asia';
+
+  @override
+  String get regionEurope => 'Europe';
+
+  @override
+  String get regionOceania => 'Oceania';
+
+  @override
+  String get subregionEasternAfrica => 'Eastern Africa';
+
+  @override
+  String get subregionMiddleAfrica => 'Middle Africa';
+
+  @override
+  String get subregionNorthernAfrica => 'Northern Africa';
+
+  @override
+  String get subregionSouthernAfrica => 'Southern Africa';
+
+  @override
+  String get subregionWesternAfrica => 'Western Africa';
+
+  @override
+  String get subregionCaribbean => 'Caribbean';
+
+  @override
+  String get subregionCentralAmerica => 'Central America';
+
+  @override
+  String get subregionNorthAmerica => 'North America';
+
+  @override
+  String get subregionSouthAmerica => 'South America';
+
+  @override
+  String get subregionCentralAsia => 'Central Asia';
+
+  @override
+  String get subregionEasternAsia => 'Eastern Asia';
+
+  @override
+  String get subregionSouthEasternAsia => 'South-Eastern Asia';
+
+  @override
+  String get subregionSouthernAsia => 'Southern Asia';
+
+  @override
+  String get subregionWesternAsia => 'Western Asia';
+
+  @override
+  String get subregionCentralEurope => 'Central Europe';
+
+  @override
+  String get subregionEasternEurope => 'Eastern Europe';
+
+  @override
+  String get subregionNorthernEurope => 'Northern Europe';
+
+  @override
+  String get subregionSoutheastEurope => 'Southeast Europe';
+
+  @override
+  String get subregionSouthernEurope => 'Southern Europe';
+
+  @override
+  String get subregionWesternEurope => 'Western Europe';
+
+  @override
+  String get subregionAustraliaNewZealand => 'Australia and New Zealand';
+
+  @override
+  String get subregionMelanesia => 'Melanesia';
+
+  @override
+  String get subregionMicronesia => 'Micronesia';
+
+  @override
+  String get subregionPolynesia => 'Polynesia';
 }

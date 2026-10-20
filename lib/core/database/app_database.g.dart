@@ -56,23 +56,12 @@ class $CountriesTable extends Countries
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _searchEnMeta = const VerificationMeta(
-    'searchEn',
+  static const VerificationMeta _nameOfficialArMeta = const VerificationMeta(
+    'nameOfficialAr',
   );
   @override
-  late final GeneratedColumn<String> searchEn = GeneratedColumn<String>(
-    'search_en',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _searchArMeta = const VerificationMeta(
-    'searchAr',
-  );
-  @override
-  late final GeneratedColumn<String> searchAr = GeneratedColumn<String>(
-    'search_ar',
+  late final GeneratedColumn<String> nameOfficialAr = GeneratedColumn<String>(
+    'name_official_ar',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -218,8 +207,7 @@ class $CountriesTable extends Countries
     nameEn,
     nameOfficialEn,
     nameAr,
-    searchEn,
-    searchAr,
+    nameOfficialAr,
     region,
     subregion,
     capital,
@@ -287,18 +275,13 @@ class $CountriesTable extends Countries
         nameAr.isAcceptableOrUnknown(data['name_ar']!, _nameArMeta),
       );
     }
-    if (data.containsKey('search_en')) {
+    if (data.containsKey('name_official_ar')) {
       context.handle(
-        _searchEnMeta,
-        searchEn.isAcceptableOrUnknown(data['search_en']!, _searchEnMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_searchEnMeta);
-    }
-    if (data.containsKey('search_ar')) {
-      context.handle(
-        _searchArMeta,
-        searchAr.isAcceptableOrUnknown(data['search_ar']!, _searchArMeta),
+        _nameOfficialArMeta,
+        nameOfficialAr.isAcceptableOrUnknown(
+          data['name_official_ar']!,
+          _nameOfficialArMeta,
+        ),
       );
     }
     if (data.containsKey('region')) {
@@ -390,13 +373,9 @@ class $CountriesTable extends Countries
         DriftSqlType.string,
         data['${effectivePrefix}name_ar'],
       ),
-      searchEn: attachedDatabase.typeMapping.read(
+      nameOfficialAr: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}search_en'],
-      )!,
-      searchAr: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}search_ar'],
+        data['${effectivePrefix}name_official_ar'],
       ),
       region: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -482,8 +461,7 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
   final String nameEn;
   final String nameOfficialEn;
   final String? nameAr;
-  final String searchEn;
-  final String? searchAr;
+  final String? nameOfficialAr;
   final String region;
   final String? subregion;
   final String? capital;
@@ -505,8 +483,7 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
     required this.nameEn,
     required this.nameOfficialEn,
     this.nameAr,
-    required this.searchEn,
-    this.searchAr,
+    this.nameOfficialAr,
     required this.region,
     this.subregion,
     this.capital,
@@ -531,9 +508,8 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
     if (!nullToAbsent || nameAr != null) {
       map['name_ar'] = Variable<String>(nameAr);
     }
-    map['search_en'] = Variable<String>(searchEn);
-    if (!nullToAbsent || searchAr != null) {
-      map['search_ar'] = Variable<String>(searchAr);
+    if (!nullToAbsent || nameOfficialAr != null) {
+      map['name_official_ar'] = Variable<String>(nameOfficialAr);
     }
     map['region'] = Variable<String>(region);
     if (!nullToAbsent || subregion != null) {
@@ -588,10 +564,9 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
       nameAr: nameAr == null && nullToAbsent
           ? const Value.absent()
           : Value(nameAr),
-      searchEn: Value(searchEn),
-      searchAr: searchAr == null && nullToAbsent
+      nameOfficialAr: nameOfficialAr == null && nullToAbsent
           ? const Value.absent()
-          : Value(searchAr),
+          : Value(nameOfficialAr),
       region: Value(region),
       subregion: subregion == null && nullToAbsent
           ? const Value.absent()
@@ -631,8 +606,7 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
       nameEn: serializer.fromJson<String>(json['nameEn']),
       nameOfficialEn: serializer.fromJson<String>(json['nameOfficialEn']),
       nameAr: serializer.fromJson<String?>(json['nameAr']),
-      searchEn: serializer.fromJson<String>(json['searchEn']),
-      searchAr: serializer.fromJson<String?>(json['searchAr']),
+      nameOfficialAr: serializer.fromJson<String?>(json['nameOfficialAr']),
       region: serializer.fromJson<String>(json['region']),
       subregion: serializer.fromJson<String?>(json['subregion']),
       capital: serializer.fromJson<String?>(json['capital']),
@@ -657,8 +631,7 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
       'nameEn': serializer.toJson<String>(nameEn),
       'nameOfficialEn': serializer.toJson<String>(nameOfficialEn),
       'nameAr': serializer.toJson<String?>(nameAr),
-      'searchEn': serializer.toJson<String>(searchEn),
-      'searchAr': serializer.toJson<String?>(searchAr),
+      'nameOfficialAr': serializer.toJson<String?>(nameOfficialAr),
       'region': serializer.toJson<String>(region),
       'subregion': serializer.toJson<String?>(subregion),
       'capital': serializer.toJson<String?>(capital),
@@ -681,8 +654,7 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
     String? nameEn,
     String? nameOfficialEn,
     Value<String?> nameAr = const Value.absent(),
-    String? searchEn,
-    Value<String?> searchAr = const Value.absent(),
+    Value<String?> nameOfficialAr = const Value.absent(),
     String? region,
     Value<String?> subregion = const Value.absent(),
     Value<String?> capital = const Value.absent(),
@@ -702,8 +674,9 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
     nameEn: nameEn ?? this.nameEn,
     nameOfficialEn: nameOfficialEn ?? this.nameOfficialEn,
     nameAr: nameAr.present ? nameAr.value : this.nameAr,
-    searchEn: searchEn ?? this.searchEn,
-    searchAr: searchAr.present ? searchAr.value : this.searchAr,
+    nameOfficialAr: nameOfficialAr.present
+        ? nameOfficialAr.value
+        : this.nameOfficialAr,
     region: region ?? this.region,
     subregion: subregion.present ? subregion.value : this.subregion,
     capital: capital.present ? capital.value : this.capital,
@@ -727,8 +700,9 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
           ? data.nameOfficialEn.value
           : this.nameOfficialEn,
       nameAr: data.nameAr.present ? data.nameAr.value : this.nameAr,
-      searchEn: data.searchEn.present ? data.searchEn.value : this.searchEn,
-      searchAr: data.searchAr.present ? data.searchAr.value : this.searchAr,
+      nameOfficialAr: data.nameOfficialAr.present
+          ? data.nameOfficialAr.value
+          : this.nameOfficialAr,
       region: data.region.present ? data.region.value : this.region,
       subregion: data.subregion.present ? data.subregion.value : this.subregion,
       capital: data.capital.present ? data.capital.value : this.capital,
@@ -757,8 +731,7 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
           ..write('nameEn: $nameEn, ')
           ..write('nameOfficialEn: $nameOfficialEn, ')
           ..write('nameAr: $nameAr, ')
-          ..write('searchEn: $searchEn, ')
-          ..write('searchAr: $searchAr, ')
+          ..write('nameOfficialAr: $nameOfficialAr, ')
           ..write('region: $region, ')
           ..write('subregion: $subregion, ')
           ..write('capital: $capital, ')
@@ -783,8 +756,7 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
     nameEn,
     nameOfficialEn,
     nameAr,
-    searchEn,
-    searchAr,
+    nameOfficialAr,
     region,
     subregion,
     capital,
@@ -808,8 +780,7 @@ class CountryRow extends DataClass implements Insertable<CountryRow> {
           other.nameEn == this.nameEn &&
           other.nameOfficialEn == this.nameOfficialEn &&
           other.nameAr == this.nameAr &&
-          other.searchEn == this.searchEn &&
-          other.searchAr == this.searchAr &&
+          other.nameOfficialAr == this.nameOfficialAr &&
           other.region == this.region &&
           other.subregion == this.subregion &&
           other.capital == this.capital &&
@@ -831,8 +802,7 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
   final Value<String> nameEn;
   final Value<String> nameOfficialEn;
   final Value<String?> nameAr;
-  final Value<String> searchEn;
-  final Value<String?> searchAr;
+  final Value<String?> nameOfficialAr;
   final Value<String> region;
   final Value<String?> subregion;
   final Value<String?> capital;
@@ -853,8 +823,7 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
     this.nameEn = const Value.absent(),
     this.nameOfficialEn = const Value.absent(),
     this.nameAr = const Value.absent(),
-    this.searchEn = const Value.absent(),
-    this.searchAr = const Value.absent(),
+    this.nameOfficialAr = const Value.absent(),
     this.region = const Value.absent(),
     this.subregion = const Value.absent(),
     this.capital = const Value.absent(),
@@ -876,8 +845,7 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
     required String nameEn,
     required String nameOfficialEn,
     this.nameAr = const Value.absent(),
-    required String searchEn,
-    this.searchAr = const Value.absent(),
+    this.nameOfficialAr = const Value.absent(),
     required String region,
     this.subregion = const Value.absent(),
     this.capital = const Value.absent(),
@@ -896,7 +864,6 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
        alpha2 = Value(alpha2),
        nameEn = Value(nameEn),
        nameOfficialEn = Value(nameOfficialEn),
-       searchEn = Value(searchEn),
        region = Value(region),
        population = Value(population),
        languages = Value(languages),
@@ -910,8 +877,7 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
     Expression<String>? nameEn,
     Expression<String>? nameOfficialEn,
     Expression<String>? nameAr,
-    Expression<String>? searchEn,
-    Expression<String>? searchAr,
+    Expression<String>? nameOfficialAr,
     Expression<String>? region,
     Expression<String>? subregion,
     Expression<String>? capital,
@@ -933,8 +899,7 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
       if (nameEn != null) 'name_en': nameEn,
       if (nameOfficialEn != null) 'name_official_en': nameOfficialEn,
       if (nameAr != null) 'name_ar': nameAr,
-      if (searchEn != null) 'search_en': searchEn,
-      if (searchAr != null) 'search_ar': searchAr,
+      if (nameOfficialAr != null) 'name_official_ar': nameOfficialAr,
       if (region != null) 'region': region,
       if (subregion != null) 'subregion': subregion,
       if (capital != null) 'capital': capital,
@@ -958,8 +923,7 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
     Value<String>? nameEn,
     Value<String>? nameOfficialEn,
     Value<String?>? nameAr,
-    Value<String>? searchEn,
-    Value<String?>? searchAr,
+    Value<String?>? nameOfficialAr,
     Value<String>? region,
     Value<String?>? subregion,
     Value<String?>? capital,
@@ -981,8 +945,7 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
       nameEn: nameEn ?? this.nameEn,
       nameOfficialEn: nameOfficialEn ?? this.nameOfficialEn,
       nameAr: nameAr ?? this.nameAr,
-      searchEn: searchEn ?? this.searchEn,
-      searchAr: searchAr ?? this.searchAr,
+      nameOfficialAr: nameOfficialAr ?? this.nameOfficialAr,
       region: region ?? this.region,
       subregion: subregion ?? this.subregion,
       capital: capital ?? this.capital,
@@ -1018,11 +981,8 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
     if (nameAr.present) {
       map['name_ar'] = Variable<String>(nameAr.value);
     }
-    if (searchEn.present) {
-      map['search_en'] = Variable<String>(searchEn.value);
-    }
-    if (searchAr.present) {
-      map['search_ar'] = Variable<String>(searchAr.value);
+    if (nameOfficialAr.present) {
+      map['name_official_ar'] = Variable<String>(nameOfficialAr.value);
     }
     if (region.present) {
       map['region'] = Variable<String>(region.value);
@@ -1085,8 +1045,7 @@ class CountriesCompanion extends UpdateCompanion<CountryRow> {
           ..write('nameEn: $nameEn, ')
           ..write('nameOfficialEn: $nameOfficialEn, ')
           ..write('nameAr: $nameAr, ')
-          ..write('searchEn: $searchEn, ')
-          ..write('searchAr: $searchAr, ')
+          ..write('nameOfficialAr: $nameOfficialAr, ')
           ..write('region: $region, ')
           ..write('subregion: $subregion, ')
           ..write('capital: $capital, ')
@@ -1829,8 +1788,7 @@ typedef $$CountriesTableCreateCompanionBuilder =
       required String nameEn,
       required String nameOfficialEn,
       Value<String?> nameAr,
-      required String searchEn,
-      Value<String?> searchAr,
+      Value<String?> nameOfficialAr,
       required String region,
       Value<String?> subregion,
       Value<String?> capital,
@@ -1853,8 +1811,7 @@ typedef $$CountriesTableUpdateCompanionBuilder =
       Value<String> nameEn,
       Value<String> nameOfficialEn,
       Value<String?> nameAr,
-      Value<String> searchEn,
-      Value<String?> searchAr,
+      Value<String?> nameOfficialAr,
       Value<String> region,
       Value<String?> subregion,
       Value<String?> capital,
@@ -1905,13 +1862,8 @@ class $$CountriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get searchEn => $composableBuilder(
-    column: $table.searchEn,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get searchAr => $composableBuilder(
-    column: $table.searchAr,
+  ColumnFilters<String> get nameOfficialAr => $composableBuilder(
+    column: $table.nameOfficialAr,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2019,13 +1971,8 @@ class $$CountriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get searchEn => $composableBuilder(
-    column: $table.searchEn,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get searchAr => $composableBuilder(
-    column: $table.searchAr,
+  ColumnOrderings<String> get nameOfficialAr => $composableBuilder(
+    column: $table.nameOfficialAr,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -2121,11 +2068,10 @@ class $$CountriesTableAnnotationComposer
   GeneratedColumn<String> get nameAr =>
       $composableBuilder(column: $table.nameAr, builder: (column) => column);
 
-  GeneratedColumn<String> get searchEn =>
-      $composableBuilder(column: $table.searchEn, builder: (column) => column);
-
-  GeneratedColumn<String> get searchAr =>
-      $composableBuilder(column: $table.searchAr, builder: (column) => column);
+  GeneratedColumn<String> get nameOfficialAr => $composableBuilder(
+    column: $table.nameOfficialAr,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get region =>
       $composableBuilder(column: $table.region, builder: (column) => column);
@@ -2208,8 +2154,7 @@ class $$CountriesTableTableManager
                 Value<String> nameEn = const Value.absent(),
                 Value<String> nameOfficialEn = const Value.absent(),
                 Value<String?> nameAr = const Value.absent(),
-                Value<String> searchEn = const Value.absent(),
-                Value<String?> searchAr = const Value.absent(),
+                Value<String?> nameOfficialAr = const Value.absent(),
                 Value<String> region = const Value.absent(),
                 Value<String?> subregion = const Value.absent(),
                 Value<String?> capital = const Value.absent(),
@@ -2230,8 +2175,7 @@ class $$CountriesTableTableManager
                 nameEn: nameEn,
                 nameOfficialEn: nameOfficialEn,
                 nameAr: nameAr,
-                searchEn: searchEn,
-                searchAr: searchAr,
+                nameOfficialAr: nameOfficialAr,
                 region: region,
                 subregion: subregion,
                 capital: capital,
@@ -2254,8 +2198,7 @@ class $$CountriesTableTableManager
                 required String nameEn,
                 required String nameOfficialEn,
                 Value<String?> nameAr = const Value.absent(),
-                required String searchEn,
-                Value<String?> searchAr = const Value.absent(),
+                Value<String?> nameOfficialAr = const Value.absent(),
                 required String region,
                 Value<String?> subregion = const Value.absent(),
                 Value<String?> capital = const Value.absent(),
@@ -2276,8 +2219,7 @@ class $$CountriesTableTableManager
                 nameEn: nameEn,
                 nameOfficialEn: nameOfficialEn,
                 nameAr: nameAr,
-                searchEn: searchEn,
-                searchAr: searchAr,
+                nameOfficialAr: nameOfficialAr,
                 region: region,
                 subregion: subregion,
                 capital: capital,

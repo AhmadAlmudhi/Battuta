@@ -71,16 +71,25 @@ class AppShell extends StatelessWidget {
 /// Scaffold for a main tab: title, the Account button every tab has, and
 /// centered content.
 class TabScaffold extends StatelessWidget {
-  const TabScaffold({super.key, required this.title, required this.body});
+  const TabScaffold({
+    super.key,
+    required this.title,
+    required this.body,
+    this.actions = const [],
+  });
 
   final String title;
   final Widget body;
+
+  /// Shown before the Account button.
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: Text(title),
       actions: [
+        ...actions,
         IconButton(
           icon: const Icon(Icons.account_circle_outlined),
           tooltip: AppLocalizations.of(context).accountTitle,

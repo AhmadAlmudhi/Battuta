@@ -35,8 +35,8 @@ void main() {
     testWidgets('a deep link opened on first visit continues after Welcome', (
       tester,
     ) async {
-      final container = await pumpApp(tester);
-      await container.goTo(tester, '/country/JPN');
+      final app = await pumpApp(tester);
+      await app.goTo(tester, '/country/JPN');
       expect(find.text('Every country, stamped.'), findsOneWidget);
 
       await tester.tap(find.text('Continue as guest'));
@@ -46,12 +46,10 @@ void main() {
   });
 
   group('navigation', () {
-    const done = {'onboarding_done': true};
-
     testWidgets('an unknown country code shows Country not found '
         '(AC-DET-04)', (tester) async {
-      final container = await pumpApp(tester, prefs: done);
-      await container.goTo(tester, '/country/XYZ');
+      final app = await pumpApp(tester, prefs: returningUser);
+      await app.goTo(tester, '/country/XYZ');
 
       expect(find.text('Country not found'), findsOneWidget);
       await tester.tap(find.text('Back to Explore'));
@@ -60,8 +58,8 @@ void main() {
     });
 
     testWidgets('an unknown path shows Page not found', (tester) async {
-      final container = await pumpApp(tester, prefs: done);
-      await container.goTo(tester, '/nowhere');
+      final app = await pumpApp(tester, prefs: returningUser);
+      await app.goTo(tester, '/nowhere');
 
       expect(find.text('Page not found'), findsOneWidget);
     });
@@ -69,7 +67,7 @@ void main() {
     testWidgets('opening a country and pressing Back returns to Explore', (
       tester,
     ) async {
-      await pumpApp(tester, prefs: done);
+      await pumpApp(tester, prefs: returningUser);
       await tester.tap(find.text('Japan'));
       await tester.pumpAndSettle();
       expect(find.widgetWithText(AppBar, 'Japan'), findsOneWidget);
@@ -82,8 +80,8 @@ void main() {
     testWidgets('a screen opened by URL has an up button to its parent', (
       tester,
     ) async {
-      final container = await pumpApp(tester, prefs: done);
-      await container.goTo(tester, '/settings');
+      final app = await pumpApp(tester, prefs: returningUser);
+      await app.goTo(tester, '/settings');
       expect(find.byType(BackButton), findsNothing);
 
       await tester.tap(find.byType(BackButtonIcon));
@@ -92,7 +90,7 @@ void main() {
     });
 
     testWidgets('compact screens use a bottom navigation bar', (tester) async {
-      await pumpApp(tester, prefs: done);
+      await pumpApp(tester, prefs: returningUser);
 
       expect(find.byType(NavigationBar), findsOneWidget);
       expect(find.byType(NavigationRail), findsNothing);
@@ -101,7 +99,7 @@ void main() {
     testWidgets('a 1,440 px window uses a navigation rail (AC-PLT-02)', (
       tester,
     ) async {
-      await pumpApp(tester, prefs: done, size: const Size(1440, 900));
+      await pumpApp(tester, prefs: returningUser, size: const Size(1440, 900));
 
       expect(find.byType(NavigationRail), findsOneWidget);
       expect(find.byType(NavigationBar), findsNothing);
@@ -110,7 +108,7 @@ void main() {
     testWidgets('tabs switch between Explore, My travels, and Stats', (
       tester,
     ) async {
-      await pumpApp(tester, prefs: done);
+      await pumpApp(tester, prefs: returningUser);
 
       await tester.tap(find.text('My travels'));
       await tester.pumpAndSettle();
@@ -123,12 +121,10 @@ void main() {
   });
 
   group('settings', () {
-    const done = {'onboarding_done': true};
-
     testWidgets('Arabic applies instantly with right-to-left layout '
         '(FR-SET-02)', (tester) async {
-      final container = await pumpApp(tester, prefs: done);
-      await container
+      final app = await pumpApp(tester, prefs: returningUser);
+      await app.container
           .read(settingsProvider.notifier)
           .setLanguage(AppLanguage.ar);
       await tester.pumpAndSettle();
@@ -144,7 +140,7 @@ void main() {
     ) async {
       await pumpApp(
         tester,
-        prefs: {...done, 'locale': 'ar', 'theme_mode': 'dark'},
+        prefs: {...returningUser, 'locale': 'ar', 'theme_mode': 'dark'},
       );
 
       final context = tester.element(find.text('فرنسا'));
@@ -154,8 +150,8 @@ void main() {
 
     testWidgets('choosing Dark on the Settings screen applies and saves it '
         '(FR-SET-01)', (tester) async {
-      final container = await pumpApp(tester, prefs: done);
-      await container.goTo(tester, '/settings');
+      final app = await pumpApp(tester, prefs: returningUser);
+      await app.goTo(tester, '/settings');
 
       await tester.tap(find.text('Dark'));
       await tester.pumpAndSettle();

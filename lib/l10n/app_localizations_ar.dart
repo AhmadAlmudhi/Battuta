@@ -128,4 +128,217 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsLanguageArabic => 'العربية';
+
+  @override
+  String get exploreSearchHint => 'ابحث عن دولة';
+
+  @override
+  String get exploreClearSearch => 'مسح البحث';
+
+  @override
+  String get exploreFilters => 'التصفية';
+
+  @override
+  String exploreFiltersActive(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'التصفية، $count عاملًا مفعّلًا',
+      few: 'التصفية، $count عوامل مفعّلة',
+      two: 'التصفية، عاملان مفعّلان',
+      one: 'التصفية، عامل واحد مفعّل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exploreSort => 'الترتيب';
+
+  @override
+  String get exploreSortNameAsc => 'الاسم، من أ إلى ي';
+
+  @override
+  String get exploreSortNameDesc => 'الاسم، من ي إلى أ';
+
+  @override
+  String get exploreSortPopulationDesc => 'عدد السكان، من الأعلى إلى الأقل';
+
+  @override
+  String get exploreSortPopulationAsc => 'عدد السكان، من الأقل إلى الأعلى';
+
+  @override
+  String get exploreSortAreaDesc => 'المساحة، من الأكبر إلى الأصغر';
+
+  @override
+  String get exploreSortAreaAsc => 'المساحة، من الأصغر إلى الأكبر';
+
+  @override
+  String get exploreMoreOptions => 'خيارات أخرى';
+
+  @override
+  String get exploreRefreshData => 'تحديث البيانات';
+
+  @override
+  String get exploreOffline => 'أنت غير متصل. تُعرض البيانات المحفوظة.';
+
+  @override
+  String get exploreRefreshFailed => 'تعذّر التحديث. تُعرض البيانات المحفوظة.';
+
+  @override
+  String get exploreUpToDate => 'البيانات محدّثة.';
+
+  @override
+  String get exploreRefreshed => 'تم تحديث بيانات الدول.';
+
+  @override
+  String get exploreEmptyTitle => 'لا توجد دول مطابقة.';
+
+  @override
+  String get exploreEmptyBody => 'جرّب بحثًا آخر أو عوامل تصفية أقل.';
+
+  @override
+  String get exploreClearFilters => 'مسح عوامل التصفية';
+
+  @override
+  String get exploreVisited => 'تمت زيارتها';
+
+  @override
+  String get exploreOnWishlist => 'في قائمة الأمنيات';
+
+  @override
+  String flagLabel(String country) {
+    return 'علم $country';
+  }
+
+  @override
+  String get filtersTitle => 'التصفية';
+
+  @override
+  String get filtersRegion => 'المنطقة';
+
+  @override
+  String get filtersSubregion => 'المنطقة الفرعية';
+
+  @override
+  String get filtersLanguage => 'اللغة';
+
+  @override
+  String get filtersCurrency => 'العملة';
+
+  @override
+  String get filtersAnyLanguage => 'أي لغة';
+
+  @override
+  String get filtersAnyCurrency => 'أي عملة';
+
+  @override
+  String get filtersClearAll => 'مسح الكل';
+
+  @override
+  String filtersShowResults(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'عرض $count دولة',
+      many: 'عرض $count دولة',
+      few: 'عرض $count دول',
+      two: 'عرض دولتين',
+      one: 'عرض دولة واحدة',
+      zero: 'لا توجد نتائج',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get filtersClose => 'إغلاق';
+
+  @override
+  String get regionAfrica => 'أفريقيا';
+
+  @override
+  String get regionAmericas => 'الأمريكتان';
+
+  @override
+  String get regionAntarctic => 'القارة القطبية الجنوبية';
+
+  @override
+  String get regionAsia => 'آسيا';
+
+  @override
+  String get regionEurope => 'أوروبا';
+
+  @override
+  String get regionOceania => 'أوقيانوسيا';
+
+  @override
+  String get subregionEasternAfrica => 'شرق أفريقيا';
+
+  @override
+  String get subregionMiddleAfrica => 'وسط أفريقيا';
+
+  @override
+  String get subregionNorthernAfrica => 'شمال أفريقيا';
+
+  @override
+  String get subregionSouthernAfrica => 'جنوب أفريقيا';
+
+  @override
+  String get subregionWesternAfrica => 'غرب أفريقيا';
+
+  @override
+  String get subregionCaribbean => 'الكاريبي';
+
+  @override
+  String get subregionCentralAmerica => 'أمريكا الوسطى';
+
+  @override
+  String get subregionNorthAmerica => 'أمريكا الشمالية';
+
+  @override
+  String get subregionSouthAmerica => 'أمريكا الجنوبية';
+
+  @override
+  String get subregionCentralAsia => 'آسيا الوسطى';
+
+  @override
+  String get subregionEasternAsia => 'شرق آسيا';
+
+  @override
+  String get subregionSouthEasternAsia => 'جنوب شرق آسيا';
+
+  @override
+  String get subregionSouthernAsia => 'جنوب آسيا';
+
+  @override
+  String get subregionWesternAsia => 'غرب آسيا';
+
+  @override
+  String get subregionCentralEurope => 'أوروبا الوسطى';
+
+  @override
+  String get subregionEasternEurope => 'أوروبا الشرقية';
+
+  @override
+  String get subregionNorthernEurope => 'أوروبا الشمالية';
+
+  @override
+  String get subregionSoutheastEurope => 'جنوب شرق أوروبا';
+
+  @override
+  String get subregionSouthernEurope => 'أوروبا الجنوبية';
+
+  @override
+  String get subregionWesternEurope => 'أوروبا الغربية';
+
+  @override
+  String get subregionAustraliaNewZealand => 'أستراليا ونيوزيلندا';
+
+  @override
+  String get subregionMelanesia => 'ميلانيزيا';
+
+  @override
+  String get subregionMicronesia => 'ميكرونيزيا';
+
+  @override
+  String get subregionPolynesia => 'بولينيزيا';
 }

@@ -12,11 +12,12 @@ abstract class Country with _$Country {
     /// 3-letter ISO code, for example SAU. Primary key and route parameter.
     required String code,
 
-    /// Lowercase 2-letter ISO code, used for flag URLs.
+    /// Lowercase 2-letter ISO code, used for the flag asset.
     required String alpha2,
     required String nameEn,
     required String nameOfficialEn,
     String? nameAr,
+    String? nameOfficialAr,
     required String region,
     String? subregion,
     String? capital,
@@ -38,8 +39,11 @@ abstract class Country with _$Country {
   /// The name in the app language, falling back to English (PRD section 10.4).
   String name({required bool arabic}) => arabic ? (nameAr ?? nameEn) : nameEn;
 
-  String flagUrl({int width = 320}) =>
-      'https://flags.restcountries.com/v5/w$width/$alpha2.png';
+  String officialName({required bool arabic}) =>
+      arabic ? (nameOfficialAr ?? nameOfficialEn) : nameOfficialEn;
+
+  /// Bundled 320 px flag, from `tool/fetch_flags.dart` (PRD section 11.4).
+  String get flagAsset => 'assets/flags/$alpha2.png';
 }
 
 @freezed

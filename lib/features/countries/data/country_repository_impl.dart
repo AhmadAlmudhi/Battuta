@@ -5,42 +5,57 @@ import 'package:drift/drift.dart';
 import '../../../core/database/app_database.dart';
 import '../domain/country.dart';
 import '../domain/country_repository.dart';
-import '../domain/search_normalizer.dart';
+import 'country_api_client.dart';
 import 'country_parser.dart';
 
 /// Loads the raw snapshot JSON. In the app this reads the bundled asset.
 typedef SnapshotLoader = Future<String> Function();
 
 class CountryRepositoryImpl implements CountryRepository {
-  CountryRepositoryImpl(this._db, this._loadSnapshot);
+  CountryRepositoryImpl(this._db, this._loadSnapshot, [this._api]);
 
   final AppDatabase _db;
   final SnapshotLoader _loadSnapshot;
 
+  /// Null when the build has no API key; refresh then always fails and the
+  /// app keeps the bundled data.
+  final CountryApiClient? _api;
+
   @override
   Future<void> ensureSeeded() async {
-    final count = await _db.countries.count().getSingle();
-    if (count > 0) return;
-
     final snapshot = jsonDecode(await _loadSnapshot()) as Map<String, Object?>;
-    final fetchedAt = snapshot['fetchedAt'] as int;
-    final countries = [
-      for (final object in snapshot['objects'] as List<Object?>)
-        ?parseCountry(object as Map<String, Object?>),
-    ];
-    await replaceAll(countries, fetchedAt: fetchedAt);
+    final bundledAt = snapshot['fetchedAt'] as int;
+    final localAt = await dataFetchedAt();
+    if (localAt != null && localAt.millisecondsSinceEpoch >= bundledAt) return;
+
+    await _replaceAll(
+      _parseAll(snapshot['objects'] as List<Object?>),
+      fetchedAt: bundledAt,
+    );
   }
 
-  /// Replaces every country row in one transaction (PRD section 8.2, rule 4).
-  Future<void> replaceAll(List<Country> countries, {required int fetchedAt}) =>
-      _db.transaction(() async {
-        await _db.delete(_db.countries).go();
-        await _db.batch((batch) {
-          batch.insertAll(_db.countries, [
-            for (final country in countries) _toCompanion(country, fetchedAt),
-          ]);
-        });
-      });
+  @override
+  Future<DateTime?> dataFetchedAt() async {
+    final latest = _db.countries.fetchedAt.max();
+    final row = await (_db.selectOnly(
+      _db.countries,
+    )..addColumns([latest])).getSingle();
+    final millis = row.read(latest);
+    return millis == null ? null : DateTime.fromMillisecondsSinceEpoch(millis);
+  }
+
+  @override
+  Future<void> refresh({required DateTime now}) async {
+    final api = _api;
+    if (api == null) {
+      throw const CountryApiException(CountryApiFailure.invalidKey);
+    }
+    final countries = _parseAll(await api.fetchAll());
+    if (countries.isEmpty) {
+      throw const CountryApiException(CountryApiFailure.unexpected);
+    }
+    await _replaceAll(countries, fetchedAt: now.millisecondsSinceEpoch);
+  }
 
   @override
   Stream<List<Country>> watchAll() {
@@ -57,6 +72,22 @@ class CountryRepositoryImpl implements CountryRepository {
     return row == null ? null : _toCountry(row);
   }
 
+  static List<Country> _parseAll(List<Object?> records) => [
+    for (final record in records)
+      if (record is Map<String, Object?>) ?parseCountry(record),
+  ];
+
+  /// Replaces every country row in one transaction (PRD section 8.2, rule 4).
+  Future<void> _replaceAll(List<Country> countries, {required int fetchedAt}) =>
+      _db.transaction(() async {
+        await _db.delete(_db.countries).go();
+        await _db.batch((batch) {
+          batch.insertAll(_db.countries, [
+            for (final country in countries) _toCompanion(country, fetchedAt),
+          ]);
+        });
+      });
+
   static CountriesCompanion _toCompanion(Country country, int fetchedAt) =>
       CountriesCompanion.insert(
         code: country.code,
@@ -64,14 +95,7 @@ class CountryRepositoryImpl implements CountryRepository {
         nameEn: country.nameEn,
         nameOfficialEn: country.nameOfficialEn,
         nameAr: Value(country.nameAr),
-        // One normalized name per line, so ranking can check each name's start.
-        searchEn: [
-          country.nameEn,
-          country.nameOfficialEn,
-        ].map(normalizeForSearch).join('\n'),
-        searchAr: Value(
-          country.nameAr == null ? null : normalizeForSearch(country.nameAr!),
-        ),
+        nameOfficialAr: Value(country.nameOfficialAr),
         region: country.region,
         subregion: Value(country.subregion),
         capital: Value(country.capital),
@@ -93,6 +117,7 @@ class CountryRepositoryImpl implements CountryRepository {
     nameEn: row.nameEn,
     nameOfficialEn: row.nameOfficialEn,
     nameAr: row.nameAr,
+    nameOfficialAr: row.nameOfficialAr,
     region: row.region,
     subregion: row.subregion,
     capital: row.capital,

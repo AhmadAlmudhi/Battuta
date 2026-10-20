@@ -6,47 +6,44 @@
   "@pageTitle": {
     "description": "Browser tab title (FR-PLT-07), for example Japan · Battuta.",
     "placeholders": {
-      "screen": {"type": "String"},
-      "appName": {"type": "String"}
+      "screen": {
+        "type": "String"
+      },
+      "appName": {
+        "type": "String"
+      }
     }
   },
-
   "navExplore": "Explore",
   "navTravels": "My travels",
   "navStats": "Stats",
-
   "welcomeTitle": "Welcome to Battuta",
   "welcomeBody": "Explore every country, record where you've been, and plan where to go next.",
   "welcomeContinueAsGuest": "Continue as guest",
   "welcomeSignIn": "Sign in",
-
   "exploreCountryCount": "{count, plural, =1{1 country} other{{count} countries}}",
   "@exploreCountryCount": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "exploreLoadError": "Couldn't load countries.",
-
   "countryNotFoundTitle": "Country not found",
   "countryNotFoundBody": "There's no country with this code.",
   "countryNotFoundBack": "Back to Explore",
-
   "pageNotFoundTitle": "Page not found",
   "pageNotFoundBody": "This page doesn't exist.",
-
   "placeholderBody": "This screen is under construction.",
-
   "accountTitle": "Account",
   "accountGuestTitle": "Back up your travels",
   "accountGuestBody": "Sign in to back up your travels and see them on all your devices.",
   "accountSignIn": "Sign in",
   "accountSettings": "Settings",
-
   "signInTitle": "Sign in",
   "signUpTitle": "Create account",
   "resetPasswordTitle": "Reset password",
-
   "settingsTitle": "Settings",
   "settingsTheme": "Theme",
   "settingsThemeSystem": "System",
@@ -55,5 +52,90 @@
   "settingsLanguage": "Language",
   "settingsLanguageSystem": "System",
   "settingsLanguageEnglish": "English",
-  "settingsLanguageArabic": "العربية"
+  "settingsLanguageArabic": "العربية",
+  "exploreSearchHint": "Search countries",
+  "exploreClearSearch": "Clear search",
+  "exploreFilters": "Filters",
+  "exploreFiltersActive": "{count, plural, =1{Filters, 1 active} other{Filters, {count} active}}",
+  "@exploreFiltersActive": {
+    "description": "Screen-reader label for the Filters button when filters are active.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exploreSort": "Sort",
+  "exploreSortNameAsc": "Name, A to Z",
+  "exploreSortNameDesc": "Name, Z to A",
+  "exploreSortPopulationDesc": "Population, high to low",
+  "exploreSortPopulationAsc": "Population, low to high",
+  "exploreSortAreaDesc": "Area, largest first",
+  "exploreSortAreaAsc": "Area, smallest first",
+  "exploreMoreOptions": "More options",
+  "exploreRefreshData": "Refresh data",
+  "exploreOffline": "You're offline. Showing saved data.",
+  "exploreRefreshFailed": "Couldn't refresh. Showing saved data.",
+  "exploreUpToDate": "Data is up to date.",
+  "exploreRefreshed": "Country data updated.",
+  "exploreEmptyTitle": "No countries match.",
+  "exploreEmptyBody": "Try a different search or fewer filters.",
+  "exploreClearFilters": "Clear filters",
+  "exploreVisited": "Visited",
+  "exploreOnWishlist": "On wishlist",
+  "flagLabel": "Flag of {country}",
+  "@flagLabel": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "filtersTitle": "Filters",
+  "filtersRegion": "Region",
+  "filtersSubregion": "Subregion",
+  "filtersLanguage": "Language",
+  "filtersCurrency": "Currency",
+  "filtersAnyLanguage": "Any language",
+  "filtersAnyCurrency": "Any currency",
+  "filtersClearAll": "Clear all",
+  "filtersShowResults": "{count, plural, =0{No matches} =1{Show 1 country} other{Show {count} countries}}",
+  "@filtersShowResults": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filtersClose": "Close",
+  "regionAfrica": "Africa",
+  "regionAmericas": "Americas",
+  "regionAntarctic": "Antarctic",
+  "regionAsia": "Asia",
+  "regionEurope": "Europe",
+  "regionOceania": "Oceania",
+  "subregionEasternAfrica": "Eastern Africa",
+  "subregionMiddleAfrica": "Middle Africa",
+  "subregionNorthernAfrica": "Northern Africa",
+  "subregionSouthernAfrica": "Southern Africa",
+  "subregionWesternAfrica": "Western Africa",
+  "subregionCaribbean": "Caribbean",
+  "subregionCentralAmerica": "Central America",
+  "subregionNorthAmerica": "North America",
+  "subregionSouthAmerica": "South America",
+  "subregionCentralAsia": "Central Asia",
+  "subregionEasternAsia": "Eastern Asia",
+  "subregionSouthEasternAsia": "South-Eastern Asia",
+  "subregionSouthernAsia": "Southern Asia",
+  "subregionWesternAsia": "Western Asia",
+  "subregionCentralEurope": "Central Europe",
+  "subregionEasternEurope": "Eastern Europe",
+  "subregionNorthernEurope": "Northern Europe",
+  "subregionSoutheastEurope": "Southeast Europe",
+  "subregionSouthernEurope": "Southern Europe",
+  "subregionWesternEurope": "Western Europe",
+  "subregionAustraliaNewZealand": "Australia and New Zealand",
+  "subregionMelanesia": "Melanesia",
+  "subregionMicronesia": "Micronesia",
+  "subregionPolynesia": "Polynesia"
 }

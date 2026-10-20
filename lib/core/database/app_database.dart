@@ -9,6 +9,9 @@ import '../../features/travels/domain/travel_entry.dart';
 part 'app_database.g.dart';
 
 /// Local country data (PRD section 8.3). List-shaped values are JSON text.
+///
+/// This table is a cache of the bundled snapshot or the last refresh, so a
+/// schema change can drop and rebuild it.
 @DataClassName('CountryRow')
 @TableIndex(name: 'countries_region', columns: {#region})
 class Countries extends Table {
@@ -17,8 +20,7 @@ class Countries extends Table {
   TextColumn get nameEn => text()();
   TextColumn get nameOfficialEn => text()();
   TextColumn get nameAr => text().nullable()();
-  TextColumn get searchEn => text()();
-  TextColumn get searchAr => text().nullable()();
+  TextColumn get nameOfficialAr => text().nullable()();
   TextColumn get region => text()();
   TextColumn get subregion => text().nullable()();
   TextColumn get capital => text().nullable()();
@@ -76,8 +78,22 @@ class TravelEntries extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _open());
 
+  /// 2: removed `search_en` and `search_ar` (search runs in memory) and
+  /// added `name_official_ar`.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        // Rebuilt empty; the next launch imports the bundled snapshot.
+        await m.deleteTable(countries.actualTableName);
+        await m.createTable(countries);
+        await m.createIndex(countriesRegion);
+      }
+    },
+  );
 
   static QueryExecutor _open() => driftDatabase(
     name: 'battuta',
