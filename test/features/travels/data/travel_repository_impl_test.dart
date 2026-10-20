@@ -145,6 +145,23 @@ void main() {
     expect(saved.updatedAt, greaterThan(syncedAt));
   });
 
+  test(
+    'watchEntries lists saved entries and leaves out removed ones',
+    () async {
+      await repo.saveVisit('FRA', rating: 4);
+      await repo.saveWishlist('JPN', priority: WishlistPriority.high);
+      await repo.saveVisit('DEU');
+      await repo.remove('DEU');
+
+      final entries = await repo.watchEntries().first;
+
+      expect(
+        {for (final e in entries) e.countryCode: e.status},
+        {'FRA': TravelStatus.visited, 'JPN': TravelStatus.wishlist},
+      );
+    },
+  );
+
   test('statuses list every saved country', () async {
     await repo.saveVisit('FRA');
     await repo.saveWishlist('JPN');

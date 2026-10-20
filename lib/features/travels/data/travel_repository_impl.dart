@@ -40,6 +40,12 @@ class TravelRepositoryImpl implements TravelRepository {
   }
 
   @override
+  Stream<List<TravelEntry>> watchEntries() {
+    final query = _db.select(_entries)..where((t) => t.isDeleted.equals(false));
+    return query.watch().map((rows) => rows.map(_toEntry).toList());
+  }
+
+  @override
   Future<void> saveVisit(
     String countryCode, {
     DateTime? visitedOn,

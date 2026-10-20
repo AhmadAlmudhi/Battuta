@@ -68,6 +68,32 @@ class AppShell extends StatelessWidget {
   }
 }
 
+/// Keeps every tab alive but shows only the current one. Inactive tabs stop
+/// their animations and take no part in hero flights, so a flag hidden in
+/// another tab never flies to a details screen.
+class BranchStack extends StatelessWidget {
+  const BranchStack({
+    super.key,
+    required this.currentIndex,
+    required this.children,
+  });
+
+  final int currentIndex;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => IndexedStack(
+    index: currentIndex,
+    children: [
+      for (var i = 0; i < children.length; i++)
+        HeroMode(
+          enabled: i == currentIndex,
+          child: TickerMode(enabled: i == currentIndex, child: children[i]),
+        ),
+    ],
+  );
+}
+
 /// Scaffold for a main tab: title, the Account button every tab has, and
 /// centered content.
 class TabScaffold extends StatelessWidget {

@@ -10,6 +10,9 @@ abstract interface class TravelRepository {
   /// The entry for one country, or null when it isn't saved.
   Stream<TravelEntry?> watchEntry(String countryCode);
 
+  /// Every saved entry, Visited and Wishlist, for My travels (FR-TRV-05).
+  Stream<List<TravelEntry>> watchEntries();
+
   /// Saves the country as Visited. A wishlist entry becomes Visited and its
   /// wishlist fields are cleared (FR-TRV-03); pass its notes to keep them.
   Future<void> saveVisit(

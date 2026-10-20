@@ -514,4 +514,61 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get validationNotesTooLong => 'يمكن أن تصل الملاحظات إلى 500 حرف.';
+
+  @override
+  String travelsVisitedTab(int count) {
+    return 'تمت زيارتها ($count)';
+  }
+
+  @override
+  String travelsWishlistTab(int count) {
+    return 'قائمة الأمنيات ($count)';
+  }
+
+  @override
+  String get travelsSearchHint => 'ابحث في رحلاتك';
+
+  @override
+  String get travelsSortByDate => 'تاريخ الزيارة، الأحدث أولًا';
+
+  @override
+  String get travelsSortByPriority => 'الأولوية، ثم السنة المستهدفة';
+
+  @override
+  String get travelsNoDate => 'بدون تاريخ';
+
+  @override
+  String get travelsEmptyVisitedTitle => 'لا توجد زيارات بعد';
+
+  @override
+  String get travelsEmptyVisitedBody => 'ستظهر هنا الدول التي تسجّل زيارتها.';
+
+  @override
+  String get travelsEmptyWishlistTitle => 'قائمة أمنياتك فارغة';
+
+  @override
+  String get travelsEmptyWishlistBody =>
+      'أضف الدول التي ترغب في زيارتها لاحقًا.';
+
+  @override
+  String get travelsExplore => 'استكشف الدول';
+
+  @override
+  String get travelsNoMatchesTitle => 'لا توجد نتائج مطابقة.';
+
+  @override
+  String get travelsClearFilters => 'مسح البحث وعوامل التصفية';
+
+  @override
+  String travelsEntryMenu(String country) {
+    return 'خيارات $country';
+  }
+
+  @override
+  String get travelsDelete => 'حذف';
+
+  @override
+  String travelsDeleted(String country) {
+    return 'تم حذف $country.';
+  }
 }

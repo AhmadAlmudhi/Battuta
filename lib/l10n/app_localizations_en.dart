@@ -502,4 +502,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get validationNotesTooLong => 'Notes can be up to 500 characters.';
+
+  @override
+  String travelsVisitedTab(int count) {
+    return 'Visited ($count)';
+  }
+
+  @override
+  String travelsWishlistTab(int count) {
+    return 'Wishlist ($count)';
+  }
+
+  @override
+  String get travelsSearchHint => 'Search your travels';
+
+  @override
+  String get travelsSortByDate => 'Visit date, newest first';
+
+  @override
+  String get travelsSortByPriority => 'Priority, then target year';
+
+  @override
+  String get travelsNoDate => 'Date not set';
+
+  @override
+  String get travelsEmptyVisitedTitle => 'No visits yet';
+
+  @override
+  String get travelsEmptyVisitedBody =>
+      'Countries you mark as visited appear here.';
+
+  @override
+  String get travelsEmptyWishlistTitle => 'Your wishlist is empty';
+
+  @override
+  String get travelsEmptyWishlistBody =>
+      'Add the countries you want to visit next.';
+
+  @override
+  String get travelsExplore => 'Explore countries';
+
+  @override
+  String get travelsNoMatchesTitle => 'No entries match.';
+
+  @override
+  String get travelsClearFilters => 'Clear search and filters';
+
+  @override
+  String travelsEntryMenu(String country) {
+    return 'Options for $country';
+  }
+
+  @override
+  String get travelsDelete => 'Delete';
+
+  @override
+  String travelsDeleted(String country) {
+    return '$country deleted.';
+  }
 }

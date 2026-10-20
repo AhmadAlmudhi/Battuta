@@ -49,9 +49,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) =>
             WelcomeScreen(from: state.uri.queryParameters['from']),
       ),
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
+        navigatorContainerBuilder: (context, navigationShell, children) =>
+            BranchStack(
+              currentIndex: navigationShell.currentIndex,
+              children: children,
+            ),
         branches: [
           StatefulShellBranch(
             routes: [
@@ -65,7 +70,9 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/travels',
-                builder: (context, state) => const TravelsScreen(),
+                builder: (context, state) => TravelsScreen(
+                  tab: TravelsTab.fromQuery(state.uri.queryParameters['tab']),
+                ),
               ),
             ],
           ),
