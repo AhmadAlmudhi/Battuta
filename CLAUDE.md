@@ -10,7 +10,11 @@ Guidance for Claude Code when working in this repository.
 - **Naming:** the app is always called **Battuta** / **بطوطة** in the UI, titles, launcher labels, and copy. `battuta-travel` is only the web address, and `battuta-b8451` is only the Firebase project ID; never show either to users.
 - **Identifiers:** package `battuta`; Android/iOS app ID `com.ahmadalmudhi.battuta`; Firebase project `battuta-b8451`; Hosting site `battuta-travel`; Firestore `(default)` in `eur3`.
 - **Source of truth:** [docs/Battuta_PRD.md](docs/Battuta_PRD.md). Where the code and the PRD disagree, the PRD wins until it is updated. Cite requirement IDs (`FR-EXP-03`, `NFR-05`, `AC-SYNC-01`, `D-6`) in commits, PRs, and tests.
-- **Current state:** Firebase is configured and initialized. The PRD packages are installed. The Drift database, country parsing, search normalization, snapshot import, and their tests exist. `main.dart` shows a temporary database-check screen in place of the real UI. Not started: routing, theme, localization, and every feature screen.
+- **Current state:** done so far:
+  - Firebase, the Drift database, country parsing, search normalization, and the snapshot import.
+  - The app shell: theme and fonts, English/Arabic localization, settings (theme, language, onboarding flag), all PRD routes, adaptive navigation, browser tab titles, and a working Welcome and Settings.
+  - Explore is a plain list. Country details, My travels, Stats, Account, and sign-in are routed placeholders.
+  - Not started: the Explore grid/search/filters, details facts and actions, travel entries, stats, auth, sync, flags, the app icon, and CI.
 
 ## Commands
 
@@ -48,7 +52,9 @@ lib/
     stats/
     auth/          accounts, guest merge, sync
     settings/
-  main.dart
+    onboarding/    Welcome screen
+  app.dart         MaterialApp.router: theme, locale, localization delegates
+  main.dart        loads SharedPreferences and Firebase, then runs the app
 assets/data/countries_snapshot.json
 tool/              snapshot script
 test/              mirrors lib/
@@ -107,6 +113,21 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 Routes: `/welcome`, `/explore`, `/country/:code` (3-letter ISO), `/travels` (`?tab=wishlist`), `/stats`, `/account`, `/account/sign-in`, `/account/sign-up`, `/account/reset`, `/settings`. Visit and wishlist forms are modals, not routes.
 
 Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must survive refresh and deep linking; browser Back/Forward must work. Explore search/filter/sort state persists across navigation for the session (FR-EXP-09). Web tab title: `Japan · Battuta` / `اليابان · بطوطة`.
+
+## Navigation conventions
+
+- `GoRouter.optionURLReflectsImperativeAPIs` is on. Open detail screens (`/country/:code`, `/account`, `/settings`, sign-in) with `context.push` so in-app Back works; the URL still updates. Switch tabs with the shell (`goBranch`); use `context.go` only to reset the stack (Welcome → Explore, not-found → Explore).
+- Screens that can be opened by URL set `leading: upButton(context, fallback: ...)` so a deep-linked page with nothing underneath still has a way up.
+- Wrap each screen in `ScreenTitle` for the browser tab title.
+- Until `onboarding_done` is set, `redirectFor` sends every route except `/welcome` and `/account/*` to `/welcome?from=<target>`; Welcome continues to `from`.
+- Theme: `fontFamily: 'Inter'` with `fontFamilyFallback: ['IBMPlexSansArabic']`. Inter has no Arabic glyphs, so Arabic text uses Plex in both languages without switching on locale.
+
+## Build gotchas
+
+- After adding or removing a plugin, run `flutter clean` if the web app throws `MissingPluginException`: the web plugin registrant in `.dart_tool/flutter_build/` can go stale. Widget tests won't catch it because they mock plugins.
+- Android uses Kotlin Gradle plugin 2.3.20 (Firebase Android SDK metadata is Kotlin 2.4) and the `kotlin { compilerOptions { ... } }` DSL.
+- The iOS deployment target is 15.0 (required by `cloud_firestore`, and the PRD minimum). If `pod install` says the specs repo is out of date, run `cd ios && pod install --repo-update`.
+- Firebase is moving iOS from CocoaPods to Swift Package Manager; new Firebase pods stop after October 2026. Plan to switch Flutter's iOS build to SwiftPM.
 
 ## Web platform gotchas
 
