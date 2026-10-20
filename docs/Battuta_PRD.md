@@ -580,7 +580,7 @@ Authorization: Bearer <RC_API_KEY>
 
 | API field | App field | Used by |
 | --- | --- | --- |
-| `codes.alpha_3` | `code` (primary key) | Routes, entries, borders |
+| `codes.alpha_3` | `code` (primary key) | Routes, entries, borders. Records without ISO codes are skipped (see the note below) |
 | `codes.alpha_2` | `alpha2` | Flag image URL |
 | `names.common` | `nameEn` | Cards, search, sort |
 | `names.official` | `nameOfficialEn` | Details, search |
@@ -596,6 +596,8 @@ Authorization: Bearer <RC_API_KEY>
 | `links.google_maps` | `mapsUrl` | Open in Maps |
 | `flag.description` | `flagAlt` | Screen-reader label for the flag |
 | `flag.colors.dominant` | `flagColor` | Header tint (FR-DET-07) |
+
+> **Data note:** The API returns 254 records. Four disputed territories (Abkhazia, Northern Cyprus, Somaliland, and South Ossetia) have no ISO codes, so they can't have a route, flag, or entry, and the app skips them. That leaves 250 countries and territories, the total used by Stats (D-3). Missing values arrive as empty strings, not null, so the parser treats empty strings as missing.
 
 ### 8.2 Snapshot and refresh rules
 
@@ -863,7 +865,7 @@ lib/
     settings/
   main.dart
 assets/data/countries_snapshot.json
-web/                    index.html, icons, sqlite3.wasm, drift_worker.dart.js
+web/                    index.html, icons, sqlite3.wasm, drift_worker.js
 tool/                   snapshot script
 firebase.json           Hosting configuration
 test/                   mirrors lib/
@@ -875,7 +877,7 @@ test/                   mirrors lib/
 - **Allowed origins:** the REST Countries key must list `localhost` for development and both production hostnames, `battuta-travel.web.app` and `battuta-travel.firebaseapp.com`. Without them, browsers block the refresh calls. Preview builds don't need the API because they use the bundled snapshot.
 - **Firebase:** configured for web, Android, and iOS with the FlutterFire CLI. Email and password is the only sign-in provider enabled.
 - **Web routing:** the app calls `usePathUrlStrategy()` before `runApp`, and `firebase.json` rewrites every path to `/index.html` so direct links and refreshes work.
-- **Database on web:** `web/` contains `sqlite3.wasm` (served as `application/wasm`) and `drift_worker.dart.js`, both from the same drift release. Drift picks the best storage the browser supports. Leave COOP and COEP headers off for 1.0: they can block cross-origin resources such as flag images, and drift works without them.
+- **Database on web:** `web/` contains `sqlite3.wasm` (served as `application/wasm`) and `drift_worker.js`, both downloaded from the same drift GitHub release as the `drift` package version in use. Drift picks the best storage the browser supports. Leave COOP and COEP headers off for 1.0: they can block cross-origin resources such as flag images, and drift works without them.
 - **Flags on web:** Flutter web draws images through the canvas, which needs CORS headers from the image server. Load flags with `Image.network` and `webHtmlElementStrategy: WebHtmlElementStrategy.fallback`, which falls back to an HTML image element when headers are missing. If that is not enough, bundle the flag images as assets.
 - **iOS:** building and testing needs a Mac with Xcode. The CI pipeline compiles iOS without code signing on a macOS runner.
 
