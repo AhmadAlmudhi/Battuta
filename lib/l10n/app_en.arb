@@ -137,5 +137,107 @@
   "subregionAustraliaNewZealand": "Australia and New Zealand",
   "subregionMelanesia": "Melanesia",
   "subregionMicronesia": "Micronesia",
-  "subregionPolynesia": "Polynesia"
+  "subregionPolynesia": "Polynesia",
+  "commonSave": "Save",
+  "commonCancel": "Cancel",
+  "commonUndo": "Undo",
+  "commonNotAvailable": "Not available",
+  "listSeparator": ", ",
+  "@listSeparator": {
+    "description": "Joins list items, for example languages."
+  },
+  "detailsFacts": "Facts",
+  "detailsCapital": "Capital",
+  "detailsRegion": "Region",
+  "detailsSubregion": "Subregion",
+  "detailsPopulation": "Population",
+  "detailsArea": "Area",
+  "detailsAreaValue": "{area} km²",
+  "@detailsAreaValue": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsLanguages": "Languages",
+  "detailsCurrencies": "Currencies",
+  "detailsTimezones": "Time zones",
+  "detailsNeighbors": "Neighboring countries",
+  "detailsNoLandBorders": "No land borders",
+  "detailsOpenInMaps": "Open in Maps",
+  "detailsOpenInMapsOffline": "Maps needs a connection.",
+  "detailsMarkVisited": "Mark as visited",
+  "detailsAddToWishlist": "Add to wishlist",
+  "detailsEdit": "Edit",
+  "detailsRemove": "Remove",
+  "detailsVisited": "Visited",
+  "detailsVisitedOn": "Visited on {date}",
+  "@detailsVisitedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsOnWishlist": "On your wishlist",
+  "detailsTargetYear": "Target year {year}",
+  "@detailsTargetYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsRemoved": "{country} removed.",
+  "@detailsRemoved": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "detailsRating": "{rating, plural, =1{1 of 5 stars} other{{rating} of 5 stars}}",
+  "@detailsRating": {
+    "placeholders": {
+      "rating": {
+        "type": "int"
+      }
+    }
+  },
+  "stampVisited": "VISITED",
+  "priorityHigh": "High priority",
+  "priorityMedium": "Medium priority",
+  "priorityLow": "Low priority",
+  "priorityHighShort": "High",
+  "priorityMediumShort": "Medium",
+  "priorityLowShort": "Low",
+  "visitFormTitle": "Your visit to {country}",
+  "@visitFormTitle": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "visitFormDate": "Visit date",
+  "visitFormAddDate": "Add date",
+  "visitFormClearDate": "Clear date",
+  "visitFormRating": "Rating",
+  "visitFormClearRating": "Clear rating",
+  "formNotes": "Notes",
+  "formNotesHint": "Optional",
+  "wishlistFormTitle": "{country} on your wishlist",
+  "@wishlistFormTitle": {
+    "placeholders": {
+      "country": {
+        "type": "String"
+      }
+    }
+  },
+  "wishlistFormPriority": "Priority",
+  "wishlistFormTargetYear": "Target year",
+  "wishlistFormNoTargetYear": "No target year",
+  "validationVisitDateFuture": "Visit date can't be in the future.",
+  "validationNotesTooLong": "Notes can be up to 500 characters."
 }

@@ -341,4 +341,177 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get subregionPolynesia => 'بولينيزيا';
+
+  @override
+  String get commonSave => 'حفظ';
+
+  @override
+  String get commonCancel => 'إلغاء';
+
+  @override
+  String get commonUndo => 'تراجع';
+
+  @override
+  String get commonNotAvailable => 'غير متوفر';
+
+  @override
+  String get listSeparator => '، ';
+
+  @override
+  String get detailsFacts => 'معلومات أساسية';
+
+  @override
+  String get detailsCapital => 'العاصمة';
+
+  @override
+  String get detailsRegion => 'المنطقة';
+
+  @override
+  String get detailsSubregion => 'المنطقة الفرعية';
+
+  @override
+  String get detailsPopulation => 'عدد السكان';
+
+  @override
+  String get detailsArea => 'المساحة';
+
+  @override
+  String detailsAreaValue(String area) {
+    return '$area كم²';
+  }
+
+  @override
+  String get detailsLanguages => 'اللغات';
+
+  @override
+  String get detailsCurrencies => 'العملات';
+
+  @override
+  String get detailsTimezones => 'المناطق الزمنية';
+
+  @override
+  String get detailsNeighbors => 'الدول المجاورة';
+
+  @override
+  String get detailsNoLandBorders => 'لا توجد حدود برية';
+
+  @override
+  String get detailsOpenInMaps => 'فتح في الخرائط';
+
+  @override
+  String get detailsOpenInMapsOffline => 'تحتاج الخرائط إلى اتصال بالإنترنت.';
+
+  @override
+  String get detailsMarkVisited => 'سجّل زيارتك';
+
+  @override
+  String get detailsAddToWishlist => 'أضف إلى قائمة الأمنيات';
+
+  @override
+  String get detailsEdit => 'تعديل';
+
+  @override
+  String get detailsRemove => 'إزالة';
+
+  @override
+  String get detailsVisited => 'تمت زيارتها';
+
+  @override
+  String detailsVisitedOn(String date) {
+    return 'تمت الزيارة في $date';
+  }
+
+  @override
+  String get detailsOnWishlist => 'في قائمة أمنياتك';
+
+  @override
+  String detailsTargetYear(String year) {
+    return 'السنة المستهدفة $year';
+  }
+
+  @override
+  String detailsRemoved(String country) {
+    return 'تمت إزالة $country.';
+  }
+
+  @override
+  String detailsRating(int rating) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rating,
+      locale: localeName,
+      other: '$rating نجوم من 5',
+      few: '$rating نجوم من 5',
+      two: 'نجمتان من 5',
+      one: 'نجمة واحدة من 5',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stampVisited => 'تمت الزيارة';
+
+  @override
+  String get priorityHigh => 'أولوية عالية';
+
+  @override
+  String get priorityMedium => 'أولوية متوسطة';
+
+  @override
+  String get priorityLow => 'أولوية منخفضة';
+
+  @override
+  String get priorityHighShort => 'عالية';
+
+  @override
+  String get priorityMediumShort => 'متوسطة';
+
+  @override
+  String get priorityLowShort => 'منخفضة';
+
+  @override
+  String visitFormTitle(String country) {
+    return 'زيارتك إلى $country';
+  }
+
+  @override
+  String get visitFormDate => 'تاريخ الزيارة';
+
+  @override
+  String get visitFormAddDate => 'إضافة تاريخ';
+
+  @override
+  String get visitFormClearDate => 'مسح التاريخ';
+
+  @override
+  String get visitFormRating => 'التقييم';
+
+  @override
+  String get visitFormClearRating => 'مسح التقييم';
+
+  @override
+  String get formNotes => 'ملاحظات';
+
+  @override
+  String get formNotesHint => 'اختيارية';
+
+  @override
+  String wishlistFormTitle(String country) {
+    return '$country في قائمة أمنياتك';
+  }
+
+  @override
+  String get wishlistFormPriority => 'الأولوية';
+
+  @override
+  String get wishlistFormTargetYear => 'السنة المستهدفة';
+
+  @override
+  String get wishlistFormNoTargetYear => 'بدون سنة محددة';
+
+  @override
+  String get validationVisitDateFuture =>
+      'لا يمكن أن يكون تاريخ الزيارة في المستقبل.';
+
+  @override
+  String get validationNotesTooLong => 'يمكن أن تصل الملاحظات إلى 500 حرف.';
 }

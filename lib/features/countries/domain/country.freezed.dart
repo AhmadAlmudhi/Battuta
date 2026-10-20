@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$Country {
 
 /// 3-letter ISO code, for example SAU. Primary key and route parameter.
- String get code;/// Lowercase 2-letter ISO code, used for flag URLs.
+ String get code;/// Lowercase 2-letter ISO code, used for the flag asset.
  String get alpha2; String get nameEn; String get nameOfficialEn; String? get nameAr; String? get nameOfficialAr; String get region; String? get subregion; String? get capital; int get population; double? get areaKm2; List<String> get languages; List<Currency> get currencies;/// 3-letter codes of neighboring countries; empty for no land borders.
  List<String> get borders; List<String> get timezones; String? get mapsUrl; String? get flagAlt;/// Dominant flag color as hex, for example #006C35.
  String? get flagColor;
@@ -232,7 +232,7 @@ class _Country extends Country {
 
 /// 3-letter ISO code, for example SAU. Primary key and route parameter.
 @override final  String code;
-/// Lowercase 2-letter ISO code, used for flag URLs.
+/// Lowercase 2-letter ISO code, used for the flag asset.
 @override final  String alpha2;
 @override final  String nameEn;
 @override final  String nameOfficialEn;

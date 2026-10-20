@@ -14,6 +14,8 @@ Map<String, Object?> apiRecord({
   String? officialAr,
   required String region,
   String? subregion,
+  String? capital,
+  String? mapsUrl,
   int population = 1000000,
   num? area = 1000,
   List<String> languages = const [],
@@ -28,7 +30,13 @@ Map<String, Object?> apiRecord({
     },
   },
   'codes': {'alpha_2': alpha2, 'alpha_3': code},
-  'capitals': const [],
+  'capitals': [
+    if (capital != null)
+      {
+        'attributes': {'primary': true},
+        'name': capital,
+      },
+  ],
   'flag': const {'colors': {}},
   'region': region,
   'subregion': subregion ?? '',
@@ -41,7 +49,7 @@ Map<String, Object?> apiRecord({
   'languages': [
     for (final language in languages) {'name': language},
   ],
-  'links': const {'google_maps': ''},
+  'links': {'google_maps': mapsUrl ?? ''},
   'population': population,
   'timezones': const ['UTC'],
 };
@@ -59,6 +67,8 @@ final testRecords = [
     officialAr: 'الجمهورية الفرنسية',
     region: 'Europe',
     subregion: 'Western Europe',
+    capital: 'Paris',
+    mapsUrl: 'https://goo.gl/maps/france',
     population: 68000000,
     area: 551695,
     languages: ['French'],
@@ -113,6 +123,7 @@ final testRecords = [
     name: 'Japan',
     nameAr: 'اليابان',
     region: 'Asia',
+    capital: 'Tokyo',
     subregion: 'Eastern Asia',
     population: 124000000,
     area: 377930,

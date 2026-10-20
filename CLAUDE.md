@@ -14,8 +14,9 @@ Guidance for Claude Code when working in this repository.
   - Firebase, the Drift database, country parsing, search normalization, and the snapshot import.
   - The app shell: theme and fonts, English/Arabic localization, settings (theme, language, onboarding flag), all PRD routes, adaptive navigation, browser tab titles, and a working Welcome and Settings.
   - Explore is complete: flag grid, search, filters, sort, badges, offline banner, and pull to refresh / Refresh data with the API refresh rules.
-  - Country details shows only its header (flag hero, names); facts and actions are next. My travels, Stats, Account, and sign-in are routed placeholders. `TravelRepository` only has `watchStatuses()` so far.
-  - Not started: travel entries and forms, stats, auth, sync, the app icon, and CI.
+  - Country details is complete: header with flag hero, tint, and passport stamp; facts; neighbor chips; Open in Maps; and the save actions with the visit and wishlist forms (`lib/features/travels/presentation/travel_forms.dart`), remove with Undo.
+  - `TravelRepository` saves, removes (soft delete), and restores entries.
+  - Not started: the My travels list screen, stats, auth, sync, the app icon, and CI.
 
 ## Commands
 
@@ -70,7 +71,8 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 
 ## Dependency constraints
 
-- The Flutter SDK pins `meta` 1.17.0. That holds `drift` below 2.35 (`>=2.34.0 <2.35.0`, because newer `drift_dev` needs a newer analyzer) and `flutter_riverpod` at 2.x. Use Riverpod 2 APIs (`Provider`, `FutureProvider`, `StreamProvider`, `Notifier`), without code generation. Revisit after a Flutter upgrade.
+- The Flutter SDK (3.41.9) pins `meta` 1.17.0. That holds `drift` below 2.35 (`>=2.34.0 <2.35.0`, because newer `drift_dev` needs a newer analyzer) and `flutter_riverpod` at 2.x. Use Riverpod 2 APIs (`Provider`, `FutureProvider`, `StreamProvider`, `Notifier`), without code generation.
+- **drift 2.34.x web bug (#3864):** a transaction's COMMIT is never flushed to IndexedDB, so its writes are lost when the browser closes. `AppDatabase.transaction` is overridden to run `SELECT 1` after the outermost transaction on web, which makes drift flush. Keep all writes going through `AppDatabase` (not a raw executor). Remove the override after upgrading Flutter and drift to 2.35.1+ (also update `web/drift_worker.js` and `web/sqlite3.wasm` from that release).
 
 ## Country data facts
 
@@ -140,10 +142,14 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 - `firebase.json` rewrites all paths to `/index.html`.
 - Flags are bundled (`assets/flags/{alpha2}.png`, 320 px) because the flag CDN sends no CORS headers. Use `FlagImage`, which decodes at display size and falls back to the 2-letter code. Hero tag: `flagHeroTag(code)`.
 - The REST Countries key only answers browsers from its allowed origins; until `localhost` is added in the REST Countries dashboard, Refresh data on `flutter run -d chrome` gets 403 (handled: "Couldn't refresh").
+- To check web persistence, restart the browser, not just the page: drift's shared worker keeps the database in memory across reloads in one session, which hides unsaved writes. Launch headless Chrome with a fixed `--user-data-dir`, save, close it, start it again with the same directory, and check the data.
 - Headless Chrome has no WebGL by default, and Flutter's CPU fallback doesn't paint images. For screenshots, launch Chrome with `--use-angle=swiftshader --enable-unsafe-swiftshader`.
 - The API key is visible in the browser; it is restricted by allowed origins (`localhost`, `battuta-travel.web.app`, `battuta-travel.firebaseapp.com`).
 
 ## Testing and done
+
+- In `testWidgets`, never await a drift stream (`watch...().first`) in the test body: it waits on a fake-clock timer and hangs until the 10-minute timeout. Read the provider the screen already watches (`container.read(travelEntryProvider(code)).valueOrNull`) or await a one-shot query. Run tests with `flutter test --timeout=90s` so a hang fails fast.
+- Mock platform channels (for example haptics) per test and remove the handler in `addTearDown`; handlers otherwise leak into later tests.
 
 - Unit-test domain logic, especially every merge-rule row, search normalization, filter/sort, and parsing of records with missing fields.
 - Repository tests use a mocked API and an in-memory Drift database (snapshot import, stale refresh, failed page keeps old data, 401/403/429 mapping).
