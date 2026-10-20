@@ -1081,6 +1081,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{country} deleted.'**
   String travelsDeleted(String country);
+
+  /// No description provided for @statsCountriesVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Countries visited'**
+  String get statsCountriesVisited;
+
+  /// Under the visited count, for example: of 250 · 4.8% (FR-STA-01).
+  ///
+  /// In en, this message translates to:
+  /// **'of {total} · {percent}%'**
+  String statsOfTotal(String total, String percent);
+
+  /// Screen-reader label for the headline.
+  ///
+  /// In en, this message translates to:
+  /// **'{visited} of {total} countries visited, {percent} percent'**
+  String statsHeadlineLabel(String visited, String total, String percent);
+
+  /// No description provided for @statsByRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'By region'**
+  String get statsByRegion;
+
+  /// No description provided for @statsRegionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{visited} of {total}'**
+  String statsRegionCount(String visited, String total);
+
+  /// No description provided for @statsHighlights.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlights'**
+  String get statsHighlights;
+
+  /// No description provided for @statsWishlistSize.
+  ///
+  /// In en, this message translates to:
+  /// **'On your wishlist'**
+  String get statsWishlistSize;
+
+  /// No description provided for @statsLatestTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Most recent trip'**
+  String get statsLatestTrip;
+
+  /// No description provided for @statsFirstTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'First trip'**
+  String get statsFirstTrip;
+
+  /// No description provided for @statsNoDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Add visit dates to see this.'**
+  String get statsNoDates;
+
+  /// No description provided for @statsEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No countries visited yet'**
+  String get statsEmptyTitle;
+
+  /// No description provided for @statsEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark your first country as visited to see your progress here.'**
+  String get statsEmptyBody;
 }
 
 class _AppLocalizationsDelegate

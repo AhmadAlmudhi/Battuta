@@ -571,4 +571,46 @@ class AppLocalizationsAr extends AppLocalizations {
   String travelsDeleted(String country) {
     return 'تم حذف $country.';
   }
+
+  @override
+  String get statsCountriesVisited => 'الدول التي زرتها';
+
+  @override
+  String statsOfTotal(String total, String percent) {
+    return 'من $total · $percent%';
+  }
+
+  @override
+  String statsHeadlineLabel(String visited, String total, String percent) {
+    return 'زرت $visited من $total دولة، أي $percent بالمئة';
+  }
+
+  @override
+  String get statsByRegion => 'حسب المنطقة';
+
+  @override
+  String statsRegionCount(String visited, String total) {
+    return '$visited من $total';
+  }
+
+  @override
+  String get statsHighlights => 'أبرز الأرقام';
+
+  @override
+  String get statsWishlistSize => 'في قائمة أمنياتك';
+
+  @override
+  String get statsLatestTrip => 'أحدث رحلة';
+
+  @override
+  String get statsFirstTrip => 'أول رحلة';
+
+  @override
+  String get statsNoDates => 'أضف تواريخ الزيارات لعرض ذلك.';
+
+  @override
+  String get statsEmptyTitle => 'لم تسجّل زيارة أي دولة بعد';
+
+  @override
+  String get statsEmptyBody => 'سجّل زيارتك لأول دولة لترى تقدّمك هنا.';
 }
