@@ -7,10 +7,12 @@ environment:
   sdk: ^3.11.5
 
 dependencies:
+  characters: ^1.4.1
   cloud_firestore: ^7.0.0
   connectivity_plus: ^7.3.2
+  cupertino_icons: ^2.0.0
   dio: ^5.11.1
-  drift: ">=2.34.0 <2.35.0"
+  drift: ^2.35.2
   drift_flutter: ^0.3.1
   firebase_auth: ^7.0.0
   firebase_core: ^5.0.0
@@ -34,14 +36,19 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  build_runner: ^2.15.1
-  freezed: ^3.2.5
-  json_serializable: ^6.14.1
-  drift_dev: ^2.34.0
+  build_runner: ^2.16.2
+  freezed: ^4.0.3
+  json_serializable: ^6.15.1
+  drift_dev: ^2.35.1
   mocktail: ^1.0.5
 
 flutter:
   uses-material-design: true
+  config:
+    # iOS builds with CocoaPods for now: Firebase's Swift Package Manager
+    # release (13.x) needs Xcode 26.2 or later. Remove this line after
+    # updating Xcode to switch iOS to Swift Package Manager.
+    enable-swift-package-manager: false
   generate: true
   assets:
     - assets/data/countries_snapshot.json

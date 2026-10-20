@@ -14,8 +14,9 @@ Guidance for Claude Code when working in this repository.
   - Firebase, the Drift database, country parsing, search normalization, and the snapshot import.
   - The app shell: theme and fonts, English/Arabic localization, settings (theme, language, onboarding flag), all PRD routes, adaptive navigation, browser tab titles, and a working Welcome and Settings.
   - Explore is complete: flag grid, search, filters, sort, badges, offline banner, and pull to refresh / Refresh data with the API refresh rules.
-  - Country details shows only its header (flag hero, names); facts and actions are next. My travels, Stats, Account, and sign-in are routed placeholders. `TravelRepository` only has `watchStatuses()` so far.
-  - Not started: travel entries and forms, stats, auth, sync, the app icon, and CI.
+  - Country details is complete: header with flag hero, tint, and passport stamp; facts; neighbor chips; Open in Maps; and the save actions with the visit and wishlist forms (`lib/features/travels/presentation/travel_forms.dart`), remove with Undo.
+  - `TravelRepository` saves, removes (soft delete), and restores entries.
+  - Not started: the My travels list screen, stats, auth, sync, the app icon, and CI.
 
 ## Commands
 
@@ -70,7 +71,9 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 
 ## Dependency constraints
 
-- The Flutter SDK pins `meta` 1.17.0. That holds `drift` below 2.35 (`>=2.34.0 <2.35.0`, because newer `drift_dev` needs a newer analyzer) and `flutter_riverpod` at 2.x. Use Riverpod 2 APIs (`Provider`, `FutureProvider`, `StreamProvider`, `Notifier`), without code generation. Revisit after a Flutter upgrade.
+- Flutter 3.47.7 (Dart 3.13.5). Code generation: drift 2.35.2 with drift_dev 2.35.1, freezed 4, json_serializable 6.15, on analyzer 14.
+- drift must stay at **2.35.1 or newer**: older versions never flush transactions to IndexedDB on web, so saved entries are lost when the browser closes (drift #3864).
+- The app still uses Riverpod 2.x (`flutter_riverpod` 2.6.1) and go_router 17. Riverpod 3 and go_router 18 now resolve, but each is a separate migration. Until then, use Riverpod 2 APIs (`Provider`, `FutureProvider`, `StreamProvider`, `Notifier`), without code generation.
 
 ## Country data facts
 
@@ -132,18 +135,26 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 - After adding or removing a plugin, run `flutter clean` if the web app throws `MissingPluginException`: the web plugin registrant in `.dart_tool/flutter_build/` can go stale. Widget tests won't catch it because they mock plugins.
 - Android uses Kotlin Gradle plugin 2.3.20 (Firebase Android SDK metadata is Kotlin 2.4) and the `kotlin { compilerOptions { ... } }` DSL.
 - The iOS deployment target is 15.0 (required by `cloud_firestore`, and the PRD minimum). If `pod install` says the specs repo is out of date, run `cd ios && pod install --repo-update`.
-- Firebase is moving iOS from CocoaPods to Swift Package Manager; new Firebase pods stop after October 2026. Plan to switch Flutter's iOS build to SwiftPM.
+- iOS builds with CocoaPods: `pubspec.yaml` sets `flutter: config: enable-swift-package-manager: false`, because Firebase's Swift Package Manager release (13.x) needs Xcode 26.2 or later and this Mac has Xcode 26.1. Firebase stopped publishing new CocoaPods releases after 12.19.0 (October 2026), so after updating Xcode, remove that setting to move iOS to Swift Package Manager.
+- Gradle 8.14 and Android Gradle Plugin 8.11 work but Flutter warns their support will be dropped; moving to AGP 9 is a pending, separate change.
 
 ## Web platform gotchas
 
-- Drift on web needs `web/sqlite3.wasm` and `web/drift_worker.js`, both downloaded from the drift GitHub release that matches the `drift` version in `pubspec.lock` (`gh release download drift-<version> -R simolus3/drift -p drift_worker.js -p sqlite3.wasm -D web --clobber`). Update them whenever drift is upgraded. Don't add COOP/COEP headers; without them drift uses IndexedDB storage, which is expected.
+- Drift on web needs `web/drift_worker.js` and `web/sqlite3.wasm`. Regenerate both whenever drift or sqlite3 changes in `pubspec.lock`:
+  - `dart compile js -O4 --no-source-maps -o web/drift_worker.js tool/drift_worker.dart` (compiled from the locked drift and sqlite3 versions, so the worker always matches the app; delete the `web/drift_worker.js.deps` it leaves behind).
+  - `gh release download sqlite3-<version> -R simolus3/sqlite3.dart -p sqlite3.wasm -D web --clobber`, with the `sqlite3` version from `pubspec.lock`.
+- Don't add COOP/COEP headers; without them drift uses IndexedDB storage, which is expected.
 - `firebase.json` rewrites all paths to `/index.html`.
 - Flags are bundled (`assets/flags/{alpha2}.png`, 320 px) because the flag CDN sends no CORS headers. Use `FlagImage`, which decodes at display size and falls back to the 2-letter code. Hero tag: `flagHeroTag(code)`.
 - The REST Countries key only answers browsers from its allowed origins; until `localhost` is added in the REST Countries dashboard, Refresh data on `flutter run -d chrome` gets 403 (handled: "Couldn't refresh").
+- To check web persistence, restart the browser, not just the page: drift's shared worker keeps the database in memory across reloads in one session, which hides unsaved writes. Launch headless Chrome with a fixed `--user-data-dir`, save, close it, start it again with the same directory, and check the data.
 - Headless Chrome has no WebGL by default, and Flutter's CPU fallback doesn't paint images. For screenshots, launch Chrome with `--use-angle=swiftshader --enable-unsafe-swiftshader`.
 - The API key is visible in the browser; it is restricted by allowed origins (`localhost`, `battuta-travel.web.app`, `battuta-travel.firebaseapp.com`).
 
 ## Testing and done
+
+- In `testWidgets`, never await a drift stream (`watch...().first`) in the test body: it waits on a fake-clock timer and hangs until the 10-minute timeout. Read the provider the screen already watches (`container.read(travelEntryProvider(code)).valueOrNull`) or await a one-shot query. Run tests with `flutter test --timeout=90s` so a hang fails fast.
+- Mock platform channels (for example haptics) per test and remove the handler in `addTearDown`; handlers otherwise leak into later tests.
 
 - Unit-test domain logic, especially every merge-rule row, search normalization, filter/sort, and parsing of records with missing fields.
 - Repository tests use a mocked API and an in-memory Drift database (snapshot import, stale refresh, failed page keeps old data, 401/403/429 mapping).

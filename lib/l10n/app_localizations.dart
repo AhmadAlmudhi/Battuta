@@ -685,6 +685,306 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Polynesia'**
   String get subregionPolynesia;
+
+  /// No description provided for @commonSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get commonUndo;
+
+  /// No description provided for @commonNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get commonNotAvailable;
+
+  /// Joins list items, for example languages.
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get listSeparator;
+
+  /// No description provided for @detailsFacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Facts'**
+  String get detailsFacts;
+
+  /// No description provided for @detailsCapital.
+  ///
+  /// In en, this message translates to:
+  /// **'Capital'**
+  String get detailsCapital;
+
+  /// No description provided for @detailsRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get detailsRegion;
+
+  /// No description provided for @detailsSubregion.
+  ///
+  /// In en, this message translates to:
+  /// **'Subregion'**
+  String get detailsSubregion;
+
+  /// No description provided for @detailsPopulation.
+  ///
+  /// In en, this message translates to:
+  /// **'Population'**
+  String get detailsPopulation;
+
+  /// No description provided for @detailsArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get detailsArea;
+
+  /// No description provided for @detailsAreaValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{area} km²'**
+  String detailsAreaValue(String area);
+
+  /// No description provided for @detailsLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get detailsLanguages;
+
+  /// No description provided for @detailsCurrencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Currencies'**
+  String get detailsCurrencies;
+
+  /// No description provided for @detailsTimezones.
+  ///
+  /// In en, this message translates to:
+  /// **'Time zones'**
+  String get detailsTimezones;
+
+  /// No description provided for @detailsNeighbors.
+  ///
+  /// In en, this message translates to:
+  /// **'Neighboring countries'**
+  String get detailsNeighbors;
+
+  /// No description provided for @detailsNoLandBorders.
+  ///
+  /// In en, this message translates to:
+  /// **'No land borders'**
+  String get detailsNoLandBorders;
+
+  /// No description provided for @detailsOpenInMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Maps'**
+  String get detailsOpenInMaps;
+
+  /// No description provided for @detailsOpenInMapsOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Maps needs a connection.'**
+  String get detailsOpenInMapsOffline;
+
+  /// No description provided for @detailsMarkVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as visited'**
+  String get detailsMarkVisited;
+
+  /// No description provided for @detailsAddToWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to wishlist'**
+  String get detailsAddToWishlist;
+
+  /// No description provided for @detailsEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get detailsEdit;
+
+  /// No description provided for @detailsRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get detailsRemove;
+
+  /// No description provided for @detailsVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited'**
+  String get detailsVisited;
+
+  /// No description provided for @detailsVisitedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited on {date}'**
+  String detailsVisitedOn(String date);
+
+  /// No description provided for @detailsOnWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'On your wishlist'**
+  String get detailsOnWishlist;
+
+  /// No description provided for @detailsTargetYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Target year {year}'**
+  String detailsTargetYear(String year);
+
+  /// No description provided for @detailsRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{country} removed.'**
+  String detailsRemoved(String country);
+
+  /// No description provided for @detailsRating.
+  ///
+  /// In en, this message translates to:
+  /// **'{rating, plural, =1{1 of 5 stars} other{{rating} of 5 stars}}'**
+  String detailsRating(int rating);
+
+  /// No description provided for @stampVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'VISITED'**
+  String get stampVisited;
+
+  /// No description provided for @priorityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High priority'**
+  String get priorityHigh;
+
+  /// No description provided for @priorityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium priority'**
+  String get priorityMedium;
+
+  /// No description provided for @priorityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low priority'**
+  String get priorityLow;
+
+  /// No description provided for @priorityHighShort.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get priorityHighShort;
+
+  /// No description provided for @priorityMediumShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get priorityMediumShort;
+
+  /// No description provided for @priorityLowShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get priorityLowShort;
+
+  /// No description provided for @visitFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your visit to {country}'**
+  String visitFormTitle(String country);
+
+  /// No description provided for @visitFormDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit date'**
+  String get visitFormDate;
+
+  /// No description provided for @visitFormAddDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Add date'**
+  String get visitFormAddDate;
+
+  /// No description provided for @visitFormClearDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear date'**
+  String get visitFormClearDate;
+
+  /// No description provided for @visitFormRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get visitFormRating;
+
+  /// No description provided for @visitFormClearRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear rating'**
+  String get visitFormClearRating;
+
+  /// No description provided for @formNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get formNotes;
+
+  /// No description provided for @formNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get formNotesHint;
+
+  /// No description provided for @wishlistFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{country} on your wishlist'**
+  String wishlistFormTitle(String country);
+
+  /// No description provided for @wishlistFormPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get wishlistFormPriority;
+
+  /// No description provided for @wishlistFormTargetYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Target year'**
+  String get wishlistFormTargetYear;
+
+  /// No description provided for @wishlistFormNoTargetYear.
+  ///
+  /// In en, this message translates to:
+  /// **'No target year'**
+  String get wishlistFormNoTargetYear;
+
+  /// No description provided for @validationVisitDateFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit date can\'t be in the future.'**
+  String get validationVisitDateFuture;
+
+  /// No description provided for @validationNotesTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes can be up to 500 characters.'**
+  String get validationNotesTooLong;
 }
 
 class _AppLocalizationsDelegate

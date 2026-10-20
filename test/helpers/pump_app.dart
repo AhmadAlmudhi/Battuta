@@ -1,7 +1,9 @@
 import 'package:battuta/app.dart';
+import 'package:battuta/core/clock.dart';
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/core/database/database_provider.dart';
 import 'package:battuta/core/network/connectivity.dart';
+import 'package:battuta/core/platform/link_launcher.dart';
 import 'package:battuta/core/router/app_router.dart';
 import 'package:battuta/features/countries/presentation/country_providers.dart';
 import 'package:battuta/features/settings/presentation/settings_controller.dart';
@@ -16,12 +18,21 @@ import 'test_countries.dart';
 /// The app under test, with the real repositories on an in-memory database
 /// seeded from [testRecords]. Only the network and connectivity are fake.
 class TestApp {
-  TestApp._(this.container, this.db, this.connectivity, this.refresher);
+  TestApp._(
+    this.container,
+    this.db,
+    this.connectivity,
+    this.refresher,
+    this.launchedLinks,
+  );
 
   final ProviderContainer container;
   final AppDatabase db;
   final FakeConnectivity connectivity;
   final FakeRefresher refresher;
+
+  /// Links the app asked to open, such as Open in Maps.
+  final List<Uri> launchedLinks;
 
   Future<void> goTo(WidgetTester tester, String location) async {
     container.read(routerProvider).go(location);
@@ -44,6 +55,7 @@ Future<TestApp> pumpApp(
   addTearDown(db.close);
   final connectivity = FakeConnectivity(online: online);
   final refresher = FakeRefresher();
+  final launchedLinks = <Uri>[];
 
   final container = ProviderContainer(
     overrides: [
@@ -54,6 +66,11 @@ Future<TestApp> pumpApp(
       snapshotLoaderProvider.overrideWithValue(() async => testSnapshotJson()),
       connectivityServiceProvider.overrideWithValue(connectivity),
       countryRefresherProvider.overrideWithValue(refresher),
+      clockProvider.overrideWithValue(() => testNow),
+      linkLauncherProvider.overrideWithValue((uri) async {
+        launchedLinks.add(uri);
+        return true;
+      }),
     ],
   );
   addTearDown(container.dispose);
@@ -62,8 +79,11 @@ Future<TestApp> pumpApp(
     UncontrolledProviderScope(container: container, child: const BattutaApp()),
   );
   await tester.pumpAndSettle();
-  return TestApp._(container, db, connectivity, refresher);
+  return TestApp._(container, db, connectivity, refresher, launchedLinks);
 }
+
+/// "Now" in widget tests, so date rules don't depend on the day tests run.
+final testNow = DateTime(2026, 10, 20, 12);
 
 /// Saved settings for a returning user, so tests start on Explore.
 const returningUser = {'onboarding_done': true};

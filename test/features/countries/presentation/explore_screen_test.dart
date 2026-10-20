@@ -285,7 +285,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('French Republic'), findsOneWidget);
-      expect(find.byType(Hero), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) => w is Hero && w.tag == flagHeroTag('FRA')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows the Arabic official name in Arabic', (tester) async {

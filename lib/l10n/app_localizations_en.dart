@@ -332,4 +332,174 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subregionPolynesia => 'Polynesia';
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get commonUndo => 'Undo';
+
+  @override
+  String get commonNotAvailable => 'Not available';
+
+  @override
+  String get listSeparator => ', ';
+
+  @override
+  String get detailsFacts => 'Facts';
+
+  @override
+  String get detailsCapital => 'Capital';
+
+  @override
+  String get detailsRegion => 'Region';
+
+  @override
+  String get detailsSubregion => 'Subregion';
+
+  @override
+  String get detailsPopulation => 'Population';
+
+  @override
+  String get detailsArea => 'Area';
+
+  @override
+  String detailsAreaValue(String area) {
+    return '$area km²';
+  }
+
+  @override
+  String get detailsLanguages => 'Languages';
+
+  @override
+  String get detailsCurrencies => 'Currencies';
+
+  @override
+  String get detailsTimezones => 'Time zones';
+
+  @override
+  String get detailsNeighbors => 'Neighboring countries';
+
+  @override
+  String get detailsNoLandBorders => 'No land borders';
+
+  @override
+  String get detailsOpenInMaps => 'Open in Maps';
+
+  @override
+  String get detailsOpenInMapsOffline => 'Maps needs a connection.';
+
+  @override
+  String get detailsMarkVisited => 'Mark as visited';
+
+  @override
+  String get detailsAddToWishlist => 'Add to wishlist';
+
+  @override
+  String get detailsEdit => 'Edit';
+
+  @override
+  String get detailsRemove => 'Remove';
+
+  @override
+  String get detailsVisited => 'Visited';
+
+  @override
+  String detailsVisitedOn(String date) {
+    return 'Visited on $date';
+  }
+
+  @override
+  String get detailsOnWishlist => 'On your wishlist';
+
+  @override
+  String detailsTargetYear(String year) {
+    return 'Target year $year';
+  }
+
+  @override
+  String detailsRemoved(String country) {
+    return '$country removed.';
+  }
+
+  @override
+  String detailsRating(int rating) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rating,
+      locale: localeName,
+      other: '$rating of 5 stars',
+      one: '1 of 5 stars',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get stampVisited => 'VISITED';
+
+  @override
+  String get priorityHigh => 'High priority';
+
+  @override
+  String get priorityMedium => 'Medium priority';
+
+  @override
+  String get priorityLow => 'Low priority';
+
+  @override
+  String get priorityHighShort => 'High';
+
+  @override
+  String get priorityMediumShort => 'Medium';
+
+  @override
+  String get priorityLowShort => 'Low';
+
+  @override
+  String visitFormTitle(String country) {
+    return 'Your visit to $country';
+  }
+
+  @override
+  String get visitFormDate => 'Visit date';
+
+  @override
+  String get visitFormAddDate => 'Add date';
+
+  @override
+  String get visitFormClearDate => 'Clear date';
+
+  @override
+  String get visitFormRating => 'Rating';
+
+  @override
+  String get visitFormClearRating => 'Clear rating';
+
+  @override
+  String get formNotes => 'Notes';
+
+  @override
+  String get formNotesHint => 'Optional';
+
+  @override
+  String wishlistFormTitle(String country) {
+    return '$country on your wishlist';
+  }
+
+  @override
+  String get wishlistFormPriority => 'Priority';
+
+  @override
+  String get wishlistFormTargetYear => 'Target year';
+
+  @override
+  String get wishlistFormNoTargetYear => 'No target year';
+
+  @override
+  String get validationVisitDateFuture => 'Visit date can\'t be in the future.';
+
+  @override
+  String get validationNotesTooLong => 'Notes can be up to 500 characters.';
 }

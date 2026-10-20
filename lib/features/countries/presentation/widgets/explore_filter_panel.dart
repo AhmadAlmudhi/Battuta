@@ -1,40 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/layout/window_size.dart';
+import '../../../../core/widgets/adaptive_modal.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../country_providers.dart';
 import '../explore_controller.dart';
 import '../region_names.dart';
 
 /// Opens the filter panel: a bottom sheet on compact screens, a dialog on
-/// wider ones (FR-PLT-02). Esc closes either.
-Future<void> showExploreFilters(BuildContext context) {
-  if (WindowSizeClass.of(context) == WindowSizeClass.compact) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (context) => const Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 24),
-        child: ExploreFilterPanel(),
-      ),
-    );
-  }
-  return showDialog<void>(
-    context: context,
-    builder: (context) => Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 560, maxHeight: 720),
-        child: const Padding(
-          padding: EdgeInsets.all(24),
-          child: ExploreFilterPanel(),
-        ),
-      ),
-    ),
-  );
-}
+/// wider ones.
+Future<void> showExploreFilters(BuildContext context) => showAdaptiveModal(
+  context,
+  builder: (context) => const ExploreFilterPanel(),
+);
 
 /// Filters apply as they change, so the grid behind and the result count stay
 /// live (FR-EXP-07).
