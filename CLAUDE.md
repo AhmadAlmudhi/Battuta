@@ -10,13 +10,14 @@ Guidance for Claude Code when working in this repository.
 - **Naming:** the app is always called **Battuta** / **بطوطة** in the UI, titles, launcher labels, and copy. `battuta-travel` is only the web address, and `battuta-b8451` is only the Firebase project ID; never show either to users.
 - **Identifiers:** package `battuta`; Android/iOS app ID `com.ahmadalmudhi.battuta`; Firebase project `battuta-b8451`; Hosting site `battuta-travel`; Firestore `(default)` in `eur3`.
 - **Source of truth:** [docs/Battuta_PRD.md](docs/Battuta_PRD.md). Where the code and the PRD disagree, the PRD wins until it is updated. Cite requirement IDs (`FR-EXP-03`, `NFR-05`, `AC-SYNC-01`, `D-6`) in commits, PRs, and tests.
-- **Current state:** Firebase is configured (`lib/firebase_options.dart`, `firebase.json`, `.firebaserc`, `firestore.rules`) and `main.dart` initializes it. The rest of the PRD stack (section 11.2) is not added yet.
+- **Current state:** Firebase is configured and initialized. The PRD packages are installed. The Drift database, country parsing, search normalization, snapshot import, and their tests exist. `main.dart` shows a temporary database-check screen in place of the real UI. Not started: routing, theme, localization, and every feature screen.
 
 ## Commands
 
 ```bash
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs   # freezed, json_serializable, drift
+dart run build_runner build --delete-conflicting-outputs   # freezed, json_serializable, drift; generated files are committed
+dart run tool/fetch_snapshot.dart                          # refresh assets/data/countries_snapshot.json (3 API requests)
 dart format --set-exit-if-changed .
 flutter analyze                                            # must report zero issues (NFR-12)
 flutter test --coverage
@@ -59,6 +60,17 @@ test/              mirrors lib/
 
 Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, `drift` + `drift_flutter`, `firebase_auth`, `cloud_firestore`, `shared_preferences`, `flutter_animate`, `url_launcher`, `cached_network_image` (mobile only), `flutter_localizations` + `intl`, `mocktail`.
 
+## Dependency constraints
+
+- The Flutter SDK pins `meta` 1.17.0. That holds `drift` below 2.35 (`>=2.34.0 <2.35.0`, because newer `drift_dev` needs a newer analyzer) and `flutter_riverpod` at 2.x. Use Riverpod 2 APIs (`Provider`, `FutureProvider`, `StreamProvider`, `Notifier`), without code generation. Revisit after a Flutter upgrade.
+
+## Country data facts
+
+- The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them, leaving **250**, the Stats total (D-3).
+- Missing values arrive as empty strings, not null; the parser maps them to null.
+- The snapshot keeps the raw API record shape (trimmed to the Arabic translation) so one parser serves both the snapshot and the live refresh. Keep `responseFields` in `tool/fetch_snapshot.dart` in step with `country_parser.dart`.
+- `search_en` stores one normalized name per line (common, then official), so prefix ranking can test each line.
+
 ## Core invariants
 
 - **Local-first (D-1, NFR-05):** every screen reads from the Drift database. Every user change is written locally before any network call.
@@ -98,7 +110,7 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 
 ## Web platform gotchas
 
-- Drift on web needs `web/sqlite3.wasm` and `web/drift_worker.dart.js` from the **same** drift release. Don't add COOP/COEP headers.
+- Drift on web needs `web/sqlite3.wasm` and `web/drift_worker.js`, both downloaded from the drift GitHub release that matches the `drift` version in `pubspec.lock` (`gh release download drift-<version> -R simolus3/drift -p drift_worker.js -p sqlite3.wasm -D web --clobber`). Update them whenever drift is upgraded. Don't add COOP/COEP headers; without them drift uses IndexedDB storage, which is expected.
 - `firebase.json` rewrites all paths to `/index.html`.
 - Load flags with `Image.network(..., webHtmlElementStrategy: WebHtmlElementStrategy.fallback)` on web (CDN may lack CORS); use `cached_network_image` on mobile. Flag URL: `https://flags.restcountries.com/v5/w320/{alpha2}.png`. Offline fallback: neutral placeholder with the 2-letter code. Hero tag: `flag-{code}`.
 - The API key is visible in the browser; it is restricted by allowed origins (`localhost`, `battuta-travel.web.app`, `battuta-travel.firebaseapp.com`).
