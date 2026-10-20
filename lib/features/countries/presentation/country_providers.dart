@@ -24,3 +24,12 @@ final countriesProvider = StreamProvider<List<Country>>((ref) async* {
   await ref.watch(countriesSeededProvider.future);
   yield* ref.watch(countryRepositoryProvider).watchAll();
 });
+
+/// Null when no country has this code (FR-DET-06).
+final countryByCodeProvider = FutureProvider.family<Country?, String>((
+  ref,
+  code,
+) async {
+  await ref.watch(countriesSeededProvider.future);
+  return ref.watch(countryRepositoryProvider).findByCode(code);
+});

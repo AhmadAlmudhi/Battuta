@@ -863,8 +863,10 @@ lib/
     stats/
     auth/               accounts, merge, and sync
     settings/
+    onboarding/         Welcome screen
   main.dart
 assets/data/countries_snapshot.json
+assets/fonts/           Inter and IBM Plex Sans Arabic, with their licenses
 web/                    index.html, icons, sqlite3.wasm, drift_worker.js
 tool/                   snapshot script
 firebase.json           Hosting configuration

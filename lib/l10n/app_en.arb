@@ -1,0 +1,59 @@
+{
+  "@@locale": "en",
+  "appName": "Battuta",
+  "appTagline": "Every country, stamped.",
+  "pageTitle": "{screen} · {appName}",
+  "@pageTitle": {
+    "description": "Browser tab title (FR-PLT-07), for example Japan · Battuta.",
+    "placeholders": {
+      "screen": {"type": "String"},
+      "appName": {"type": "String"}
+    }
+  },
+
+  "navExplore": "Explore",
+  "navTravels": "My travels",
+  "navStats": "Stats",
+
+  "welcomeTitle": "Welcome to Battuta",
+  "welcomeBody": "Explore every country, record where you've been, and plan where to go next.",
+  "welcomeContinueAsGuest": "Continue as guest",
+  "welcomeSignIn": "Sign in",
+
+  "exploreCountryCount": "{count, plural, =1{1 country} other{{count} countries}}",
+  "@exploreCountryCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "exploreLoadError": "Couldn't load countries.",
+
+  "countryNotFoundTitle": "Country not found",
+  "countryNotFoundBody": "There's no country with this code.",
+  "countryNotFoundBack": "Back to Explore",
+
+  "pageNotFoundTitle": "Page not found",
+  "pageNotFoundBody": "This page doesn't exist.",
+
+  "placeholderBody": "This screen is under construction.",
+
+  "accountTitle": "Account",
+  "accountGuestTitle": "Back up your travels",
+  "accountGuestBody": "Sign in to back up your travels and see them on all your devices.",
+  "accountSignIn": "Sign in",
+  "accountSettings": "Settings",
+
+  "signInTitle": "Sign in",
+  "signUpTitle": "Create account",
+  "resetPasswordTitle": "Reset password",
+
+  "settingsTitle": "Settings",
+  "settingsTheme": "Theme",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsLanguage": "Language",
+  "settingsLanguageSystem": "System",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageArabic": "العربية"
+}

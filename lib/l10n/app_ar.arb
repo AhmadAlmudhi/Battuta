@@ -1,0 +1,47 @@
+{
+  "@@locale": "ar",
+  "appName": "بطوطة",
+  "appTagline": "كل دولة، بختمها",
+  "pageTitle": "{screen} · {appName}",
+
+  "navExplore": "استكشف",
+  "navTravels": "رحلاتي",
+  "navStats": "الإحصاءات",
+
+  "welcomeTitle": "مرحبًا بك في بطوطة",
+  "welcomeBody": "استكشف كل دول العالم، وسجّل الدول التي زرتها، وخطّط لوجهتك القادمة.",
+  "welcomeContinueAsGuest": "المتابعة كضيف",
+  "welcomeSignIn": "تسجيل الدخول",
+
+  "exploreCountryCount": "{count, plural, =0{لا توجد دول} =1{دولة واحدة} =2{دولتان} few{{count} دول} many{{count} دولة} other{{count} دولة}}",
+  "exploreLoadError": "تعذّر تحميل الدول.",
+
+  "countryNotFoundTitle": "الدولة غير موجودة",
+  "countryNotFoundBody": "لا توجد دولة بهذا الرمز.",
+  "countryNotFoundBack": "العودة إلى الاستكشاف",
+
+  "pageNotFoundTitle": "الصفحة غير موجودة",
+  "pageNotFoundBody": "هذه الصفحة غير موجودة.",
+
+  "placeholderBody": "هذه الشاشة قيد الإنشاء.",
+
+  "accountTitle": "الحساب",
+  "accountGuestTitle": "احفظ رحلاتك احتياطيًا",
+  "accountGuestBody": "سجّل الدخول لحفظ رحلاتك احتياطيًا ورؤيتها على جميع أجهزتك.",
+  "accountSignIn": "تسجيل الدخول",
+  "accountSettings": "الإعدادات",
+
+  "signInTitle": "تسجيل الدخول",
+  "signUpTitle": "إنشاء حساب",
+  "resetPasswordTitle": "إعادة تعيين كلمة المرور",
+
+  "settingsTitle": "الإعدادات",
+  "settingsTheme": "المظهر",
+  "settingsThemeSystem": "حسب النظام",
+  "settingsThemeLight": "فاتح",
+  "settingsThemeDark": "داكن",
+  "settingsLanguage": "اللغة",
+  "settingsLanguageSystem": "حسب النظام",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageArabic": "العربية"
+}
