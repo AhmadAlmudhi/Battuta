@@ -4,7 +4,6 @@ import 'package:battuta/features/settings/domain/app_settings.dart';
 import 'package:battuta/features/settings/presentation/settings_controller.dart';
 import 'package:battuta/features/travels/domain/travel_entry.dart';
 import 'package:battuta/features/travels/presentation/travel_providers.dart';
-import 'package:battuta/features/travels/presentation/travels_controller.dart';
 import 'package:battuta/features/travels/presentation/widgets/travel_entry_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

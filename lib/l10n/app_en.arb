@@ -283,5 +283,52 @@
         "type": "String"
       }
     }
-  }
+  },
+  "statsCountriesVisited": "Countries visited",
+  "statsOfTotal": "of {total} · {percent}%",
+  "@statsOfTotal": {
+    "description": "Under the visited count, for example: of 250 · 4.8% (FR-STA-01).",
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "statsHeadlineLabel": "{visited} of {total} countries visited, {percent} percent",
+  "@statsHeadlineLabel": {
+    "description": "Screen-reader label for the headline.",
+    "placeholders": {
+      "visited": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "statsByRegion": "By region",
+  "statsRegionCount": "{visited} of {total}",
+  "@statsRegionCount": {
+    "placeholders": {
+      "visited": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "statsHighlights": "Highlights",
+  "statsWishlistSize": "On your wishlist",
+  "statsLatestTrip": "Most recent trip",
+  "statsFirstTrip": "First trip",
+  "statsNoDates": "Add visit dates to see this.",
+  "statsEmptyTitle": "No countries visited yet",
+  "statsEmptyBody": "Mark your first country as visited to see your progress here."
 }

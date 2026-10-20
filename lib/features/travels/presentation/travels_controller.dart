@@ -85,10 +85,6 @@ class TravelsView {
   final List<String> regions;
 }
 
-final travelEntriesProvider = StreamProvider<List<TravelEntry>>(
-  (ref) => ref.watch(travelRepositoryProvider).watchEntries(),
-);
-
 /// My travels in the app language: [arabic] picks the names used for name
 /// order. Search matches the same names as Explore (FR-TRV-08).
 final travelsViewProvider = Provider.family<AsyncValue<TravelsView>, bool>((

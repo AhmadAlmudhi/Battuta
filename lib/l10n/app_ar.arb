@@ -163,5 +163,17 @@
   "travelsClearFilters": "مسح البحث وعوامل التصفية",
   "travelsEntryMenu": "خيارات {country}",
   "travelsDelete": "حذف",
-  "travelsDeleted": "تم حذف {country}."
+  "travelsDeleted": "تم حذف {country}.",
+  "statsCountriesVisited": "الدول التي زرتها",
+  "statsOfTotal": "من {total} · {percent}%",
+  "statsHeadlineLabel": "زرت {visited} من {total} دولة، أي {percent} بالمئة",
+  "statsByRegion": "حسب المنطقة",
+  "statsRegionCount": "{visited} من {total}",
+  "statsHighlights": "أبرز الأرقام",
+  "statsWishlistSize": "في قائمة أمنياتك",
+  "statsLatestTrip": "أحدث رحلة",
+  "statsFirstTrip": "أول رحلة",
+  "statsNoDates": "أضف تواريخ الزيارات لعرض ذلك.",
+  "statsEmptyTitle": "لم تسجّل زيارة أي دولة بعد",
+  "statsEmptyBody": "سجّل زيارتك لأول دولة لترى تقدّمك هنا."
 }

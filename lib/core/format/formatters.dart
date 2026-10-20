@@ -14,6 +14,10 @@ extension LocaleFormatting on BuildContext {
   String formatDecimal(num value) =>
       NumberFormat('#,##0.##', _localeTag).format(value);
 
+  /// One decimal place, such as 4.8 for 4.8% (FR-STA-01).
+  String formatPercent(num value) =>
+      NumberFormat('#,##0.0', _localeTag).format(value);
+
   /// 14 March 2026, or 14 مارس 2026.
   String formatDate(DateTime date) =>
       DateFormat.yMMMMd(_localeTag).format(date);

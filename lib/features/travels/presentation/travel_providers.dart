@@ -17,6 +17,11 @@ final travelStatusesProvider = StreamProvider<Map<String, TravelStatus>>(
   (ref) => ref.watch(travelRepositoryProvider).watchStatuses(),
 );
 
+/// Every saved entry, for My travels and Stats.
+final travelEntriesProvider = StreamProvider<List<TravelEntry>>(
+  (ref) => ref.watch(travelRepositoryProvider).watchEntries(),
+);
+
 /// The entry for one country, or null when it isn't saved.
 final travelEntryProvider = StreamProvider.family<TravelEntry?, String>(
   (ref, countryCode) =>

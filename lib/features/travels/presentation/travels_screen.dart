@@ -14,6 +14,7 @@ import '../domain/travel_entry.dart';
 import '../domain/travel_list.dart';
 import 'travel_actions.dart';
 import 'travel_forms.dart';
+import 'travel_providers.dart';
 import 'travels_controller.dart';
 import 'widgets/travel_entry_tile.dart';
 

@@ -17,7 +17,8 @@ Guidance for Claude Code when working in this repository.
   - Country details is complete: header with flag hero, tint, and passport stamp; facts; neighbor chips; Open in Maps; and the save actions with the visit and wishlist forms (`lib/features/travels/presentation/travel_forms.dart`), remove with Undo.
   - `TravelRepository` saves, removes (soft delete), and restores entries.
   - My travels is complete: Visited and Wishlist tabs with counts and their own URLs, sorting, search, region filter, swipe and menu Edit/Delete with Undo, and empty states.
-  - Not started: Stats, accounts and sign-in, cloud sync, the app icon, and CI.
+  - Stats is complete: headline (visited of the dataset total, one decimal), a bar per region, highlights, count-up animation, and the zero state.
+  - The whole guest app is done. Not started: accounts and sign-in, cloud sync, the app icon, and CI.
 
 ## Commands
 
@@ -95,7 +96,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 - **Sign out (D-4)** removes the user's entries from the device; the cloud copy stays.
 - **Country data (section 8.2, D-9):** import the bundled snapshot on first launch with zero API calls. Auto-refresh only if data is older than 7 days and online; manual refresh at most once per 60 minutes. Refresh is all-or-nothing (3 pages, `limit=100`, offsets 0/100/200) and replaces all rows in one transaction. A normal launch makes no API requests (NFR-13): the quota is 1,000 requests/month shared by all users.
 - **REST Countries v5 only** (`https://api.restcountries.com/countries/v5`, `Authorization: Bearer <key>`); v1–v4 are retired. Field mapping is in PRD section 8.1. Parse defensively: capitals, borders, currencies, Arabic names may be missing.
-- **Stats total (D-3)** is the full dataset count (~250), kept as one constant.
+- **Stats total (D-3)** is the number of countries in the dataset (250 today), computed in one place: `TravelStats.total`. Entries for countries that leave the dataset aren't counted anywhere.
 
 ## UI conventions
 

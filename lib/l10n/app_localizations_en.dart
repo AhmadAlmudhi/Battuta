@@ -560,4 +560,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String travelsDeleted(String country) {
     return '$country deleted.';
   }
+
+  @override
+  String get statsCountriesVisited => 'Countries visited';
+
+  @override
+  String statsOfTotal(String total, String percent) {
+    return 'of $total · $percent%';
+  }
+
+  @override
+  String statsHeadlineLabel(String visited, String total, String percent) {
+    return '$visited of $total countries visited, $percent percent';
+  }
+
+  @override
+  String get statsByRegion => 'By region';
+
+  @override
+  String statsRegionCount(String visited, String total) {
+    return '$visited of $total';
+  }
+
+  @override
+  String get statsHighlights => 'Highlights';
+
+  @override
+  String get statsWishlistSize => 'On your wishlist';
+
+  @override
+  String get statsLatestTrip => 'Most recent trip';
+
+  @override
+  String get statsFirstTrip => 'First trip';
+
+  @override
+  String get statsNoDates => 'Add visit dates to see this.';
+
+  @override
+  String get statsEmptyTitle => 'No countries visited yet';
+
+  @override
+  String get statsEmptyBody =>
+      'Mark your first country as visited to see your progress here.';
 }
