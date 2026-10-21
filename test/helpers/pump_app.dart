@@ -12,6 +12,7 @@ import 'package:battuta/features/settings/presentation/settings_controller.dart'
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fakes.dart';
@@ -60,6 +61,13 @@ Future<TestApp> pumpApp(
   addTearDown(tester.view.reset);
 
   SharedPreferences.setMockInitialValues(prefs);
+  PackageInfo.setMockInitialValues(
+    appName: 'battuta',
+    packageName: 'battuta',
+    version: '0.1.0',
+    buildNumber: '1',
+    buildSignature: '',
+  );
   final db = inMemoryDatabase();
   addTearDown(db.close);
   final connectivity = FakeConnectivity(online: online);
@@ -74,7 +82,10 @@ Future<TestApp> pumpApp(
         await SharedPreferences.getInstance(),
       ),
       appDatabaseProvider.overrideWithValue(db),
-      snapshotLoaderProvider.overrideWithValue(() async => testSnapshotJson()),
+      snapshotLoaderProvider.overrideWithValue(
+        () async =>
+            testSnapshotJson(fetchedAt: testDataDate.millisecondsSinceEpoch),
+      ),
       connectivityServiceProvider.overrideWithValue(connectivity),
       countryRefresherProvider.overrideWithValue(refresher),
       clockProvider.overrideWithValue(() => testNow),
@@ -105,6 +116,9 @@ Future<TestApp> pumpApp(
 
 /// "Now" in widget tests, so date rules don't depend on the day tests run.
 final testNow = DateTime(2026, 10, 20, 12);
+
+/// When the test country data was fetched.
+final testDataDate = DateTime(2026, 10, 1);
 
 /// Saved settings for a returning user, so tests start on Explore.
 const returningUser = {'onboarding_done': true};

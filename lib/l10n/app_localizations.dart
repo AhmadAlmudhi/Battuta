@@ -1357,6 +1357,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 change hasn\'t been backed up yet and will be lost.} other{{count} changes haven\'t been backed up yet and will be lost.}}'**
   String accountSignOutUnsynced(int count);
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get settingsVersion;
+
+  /// No description provided for @settingsCountryData.
+  ///
+  /// In en, this message translates to:
+  /// **'Country data'**
+  String get settingsCountryData;
+
+  /// No description provided for @settingsCountryDataUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {date}'**
+  String settingsCountryDataUpdated(String date);
+
+  /// No description provided for @settingsDataSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Data source'**
+  String get settingsDataSource;
+
+  /// No description provided for @settingsDataSourceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Country data and flags from REST Countries'**
+  String get settingsDataSourceValue;
+
+  /// No description provided for @settingsLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Open-source licenses'**
+  String get settingsLicenses;
 }
 
 class _AppLocalizationsDelegate

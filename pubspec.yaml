@@ -28,6 +28,7 @@ dependencies:
   go_router: ^17.5.0
   intl: ^0.20.2
   json_annotation: ^4.12.0
+  package_info_plus: ^10.2.2
   path_provider: ^2.1.6
   shared_preferences: ^2.5.6
   url_launcher: ^6.3.3
@@ -41,6 +42,7 @@ dev_dependencies:
   json_serializable: ^6.15.1
   drift_dev: ^2.35.1
   mocktail: ^1.0.5
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -53,6 +55,9 @@ flutter:
   assets:
     - assets/data/countries_snapshot.json
     - assets/flags/
+    # Shown on the licenses page (OFL requires the license to travel with the fonts).
+    - assets/fonts/inter/OFL.txt
+    - assets/fonts/ibm_plex_sans_arabic/OFL.txt
   fonts:
     - family: Inter
       fonts:

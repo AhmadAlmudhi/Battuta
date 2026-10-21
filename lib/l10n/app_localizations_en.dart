@@ -723,4 +723,28 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get settingsAbout => 'About';
+
+  @override
+  String get settingsVersion => 'Version';
+
+  @override
+  String get settingsCountryData => 'Country data';
+
+  @override
+  String settingsCountryDataUpdated(String date) {
+    return 'Updated $date';
+  }
+
+  @override
+  String get settingsDataSource => 'Data source';
+
+  @override
+  String get settingsDataSourceValue =>
+      'Country data and flags from REST Countries';
+
+  @override
+  String get settingsLicenses => 'Open-source licenses';
 }
