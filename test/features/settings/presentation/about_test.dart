@@ -16,14 +16,21 @@ void main() {
     return app;
   }
 
-  testWidgets('About shows the version, the data date, and the source '
-      '(FR-SET-04)', (tester) async {
+  testWidgets('About shows the version, the data date, and the sources of '
+      'the country data and the map (FR-SET-04)', (tester) async {
     await openSettings(tester);
 
     expect(find.text('0.1.0 (1)'), findsOneWidget);
     expect(find.text('Updated October 1, 2026'), findsOneWidget);
     expect(
       find.text('Country data and flags from REST Countries'),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'World map from Natural Earth. Disputed borders are shown as Saudi '
+        'Arabia recognizes them.',
+      ),
       findsOneWidget,
     );
   });
@@ -35,6 +42,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(app.launchedLinks, [Uri.parse('https://restcountries.com')]);
+  });
+
+  testWidgets('the map data opens naturalearthdata.com', (tester) async {
+    final app = await openSettings(tester);
+
+    await tester.tap(find.text('Map data'));
+    await tester.pumpAndSettle();
+
+    expect(app.launchedLinks, [Uri.parse('https://www.naturalearthdata.com')]);
   });
 
   testWidgets('Open-source licenses opens the licenses page', (tester) async {
@@ -56,6 +72,7 @@ void main() {
 
     expect(find.text('حول التطبيق'), findsOneWidget);
     expect(find.text('حُدّثت في 1 أكتوبر 2026'), findsOneWidget);
+    expect(find.text('بيانات الخريطة'), findsOneWidget);
   });
 
   test('both fonts\' licenses are registered', () async {

@@ -1,5 +1,8 @@
 import 'package:battuta/core/router/app_router.dart';
+import 'package:battuta/features/travels/domain/travel_entry.dart';
 import 'package:battuta/features/travels/presentation/travel_providers.dart';
+import 'package:battuta/features/world_map/presentation/widgets/world_map_card.dart';
+import 'package:battuta/features/world_map/presentation/world_map_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -24,12 +27,29 @@ void main() {
     await repo.saveWishlist('SAU');
   }
 
-  testWidgets('no visits shows the zero state, not empty bars (AC-STA-02)', (
-    tester,
-  ) async {
-    await openStats(tester);
+  testWidgets('no visits shows the map and the zero state, not the headline '
+      'or empty bars (AC-STA-02)', (tester) async {
+    await openStats(
+      tester,
+      seed: (app) =>
+          app.container.read(travelRepositoryProvider).saveWishlist('JPN'),
+    );
 
+    expect(find.byKey(WorldMapCard.mapKey), findsOneWidget);
+    final map = tester.widget<CustomPaint>(
+      find.descendant(
+        of: find.byKey(WorldMapCard.mapKey),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is CustomPaint && widget.painter is WorldMapPainter,
+        ),
+      ),
+    );
+    expect((map.painter! as WorldMapPainter).statuses, {
+      'JPN': TravelStatus.wishlist,
+    });
     expect(find.text('No countries visited yet'), findsOneWidget);
+    expect(find.text('Countries visited'), findsNothing);
     expect(find.byType(LinearProgressIndicator), findsNothing);
 
     await tester.tap(find.text('Explore countries'));
@@ -43,7 +63,7 @@ void main() {
 
     // The test dataset has 8 countries: 2 of 8 is 25.0%.
     expect(find.text('2'), findsOneWidget);
-    expect(find.text('of 8 · 25.0%'), findsOneWidget);
+    expect(find.text('of 8 · 25.0% · 1 on your wishlist'), findsOneWidget);
     expect(
       find.bySemanticsLabel('2 of 8 countries visited, 25.0 percent'),
       findsOneWidget,
@@ -58,12 +78,14 @@ void main() {
     expect(find.text('1 of 2'), findsOneWidget); // Japan, in Asia
     // Africa and the Antarctic: one country each, none visited.
     expect(find.text('0 of 1'), findsNWidgets(2));
-    // One bar per region plus the headline bar.
-    expect(find.byType(LinearProgressIndicator), findsNWidgets(5));
+    // One bar per region; the map card replaced the headline bar.
+    expect(find.byType(LinearProgressIndicator), findsNWidgets(4));
   });
 
   testWidgets('highlights (FR-STA-03)', (tester) async {
     await openStats(tester, seed: twoVisits);
+    // They come after the map and the region bars.
+    await tester.scrollUntilVisible(find.text('First trip'), 200);
 
     expect(find.text('Japan'), findsOneWidget); // Most recent trip.
     expect(find.text('March 14, 2026'), findsOneWidget);
@@ -75,12 +97,12 @@ void main() {
     tester,
   ) async {
     final app = await openStats(tester, seed: twoVisits);
-    expect(find.text('of 8 · 25.0%'), findsOneWidget);
+    expect(find.text('of 8 · 25.0% · 1 on your wishlist'), findsOneWidget);
 
     await app.container.read(travelRepositoryProvider).remove('FRA');
     await tester.pumpAndSettle();
 
-    expect(find.text('of 8 · 12.5%'), findsOneWidget);
+    expect(find.text('of 8 · 12.5% · 1 on your wishlist'), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('^1 of 8')), findsOneWidget);
   });
 
@@ -95,11 +117,11 @@ void main() {
 
     expect(find.text('0'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('of 8 · 25.0%'), findsNothing);
+    expect(find.text('of 8 · 25.0% · 1 on your wishlist'), findsNothing);
 
     await tester.pumpAndSettle();
     expect(find.text('2'), findsOneWidget);
-    expect(find.text('of 8 · 25.0%'), findsOneWidget);
+    expect(find.text('of 8 · 25.0% · 1 on your wishlist'), findsOneWidget);
   });
 
   testWidgets('with reduced motion the final numbers show at once '
@@ -114,7 +136,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('2'), findsOneWidget);
-    expect(find.text('of 8 · 25.0%'), findsOneWidget);
+    expect(find.text('of 8 · 25.0% · 1 on your wishlist'), findsOneWidget);
   });
 
   testWidgets('reads in Arabic, with bars filling from the right', (
@@ -122,7 +144,7 @@ void main() {
   ) async {
     await openStats(tester, seed: twoVisits, prefs: {'locale': 'ar'});
 
-    expect(find.text('من 8 · 25.0%'), findsOneWidget);
+    expect(find.text('من 8 · 25.0% · 1 في قائمة أمنياتك'), findsOneWidget);
     expect(find.text('أوروبا'), findsOneWidget);
     final bar = tester.element(find.byType(LinearProgressIndicator).first);
     expect(Directionality.of(bar), TextDirection.rtl);

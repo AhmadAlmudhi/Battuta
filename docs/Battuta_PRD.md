@@ -229,7 +229,7 @@ Release 1.0 is accepted when all of the following are true:
 | D-8 | Email and password is the only sign-in method in 1.0. | Works the same on all three platforms with no extra provider setup. |
 | D-9 | Country data loads from a snapshot bundled with each build. The API only refreshes it. | Instant first load, and web traffic doesn't use up the shared API quota. |
 | D-10 | The web app is served from the free Firebase Hosting address, battuta-travel.web.app. | No domain cost or DNS setup. A custom domain can be added later without code changes. |
-| D-11 | The world map is drawn by the app from Natural Earth's 1:10m Saudi point-of-view edition, bundled with each build (section 8.7). | No map service, API key, or network use, so the map works offline and stays free. This edition includes every small country tested, makes the smallest complete map file, and draws disputed borders as recognized in the app's main region. Somaliland and Northern Cyprus are part of Somalia and Cyprus, which matches the dataset (section 8.1). Western Sahara is part of Morocco, so it has no shape of its own, though it still counts in Stats when marked as visited. |
+| D-11 | The world map is drawn by the app from Natural Earth's 1:10m Saudi point-of-view edition, bundled with each build (section 8.7). | No map service, API key, or network use, so the map works offline and stays free. This edition includes every small country tested, makes the smallest complete map file, and draws disputed borders as recognized in the app's main region. Somaliland and Northern Cyprus are part of Somalia and Cyprus, which matches the dataset (section 8.1). Western Sahara is drawn as part of Morocco, and Israel's area as Palestine, with only a placeholder about 1 km across left for Israel. So neither country has a shape of its own, though both still count in Stats when marked as visited. |
 
 ## 4. Users
 
@@ -512,7 +512,7 @@ The top of the Stats screen is a world map of the user's travels: visited countr
 | FR-MAP-04 | Status comes from the travel entries, and soft-deleted entries count as Not yet. The map updates immediately when an entry changes, on this device or through sync. | Must |
 | FR-MAP-05 | The map draws only from the bundled map file (section 8.7). It makes no network requests and works offline on every platform. | Must |
 | FR-MAP-06 | Light and dark themes use the colors in section 10.1 and switch with the app theme. | Must |
-| FR-MAP-07 | Shapes that match no country in the dataset, such as Bir Tawil, draw as Not yet and can't be selected. Dataset countries with no shape or dot, Antarctica and Western Sahara (section 8.7), still count in every total but don't appear on the map. | Must |
+| FR-MAP-07 | Shapes that match no country in the dataset, such as Bir Tawil, draw as Not yet and can't be selected. Dataset countries with no shape or dot, Antarctica, Western Sahara, and Israel (section 8.7), still count in every total but don't appear on the map. | Must |
 | FR-MAP-08 | Screen readers treat the map as one element with a summary, for example: World map: 16 countries visited, 12 on your wishlist. It has a View as list action that opens My travels. Every map action is also available from Explore, Country details, and My travels, so countries on the map don't need the 48 dp touch targets of NFR-08. | Must |
 
 | ID | Given | When | Then |
@@ -531,7 +531,7 @@ Some countries are too small to see or tap on a world map, such as Singapore, Ba
 | --- | --- | --- |
 | FR-MAP-09 | A country gets a dot when its largest part fits within 6 × 6 units on the 1,000-unit map (a starting value to tune by eye), or when it has no shape at all. Measuring the largest part, not the whole country, gives dots to island countries spread over a wide area, such as the Maldives and Kiribati. Small shapes still draw under their dots. | Should |
 | FR-MAP-10 | Dots use the status colors and draw above country shapes. | Should |
-| FR-MAP-11 | Over water, the nearest dot within 24 dp of the pointer is selected, which gives each dot a 48 dp target. Over land, a dot is selected only when the pointer is within 6 dp of its center; anywhere else, the country under the pointer is selected. This keeps large countries next to small ones selectable, such as Saudi Arabia next to Bahrain. | Should |
+| FR-MAP-11 | A dot is selected when the pointer is on it, within its 4 dp radius, over land or water. Otherwise, over land, the country under the pointer is selected, which keeps large countries next to small ones selectable, such as Saudi Arabia next to Bahrain. Over water, the nearest country or dot within 24 dp of its edge is selected: a tap just off a coast selects that country, and a dot in open water is easy to hit. | Should |
 
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
@@ -919,11 +919,13 @@ Shapes match dataset countries by their `ISO_A3_EH` code. Don't use `ISO_A3`, wh
 | Kosovo | Coded -99 (KOS in `ADM0_A3`) | A manual table maps it to UNK, the code the countries API uses |
 | Western Sahara | Part of Morocco in this edition (D-11) | Excluded: no shape or dot |
 
-Antarctica matches a shape but is removed with the crop (section 10.1), so it is excluded too. Other shapes that share a code merge into one country: the Coral Sea Islands and the Ashmore and Cartier Islands join Australia, Brazilian Island joins Brazil, and Clipperton Island joins France. The remaining shapes coded -99 (Akrotiri, Dhekelia, Bir Tawil, the Spratly Islands, Scarborough Reef, and the Guantanamo Bay naval base) match no country: they draw as Not yet and can't be selected (FR-MAP-07).
+Antarctica matches a shape but is removed with the crop (section 10.1). Israel matches only a placeholder about 1 km across near Jerusalem, because this edition draws Israel's area as Palestine (D-11). Both are excluded too. Other shapes that share a code merge into one country: the Coral Sea Islands and the Ashmore and Cartier Islands join Australia, Brazilian Island joins Brazil, and Clipperton Island joins France. The remaining shapes coded -99 (Akrotiri, Dhekelia, Bir Tawil, the Spratly Islands, Scarborough Reef, and the Guantanamo Bay naval base) match no country: they draw as Not yet and can't be selected (FR-MAP-07).
 
 #### Build script
 
-1. **Simplify.** Drop Antarctica, keep only the fields the app needs, and reduce detail:
+Run it with `dart run tool/build_world_map.dart <path to ne_10m_admin_0_countries_sau.geojson>`. It needs Node.js and makes no API requests.
+
+1. **Simplify.** The script runs mapshaper through `npx` to drop Antarctica, keep only the fields it needs, and reduce detail:
 
     ```text
     npx mapshaper@0.7.71 -i ne_10m_admin_0_countries_sau.geojson \
@@ -935,8 +937,8 @@ Antarctica matches a shape but is removed with the crop (section 10.1), so it is
 
 2. **Match codes and split overseas parts** as described above.
 3. **Project.** Convert every point with Equal Earth (below), clamp latitude to between 57° south and 84° north, scale to 1,000 units wide, and round to 0.1 unit.
-4. **Choose dots.** Give a dot to every country whose largest part fits within 6 × 6 units, and to every dataset country with no shape (FR-MAP-09); measured on the unsimplified source, that is about 80 countries. Shapes can vanish during simplification, as Vatican City's does. A dot sits at the center of the country's largest part, or at the API's `coordinates.lat` and `coordinates.lng` when the country has no shape. The script fetches those coordinates itself, with at most 3 API requests and `RC_API_KEY` from `env.json` or the environment, as `tool/fetch_snapshot.dart` does, so the snapshot and the database don't store them.
-5. **Write and report.** Write `assets/data/world_map.json`, then list every dataset country with neither a shape nor a dot. Only Antarctica and Western Sahara may be on that list; a test fails on anything else (section 12.1).
+4. **Choose dots.** Give a dot to every country whose largest part fits within 6 × 6 units, and to every country whose shape vanishes during simplification (FR-MAP-09): 94 countries in all. A dot sits in the middle of the country's largest part. Ten countries' shapes vanish, such as Vatican City and Tuvalu. They are placed from the full-detail source and kept as dots only.
+5. **Write and report.** Write `assets/data/world_map.json`, then list every dataset country with neither a shape nor a dot. Only Antarctica, Western Sahara, and Israel may be on that list; the script and a test both fail on anything else (section 12.1).
 
 The Equal Earth formula, in Dart:
 
@@ -973,11 +975,12 @@ Coordinates are already projected, with y pointing down from 84° north, so the 
   "dots": {
     "BHR": [633.6, 145.8],
     "SGP": [788.4, 236.3]
-  }
+  },
+  "unmatched": [[588.9, 160.1, 590, 161.2, "..."]]
 }
 ```
 
-Each shape is a list of rings, and each ring is a flat list of x, y pairs. The example is shortened.
+Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes are rings too, so shapes fill with the even-odd rule. `unmatched` lists the rings of shapes that match no country, such as Bir Tawil (FR-MAP-07). The example is shortened.
 
 ## 9. Non-functional requirements
 
@@ -1014,7 +1017,7 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. The e
 - **Projection:** Equal Earth. It shows every country at its true relative size, so Africa isn't shrunk next to Europe as on common web maps, and its rounded sides give an atlas-like look.
 - **Framing:** the map is cropped between 57° south and 84° north, which removes Antarctica and a large empty area. At 1,000 units wide it is 435 units tall, a ratio of about 2.3 to 1, and the card keeps that ratio at every width.
 - **Lines and hatching:** borders are 0.55 dp for Not yet and Visited countries and 0.9 dp for Wishlist countries. Wishlist hatching runs at 45°, repeating every 5 dp, with stripes 1.6 dp wide, so wishlist countries differ from visited ones without relying on color. Dots have a 4 dp radius and a 1.2 dp border. All of these keep their size at every zoom level (FR-MAP-20).
-- **Card layout:** from top to bottom, the headline (FR-MAP-02), the region chips, the map, and the legend. The region summary sits over the map's top start corner, and the zoom and Reset view buttons over its bottom end corner.
+- **Card layout:** from top to bottom, the headline (FR-MAP-02), the region chips, the map, the selected country's card (FR-MAP-12), and the legend. The region summary sits over the map's top start corner, and the zoom and Reset view buttons over its bottom end corner.
 - **Faded countries** outside a region focus keep their colors at 30% opacity.
 
 | Element | Light theme | Dark theme |
@@ -1202,18 +1205,20 @@ flowchart LR
 
 | Part | Responsibility |
 | --- | --- |
-| `worldMapProvider` | Loads the map file once and builds one `Path` per country, plus bounding boxes. It parses the JSON with `compute`, which uses a background isolate on Android and iOS and runs on the main thread on web, fast enough at this size. |
+| `worldMapProvider` | Loads the map file once. It parses the JSON with `compute`, which uses a background isolate on Android and iOS and runs on the main thread on web, fast enough at this size. |
+| `worldMapGeometryProvider` | Builds one `Path` per country from the map file, plus the outline and grid lines. |
+| `mapHitTesterProvider` | The `MapHitTester` (FR-MAP-11), in pure Dart. Only countries in the dataset can be selected. |
 | `travelStatusesProvider` | The existing stream of statuses by country code. It skips soft-deleted entries and updates after local changes and sync (FR-MAP-04). |
-| `WorldMapPainter` | A `CustomPainter` that draws the map in the order below. |
-| `WorldMapView` | Wraps the painter in `InteractiveViewer` and handles taps, hover, scrolling, keys, and the tap card. |
+| `WorldMapBasePainter`, `WorldMapPainter` | Two `CustomPainter`s that draw the map in the order below: the first draws the ocean, grid lines, and Not yet layer; the second draws statuses, dots, and highlights over it. |
+| `WorldMapCard` | Lays out the headline, the map, the selected country's card, and the legend, and handles taps, hover, and Esc. Zoom wraps its painters in `InteractiveViewer` (FR-MAP-16). |
 | `MapCamera` | Animates Reset view and region focus. |
 | `RevealController` | Runs the reveal, the spread from the tap, and the replay, and gives the painter each country's progress. |
 
 - **Painting order:** ocean and grid lines; every country in the Not yet fill; wishlist hatching; visited fills, including partly filled countries during animations; borders; dots; highlights and flight paths.
-- **Caching:** layers that don't change during animations are recorded into a `ui.Picture` and replayed each frame, and recorded again only when the zoom changes. The map sits in a `RepaintBoundary`, so its animations don't repaint the rest of the screen.
+- **Caching:** the base layer (the ocean, grid lines, and every country in the Not yet colors) has its own `RepaintBoundary`. It is drawn once and reused while statuses, highlights, and animations repaint the layer above, and with zoom it redraws only when the zoom changes.
 - **Hatching and fading:** all wishlist countries combine into one path, which is clipped once and filled with diagonal stripes. Faded countries lower the alpha of their paint instead of using `saveLayer` per country, which is expensive, especially on web.
 - **Constant sizes (FR-MAP-20):** the painter reads the zoom with `getMaxScaleOnAxis()` and divides line widths, dot sizes, and stripe spacing by it.
-- **Hit testing (FR-MAP-11):** convert the pointer position to map coordinates with `TransformationController.toScene`, and divide the 6 dp and 24 dp distances by the zoom. Find the country under the pointer by checking only countries whose bounding box contains the point, then calling `Path.contains`. Over land, a dot within 6 dp wins over that country; over water, the nearest dot within 24 dp wins.
+- **Hit testing (FR-MAP-11):** convert the pointer position to map units (with `TransformationController.toScene` once zoom exists) and convert the 4 dp and 24 dp distances the same way. `MapHitTester` first checks the dots: one whose center is within 4 dp wins. Otherwise it finds the country under the pointer by checking only rings whose bounding box contains the point, then applying the even-odd rule. Over water, the nearest country or dot within 24 dp wins, measured to its edge.
 - **Scrolling (FR-MAP-17):** at 1×, the viewer doesn't pan, so vertical drags reach the page, and the mouse wheel over the map scrolls the page unless Ctrl or ⌘ is held. Once zoomed in, the map takes drags so it can pan.
 - **Ink spread:** for each animating country, clip to its path and draw a filled circle that grows from the start point to the farthest corner of the country's bounding box. The start point is the center of the country's largest part for the reveal, and the tap point for the spread from the tap. One `AnimationController` drives the whole reveal, and each country reads its progress from its slot in the stagger. A session flag, like the one for Explore's grid entrance, plays the reveal once per session.
 - **Region focus:** project each region's frame once, sampling its edges rather than only its corners, because Equal Earth's meridians curve. Fit it into the card with 16 dp of padding, and animate from the current matrix with a `Matrix4Tween` and `Curves.easeInOutCubic` over 600 ms. The fade uses the same animation value.
@@ -1228,7 +1233,7 @@ flowchart LR
 | --- | --- | --- |
 | Unit | Domain logic | Every row of the merge rules (section 7.3); search normalization; filter and sort; parsing records with missing capitals, borders, or currencies; the Equal Earth projection; map hit testing (a point in Spain is ESP, a point near Bahrain is BHR, western Saudi Arabia is SAU, the ocean is nothing); reveal timings within 1.5 s for 1, 50, and 250 countries |
 | Repository | Data layer with a mocked API and an in-memory database | Snapshot import; stale-data refresh; a failed page keeps old data; 401, 403, and 429 map to the right errors |
-| Map data | The committed map file against the snapshot | Every dataset country has a shape or a dot except Antarctica and Western Sahara; no shape is coded -99; overseas parts belong to their own countries, so Réunion isn't part of France |
+| Map data | The committed map file against the snapshot | Every dataset country has a shape or a dot except Antarctica, Western Sahara, and Israel; no shape is coded -99; overseas parts belong to their own countries, so Réunion isn't part of France |
 | Widget | Screens | Explore loading, empty, error, and data states; visit form validation; Arabic layout mirrors; compact and expanded layouts; map colors by status in both themes; the map's tap card actions |
 | Manual | End-to-end flows | Sync between a browser and a phone; airplane mode on mobile; keyboard-only use on web; a full Arabic and dark-mode walkthrough; map smoothness on a mid-range phone, in a phone browser, and in desktop Chrome, Safari, and Firefox |
 

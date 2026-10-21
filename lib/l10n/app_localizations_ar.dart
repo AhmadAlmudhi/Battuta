@@ -355,6 +355,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commonNotAvailable => 'غير متوفر';
 
   @override
+  String get commonClose => 'إغلاق';
+
+  @override
   String get listSeparator => '، ';
 
   @override
@@ -576,8 +579,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statsCountriesVisited => 'الدول التي زرتها';
 
   @override
-  String statsOfTotal(String total, String percent) {
-    return 'من $total · $percent%';
+  String statsOfTotal(String total, String percent, String wishlist) {
+    return 'من $total · $percent% · $wishlist في قائمة أمنياتك';
   }
 
   @override
@@ -613,6 +616,32 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get statsEmptyBody => 'سجّل زيارتك لأول دولة لترى تقدّمك هنا.';
+
+  @override
+  String mapSemanticsLabel(String visited, String wishlist) {
+    return 'خريطة العالم: زرت $visited دولة، و$wishlist في قائمة أمنياتك';
+  }
+
+  @override
+  String get mapViewAsList => 'عرض كقائمة';
+
+  @override
+  String get mapLegendVisited => 'تمت زيارتها';
+
+  @override
+  String get mapLegendWishlist => 'قائمة الأمنيات';
+
+  @override
+  String get mapLegendNotYet => 'ليس بعد';
+
+  @override
+  String get mapLegendDots => 'تظهر الدول الصغيرة كنقاط';
+
+  @override
+  String get mapNotVisited => 'لم تزرها بعد';
+
+  @override
+  String get mapOpenDetails => 'عرض التفاصيل';
 
   @override
   String get authEmail => 'البريد الإلكتروني';
@@ -756,6 +785,13 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settingsDataSourceValue =>
       'بيانات الدول والأعلام من REST Countries';
+
+  @override
+  String get settingsMapSource => 'بيانات الخريطة';
+
+  @override
+  String get settingsMapSourceValue =>
+      'خريطة العالم من Natural Earth، وتظهر الحدود المتنازع عليها كما تعترف بها المملكة العربية السعودية.';
 
   @override
   String get settingsLicenses => 'تراخيص المصادر المفتوحة';

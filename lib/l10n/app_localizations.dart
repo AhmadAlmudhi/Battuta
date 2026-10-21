@@ -710,6 +710,12 @@ abstract class AppLocalizations {
   /// **'Not available'**
   String get commonNotAvailable;
 
+  /// No description provided for @commonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
   /// Joins list items, for example languages.
   ///
   /// In en, this message translates to:
@@ -1088,11 +1094,11 @@ abstract class AppLocalizations {
   /// **'Countries visited'**
   String get statsCountriesVisited;
 
-  /// Under the visited count, for example: of 250 · 4.8% (FR-STA-01).
+  /// Under the visited count, for example: of 250 · 6.4% · 12 on your wishlist (FR-STA-01, FR-MAP-02).
   ///
   /// In en, this message translates to:
-  /// **'of {total} · {percent}%'**
-  String statsOfTotal(String total, String percent);
+  /// **'of {total} · {percent}% · {wishlist} on your wishlist'**
+  String statsOfTotal(String total, String percent, String wishlist);
 
   /// Screen-reader label for the headline.
   ///
@@ -1153,6 +1159,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark your first country as visited to see your progress here.'**
   String get statsEmptyBody;
+
+  /// Screen-reader label for the world map (FR-MAP-08).
+  ///
+  /// In en, this message translates to:
+  /// **'World map: {visited} countries visited, {wishlist} on your wishlist'**
+  String mapSemanticsLabel(String visited, String wishlist);
+
+  /// No description provided for @mapViewAsList.
+  ///
+  /// In en, this message translates to:
+  /// **'View as list'**
+  String get mapViewAsList;
+
+  /// No description provided for @mapLegendVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited'**
+  String get mapLegendVisited;
+
+  /// No description provided for @mapLegendWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist'**
+  String get mapLegendWishlist;
+
+  /// No description provided for @mapLegendNotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet'**
+  String get mapLegendNotYet;
+
+  /// No description provided for @mapLegendDots.
+  ///
+  /// In en, this message translates to:
+  /// **'Small countries appear as dots'**
+  String get mapLegendDots;
+
+  /// No description provided for @mapNotVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Not visited yet'**
+  String get mapNotVisited;
+
+  /// No description provided for @mapOpenDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Open details'**
+  String get mapOpenDetails;
 
   /// No description provided for @authEmail.
   ///
@@ -1393,6 +1447,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Country data and flags from REST Countries'**
   String get settingsDataSourceValue;
+
+  /// No description provided for @settingsMapSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Map data'**
+  String get settingsMapSource;
+
+  /// No description provided for @settingsMapSourceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'World map from Natural Earth. Disputed borders are shown as Saudi Arabia recognizes them.'**
+  String get settingsMapSourceValue;
 
   /// No description provided for @settingsLicenses.
   ///
