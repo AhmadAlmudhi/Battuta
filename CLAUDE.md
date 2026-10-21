@@ -20,7 +20,7 @@ Guidance for Claude Code when working in this repository.
   - Stats is complete: headline (visited of the dataset total, one decimal), a bar per region, highlights, count-up animation, and the zero state.
   - Accounts and cloud sync are complete: sign in, create account, reset password, Account screen with sync status, Sync now, and Sign out; guest merge on first sign-in, live two-way sync, and server-enforced last write wins.
   - Settings has its About section (FR-SET-04); app icons and the favicon are generated; the home-screen name is Battuta or بطوطة on Android and iOS.
-  - Not started: CI and the first production deploy.
+  - Not started: the world map on Stats (PRD section 6.10, data in 8.7, rendering in 11.5), CI, and the first production deploy.
 
 ## Commands
 
