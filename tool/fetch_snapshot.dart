@@ -65,9 +65,23 @@ bool _kept(Object? record) => !excludedCountryCodes.contains(
 
 /// Keeps only the Arabic translation and drops API metadata, which cuts the
 /// snapshot size by most of its weight without changing the record shape.
+/// Also drops the borders and currencies the app leaves out (D-12).
 Object? _trim(Object? record) {
   if (record is! Map<String, Object?>) return record;
   final trimmed = Map<String, Object?>.of(record)..remove('_meta');
+  if (trimmed['borders'] case final List<Object?> borders) {
+    trimmed['borders'] = [
+      for (final border in borders)
+        if (!excludedCountryCodes.contains(border)) border,
+    ];
+  }
+  if (trimmed['currencies'] case final List<Object?> currencies) {
+    trimmed['currencies'] = [
+      for (final currency in currencies)
+        if (!excludedCurrencyCodes.contains((currency as Map?)?['code']))
+          currency,
+    ];
+  }
   final names = trimmed['names'];
   if (names is Map<String, Object?>) {
     final translations = names['translations'];

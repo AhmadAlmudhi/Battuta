@@ -5,13 +5,16 @@ import '../domain/country.dart';
 /// area as part of another country.
 const excludedCountryCodes = {'ISR'};
 
+/// Currencies left out with them, by code (D-12).
+const excludedCurrencyCodes = {'ILS'};
+
 /// Parses one REST Countries v5 record, as returned by the API and stored in
 /// the bundled snapshot (field mapping in PRD section 8.1).
 ///
 /// The API uses empty strings for missing values, so they are read as null.
 /// Returns null for records without ISO codes (a few disputed territories),
 /// because the app keys routes, flags, and entries by code, and for
-/// [excludedCountryCodes].
+/// [excludedCountryCodes]. Leaves out [excludedCurrencyCodes] too.
 Country? parseCountry(Map<String, Object?> json) {
   final codes = _map(json['codes']);
   final code = _string(codes['alpha_3'])?.toUpperCase();
@@ -42,7 +45,8 @@ Country? parseCountry(Map<String, Object?> json) {
     ],
     currencies: [
       for (final currency in _list(json['currencies']).map(_map))
-        if (_string(currency['code']) case final currencyCode?)
+        if (_string(currency['code']) case final currencyCode?
+            when !excludedCurrencyCodes.contains(currencyCode))
           Currency(
             code: currencyCode,
             name: _string(currency['name']) ?? currencyCode,

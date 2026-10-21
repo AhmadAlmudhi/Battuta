@@ -90,7 +90,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 
 ## Country data facts
 
-- The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them. It also skips Israel (`excludedCountryCodes`, D-12) and drops it from neighbors' borders, leaving **249**, the Stats total (D-3). The snapshot and flags scripts leave Israel out too, `ensureSeeded` deletes it from data saved earlier, and the map draws its area as Palestine.
+- The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them. It also skips Israel (`excludedCountryCodes`, D-12), drops it from neighbors' borders, and drops the Israeli new shekel (`excludedCurrencyCodes`), leaving **249**, the Stats total (D-3). The snapshot and flags scripts leave them out too; for data saved earlier, `ensureSeeded` deletes Israel's row and the repository filters currencies and borders when reading. The map draws Israel's area as Palestine.
 - Missing values arrive as empty strings, not null; the parser maps them to null.
 - The snapshot keeps the raw API record shape (trimmed to the Arabic translation) so one parser serves both the snapshot and the live refresh. The request fields live in `lib/features/countries/data/rest_countries.dart` (pure Dart, also imported by the tool); keep them in step with `country_parser.dart`.
 - `ensureSeeded` imports the snapshot when the DB is empty or older than the bundled snapshot (so a redeploy refreshes web visitors for free). Data age is `MAX(countries.fetched_at)`.

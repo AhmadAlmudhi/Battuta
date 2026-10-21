@@ -100,6 +100,20 @@ void main() {
       expect(palestine!.borders, ['EGY', 'JOR']);
     });
 
+    test('leaves out the Israeli currency (D-12)', () {
+      final palestine = parseCountry(
+        _record(
+          codes: {'alpha_2': 'PS', 'alpha_3': 'PSE'},
+          currencies: [
+            {'code': 'EGP', 'name': 'Egyptian pound', 'symbol': 'E£'},
+            {'code': 'ILS', 'name': 'Israeli new shekel', 'symbol': '₪'},
+            {'code': 'JOD', 'name': 'Jordanian dinar', 'symbol': 'JD'},
+          ],
+        ),
+      );
+      expect(palestine!.currencies.map((c) => c.code), ['EGP', 'JOD']);
+    });
+
     test('picks the primary capital, else the first', () {
       final bolivia = parseCountry(
         _record(

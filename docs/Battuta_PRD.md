@@ -231,7 +231,7 @@ Release 1.0 is accepted when all of the following are true:
 | D-9 | Country data loads from a snapshot bundled with each build. The API only refreshes it. | Instant first load, and web traffic doesn't use up the shared API quota. |
 | D-10 | The web app is served from the free Firebase Hosting address, battuta-travel.web.app. | No domain cost or DNS setup. A custom domain can be added later without code changes. |
 | D-11 | The world map is drawn by the app from Natural Earth's 1:10m Saudi point-of-view edition, bundled with each build (section 8.7). | No map service, API key, or network use, so the map works offline and stays free. This edition includes every small country tested, makes the smallest complete map file, and draws disputed borders as recognized in the app's main region. Somaliland and Northern Cyprus are part of Somalia and Cyprus, which matches the dataset (section 8.1). Western Sahara is drawn as part of Morocco, so it has no shape of its own, though it still counts in Stats when marked as visited. Israel's area is drawn as Palestine (D-12). |
-| D-12 | The app leaves out Israel. It isn't in the country data, Explore, Stats, or any country's neighbors, and the map draws its area as Palestine. | Follows the map's point of view (D-11). The parser skips Israel the way it skips records without ISO codes (section 8.1), so neither the bundled data nor a refresh brings it back, and data saved before this decision loses it at the next launch. |
+| D-12 | The app leaves out Israel. It isn't in the country data, Explore, Stats, or any country's neighbors, and the map draws its area as Palestine. | Follows the map's point of view (D-11). The parser skips Israel the way it skips records without ISO codes (section 8.1), so neither the bundled data nor a refresh brings it back, and data saved before this decision loses it at the next launch. The Israeli new shekel, which the data lists among Palestine's currencies, is left out too, so no screen or filter shows it. |
 
 ## 4. Users
 
@@ -775,11 +775,11 @@ Authorization: Bearer <RC_API_KEY>
 | `flag.description` | `flagAlt` | Screen-reader label for the flag |
 | `flag.colors.dominant` | `flagColor` | Header tint (FR-DET-07) |
 
-> **Data note:** The API returns 254 records. Four disputed territories (Abkhazia, Northern Cyprus, Somaliland, and South Ossetia) have no ISO codes, so they can't have a route, flag, or entry, and the app skips them. The app also leaves out Israel (D-12). That leaves 249 countries and territories, the total used by Stats (D-3). Missing values arrive as empty strings, not null, so the parser treats empty strings as missing.
+> **Data note:** The API returns 254 records. Four disputed territories (Abkhazia, Northern Cyprus, Somaliland, and South Ossetia) have no ISO codes, so they can't have a route, flag, or entry, and the app skips them. The app also leaves out Israel and the Israeli new shekel (D-12). That leaves 249 countries and territories, the total used by Stats (D-3). Missing values arrive as empty strings, not null, so the parser treats empty strings as missing.
 
 ### 8.2 Snapshot and refresh rules
 
-1. Every build bundles `assets/data/countries_snapshot.json`, produced by `tool/fetch_snapshot.dart`, which runs the request above and records when it ran. It keeps only the Arabic translation to stay small, and leaves out Israel (D-12). `tool/fetch_flags.dart` downloads a 320 px flag for each country into `assets/flags/`.
+1. Every build bundles `assets/data/countries_snapshot.json`, produced by `tool/fetch_snapshot.dart`, which runs the request above and records when it ran. It keeps only the Arabic translation to stay small, and leaves out Israel, its currency, and its place in other countries' borders (D-12). `tool/fetch_flags.dart` downloads a 320 px flag for each country into `assets/flags/`.
 2. On first launch, or a first visit to the website, the app imports the snapshot into the local database. No API call is made. On later launches, a bundled snapshot newer than the local data (after an app update or a redeploy) replaces it the same way.
 3. On later launches, the app reads from the local database. If the data is older than 7 days and the device is online, it refreshes in the background.
 4. A refresh is all or nothing: if any page fails, keep the previous data. On success, replace all rows in one transaction.

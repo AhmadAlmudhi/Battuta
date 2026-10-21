@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/features/countries/data/country_api_client.dart';
 import 'package:battuta/features/countries/data/country_repository_impl.dart';
+import 'package:battuta/features/countries/domain/country.dart';
 import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,7 +42,12 @@ void main() {
         // Israel is left out of the snapshot and the app (D-12).
         expect(countries, hasLength(249));
         expect(await repo.findByCode('ISR'), isNull);
-        expect((await repo.findByCode('PSE'))?.borders, isNot(contains('ISR')));
+        final palestine = await repo.findByCode('PSE');
+        expect(palestine?.borders, isNot(contains('ISR')));
+        expect(
+          palestine?.currencies.map((c) => c.code),
+          isNot(contains('ILS')),
+        );
         expect(
           countries.map((c) => c.nameEn).toList(),
           orderedEquals([...countries.map((c) => c.nameEn)]..sort()),
@@ -98,6 +104,25 @@ void main() {
         );
       },
     );
+
+    test('reads data saved before D-12 without the Israeli currency or '
+        'border', () async {
+      await repository(bundledAt: 100).ensureSeeded();
+      await (db.update(db.countries)..where((t) => t.code.equals('SAU'))).write(
+        const CountriesCompanion(
+          currencies: Value([
+            Currency(code: 'SAR', name: 'Saudi riyal', symbol: 'ر.س'),
+            Currency(code: 'ILS', name: 'Israeli new shekel', symbol: '₪'),
+          ]),
+          borders: Value(['JOR', 'ISR']),
+        ),
+      );
+
+      final saudi = await repository().findByCode('SAU');
+
+      expect(saudi?.currencies.map((c) => c.code), ['SAR']);
+      expect(saudi?.borders, ['JOR']);
+    });
 
     test('replaces older local data with a newer bundled snapshot, as after '
         'a redeploy (PRD 8.2, rule 7)', () async {
