@@ -1208,6 +1208,48 @@ abstract class AppLocalizations {
   /// **'Open details'**
   String get mapOpenDetails;
 
+  /// No description provided for @mapRegionAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get mapRegionAll;
+
+  /// No description provided for @mapZoomIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get mapZoomIn;
+
+  /// No description provided for @mapZoomOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get mapZoomOut;
+
+  /// No description provided for @mapResetView.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset view'**
+  String get mapResetView;
+
+  /// Over the map during a region focus, for example: Europe · 4 visited · 3 on your wishlist (FR-MAP-24).
+  ///
+  /// In en, this message translates to:
+  /// **'{region} · {visited} visited · {wishlist} on your wishlist'**
+  String mapRegionSummary(String region, String visited, String wishlist);
+
+  /// No description provided for @statsShowOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Show on the map'**
+  String get statsShowOnMap;
+
+  /// Screen-reader label for a region bar, for example: Europe, 4 of 53.
+  ///
+  /// In en, this message translates to:
+  /// **'{region}, {count}'**
+  String statsRegionLabel(String region, String count);
+
   /// No description provided for @authEmail.
   ///
   /// In en, this message translates to:

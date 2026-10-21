@@ -8,19 +8,46 @@ import '../../../core/widgets/message_view.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../countries/presentation/region_names.dart';
+import '../../world_map/domain/map_regions.dart';
 import '../../world_map/presentation/widgets/world_map_card.dart';
+import '../../world_map/presentation/world_map_providers.dart';
 import '../domain/travel_stats.dart';
 import 'stats_providers.dart';
 
 /// Digits of equal width, so counting numbers don't shift (PRD 10.1).
 const _tabular = [FontFeature.tabularFigures()];
 
-/// Stats tab: progress overall and by region (PRD section 6.5).
-class StatsScreen extends ConsumerWidget {
+/// Stats tab: the world map, and progress overall and by region (PRD
+/// sections 6.5 and 6.10).
+class StatsScreen extends ConsumerStatefulWidget {
   const StatsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StatsScreen> createState() => _StatsScreenState();
+}
+
+class _StatsScreenState extends ConsumerState<StatsScreen> {
+  /// Keeps the map's state when the first visit replaces the zero state,
+  /// and lets a region bar scroll it into view.
+  final _mapCard = GlobalKey();
+
+  /// Selects [region] on the map and scrolls the map into view
+  /// (FR-MAP-25).
+  void _showRegion(String region) {
+    ref.read(mapRegionProvider.notifier).state = region;
+    final map = _mapCard.currentContext;
+    if (map == null) return;
+    Scrollable.ensureVisible(
+      map,
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final stats = ref.watch(travelStatsProvider);
 
@@ -33,7 +60,11 @@ class StatsScreen extends ConsumerWidget {
           // and empty bars (FR-STA-05).
           AsyncData(:final value) when value.visited == 0 => _StatsList(
             children: [
-              WorldMapCard(visited: 0, wishlist: value.wishlistSize),
+              WorldMapCard(
+                key: _mapCard,
+                visited: 0,
+                wishlist: value.wishlistSize,
+              ),
               MessageView(
                 icon: Icons.public_rounded,
                 title: l10n.statsEmptyTitle,
@@ -43,7 +74,11 @@ class StatsScreen extends ConsumerWidget {
               ),
             ],
           ),
-          AsyncData(:final value) => _StatsBody(stats: value),
+          AsyncData(:final value) => _StatsBody(
+            stats: value,
+            mapCard: _mapCard,
+            onShowRegion: _showRegion,
+          ),
           AsyncError() => MessageView(
             icon: Icons.error_outline_rounded,
             title: l10n.exploreLoadError,
@@ -57,9 +92,15 @@ class StatsScreen extends ConsumerWidget {
 }
 
 class _StatsBody extends StatelessWidget {
-  const _StatsBody({required this.stats});
+  const _StatsBody({
+    required this.stats,
+    required this.mapCard,
+    required this.onShowRegion,
+  });
 
   final TravelStats stats;
+  final GlobalKey mapCard;
+  final ValueChanged<String> onShowRegion;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +115,7 @@ class _StatsBody extends StatelessWidget {
     return _StatsList(
       children: [
         WorldMapCard(
+          key: mapCard,
           header: _Headline(stats: stats),
           visited: stats.visited,
           wishlist: stats.wishlistSize,
@@ -87,7 +129,14 @@ class _StatsBody extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Column(
               children: [
-                for (final region in regions) _RegionRow(progress: region),
+                for (final region in regions)
+                  _RegionRow(
+                    progress: region,
+                    // The Antarctic has no frame on the map.
+                    onTap: regionFrame(region.region) == null
+                        ? null
+                        : () => onShowRegion(region.region),
+                  ),
               ],
             ),
           ),
@@ -177,11 +226,13 @@ class _Headline extends StatelessWidget {
   }
 }
 
-/// One region's visited countries out of its total (FR-STA-02).
+/// One region's visited countries out of its total (FR-STA-02). Tapping it
+/// shows the region on the map (FR-MAP-25).
 class _RegionRow extends StatelessWidget {
-  const _RegionRow({required this.progress});
+  const _RegionRow({required this.progress, this.onTap});
 
   final RegionProgress progress;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -191,35 +242,57 @@ class _RegionRow extends StatelessWidget {
       context.formatInteger(progress.visited),
       context.formatInteger(progress.total),
     );
-    return Semantics(
-      label: '${regionName(l10n, progress.region)}, $count',
-      child: ExcludeSemantics(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    final content = Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      regionName(l10n, progress.region),
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                  ),
-                  Text(
-                    count,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontFeatures: _tabular,
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: Text(
+                  regionName(l10n, progress.region),
+                  style: theme.textTheme.bodyLarge,
+                ),
               ),
-              const SizedBox(height: 6),
-              _ProgressBar(value: progress.fraction, height: 8),
+              Text(
+                count,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontFeatures: _tabular,
+                ),
+              ),
             ],
           ),
+          const SizedBox(height: 6),
+          _ProgressBar(value: progress.fraction, height: 8),
+        ],
+      ),
+    );
+    final label = l10n.statsRegionLabel(
+      regionName(l10n, progress.region),
+      count,
+    );
+    // Each row is its own node, so a screen reader doesn't read a plain row
+    // as the whole card around the tappable ones.
+    if (onTap == null) {
+      return Semantics(
+        container: true,
+        label: label,
+        child: ExcludeSemantics(child: content),
+      );
+    }
+    return Semantics(
+      container: true,
+      label: label,
+      button: true,
+      onTap: onTap,
+      onTapHint: l10n.statsShowOnMap,
+      child: ExcludeSemantics(
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: content,
         ),
       ),
     );

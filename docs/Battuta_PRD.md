@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.9 |
+| Version | 1.10 |
 | Status | Ready for development |
 | Date | 21 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.10 | 21 Oct 2026 | World map zoom, region focus, and the reveal built. The map handles its own gestures instead of `InteractiveViewer`, so the page still scrolls at 1× and the map pans once zoomed (section 11.5). Region bars on Stats are their own screen-reader items. |
 | 1.9 | 21 Oct 2026 | World map added to the top of the Stats screen (section 6.10). The app draws it from bundled Natural Earth data in the Saudi point-of-view edition (D-11, section 8.7), so it needs no map service. The map card takes over the Stats headline and also shows when nothing is visited yet. About credits Natural Earth. Israel is left out of the app, and the map draws its area as Palestine (D-12). |
 | 1.8 | 21 Oct 2026 | App icons generated for every platform from the logo. The iOS home-screen name follows the device language. Settings has an About section. Arabic dates now use Western digits too (D-5). |
 | 1.7 | 20 Oct 2026 | Accounts and sync built. Security rules now also enforce last write wins and the entry shape. A new `local_data_owner` setting makes sure one account's entries never merge into another's after a session ends without Sign out. Sync is tested against the Firebase emulators. |
@@ -1043,7 +1044,7 @@ One signature moment, the passport stamp, plus a small set of consistent transit
 | Search results | Query change | Results cross-fade instead of jumping | 200 ms | AnimatedSwitcher |
 | Stats | Screen opens | Numbers count up; region bars fill | 800 ms, ease-out-cubic | TweenAnimationBuilder |
 | Map reveal | The map's first appearance in a session | Visited countries fill one by one from their middles, in order of visit; the headline counts up alongside; wishlist hatching fades in last; a tap skips to the end | 400 ms per country, ease-out, starting 60 ms apart, all fills within 1.2 s; hatching 300 ms; whole reveal within 1.5 s | One AnimationController; a circle clipped to each country |
-| Region focus | Region chip or region bar | The map flies to the region's frame; other countries fade to 30% | 600 ms, ease-in-out-cubic | Matrix4Tween on the TransformationController |
+| Region focus | Region chip or region bar | The map flies to the region's frame; other countries fade to 30% | 600 ms, ease-in-out-cubic | MapView.lerp in an AnimationController |
 | Reset view | Reset view or the All chip | The map flies back to the world view | 600 ms, ease-in-out-cubic | Same as region focus |
 | Map spread (Could) | Saving from the map's tap card | Amber spreads from the tap point, then the stamp plays; new wishlist hatching fades in; a removed country's color fades out | 500 ms; hatching 300 ms; fade-out 250 ms | Same as the map reveal |
 | Replay (Could) | Replay button | Dotted flight paths draw from country to country, each followed by its fill; a year label ticks forward | 700 ms per step, at most 20 s in total | PathMetric.extractPath |
@@ -1140,7 +1141,7 @@ flowchart TB
 | Images | `Image.asset` with bundled flags | Same on every platform; no network or CORS needed (section 11.4) |
 | Connectivity | `connectivity_plus` | Offline banner and refresh checks; browser online and offline events on web |
 | Animation | `flutter_animate` | Staggered and chained effects |
-| World map | `CustomPainter` and `InteractiveViewer` from the Flutter SDK | Draws, zooms, and pans the map from bundled data, with no map package or tile service (section 11.5) |
+| World map | `CustomPainter` and gesture recognizers from the Flutter SDK | Draws, zooms, and pans the map from bundled data, with no map package or tile service (section 11.5) |
 | Map data, build time only | Natural Earth, and mapshaper 0.7.71 through `npx` | Country shapes for the map file (section 8.7). Normal builds don't need them. |
 | Sharing | `share_plus` | Share my map on Android and iOS (FR-MAP-42). Added only when that feature is built. |
 | External links | `url_launcher` | Open in Maps |
@@ -1211,18 +1212,19 @@ flowchart LR
 | `mapHitTesterProvider` | The `MapHitTester` (FR-MAP-11), in pure Dart. Only countries in the dataset can be selected. |
 | `travelStatusesProvider` | The existing stream of statuses by country code. It skips soft-deleted entries and updates after local changes and sync (FR-MAP-04). |
 | `WorldMapBasePainter`, `WorldMapPainter` | Two `CustomPainter`s that draw the map in the order below: the first draws the ocean, grid lines, and Not yet layer; the second draws statuses, dots, and highlights over it. |
-| `WorldMapCard` | Lays out the headline, the map, the selected country's card, and the legend, and handles taps, hover, and Esc. Zoom wraps its painters in `InteractiveViewer` (FR-MAP-16). |
-| `MapCamera` | Animates Reset view and region focus. |
-| `RevealController` | Runs the reveal, the spread from the tap, and the replay, and gives the painter each country's progress. |
+| `MapView` | The view in pure Dart: a zoom from 1× to 8× and the map point at its middle. It zooms around a point, pans, fits a region's frame, and blends two views for a flight. |
+| `RevealSchedule`, `revealOrder` | When each country fills and the hatching fades in (FR-MAP-27 to 29), in pure Dart. |
+| `WorldMapCard` | Lays out the headline, region chips, map, selected country's card, and legend. It runs flights and the reveal with two `AnimationController`s and handles gestures, the mouse wheel, keys, hover, and Esc. |
+| `mapRegionProvider` | The focused region, set by the chips and by the region bars on Stats (FR-MAP-25). |
 
 - **Painting order:** ocean and grid lines; every country in the Not yet fill; wishlist hatching; visited fills, including partly filled countries during animations; borders; dots; highlights and flight paths.
 - **Caching:** the base layer (the ocean, grid lines, and every country in the Not yet colors) has its own `RepaintBoundary`. It is drawn once and reused while statuses, highlights, and animations repaint the layer above, and with zoom it redraws only when the zoom changes.
-- **Hatching and fading:** all wishlist countries combine into one path, which is clipped once and filled with diagonal stripes. Faded countries lower the alpha of their paint instead of using `saveLayer` per country, which is expensive, especially on web.
-- **Constant sizes (FR-MAP-20):** the painter reads the zoom with `getMaxScaleOnAxis()` and divides line widths, dot sizes, and stripe spacing by it.
-- **Hit testing (FR-MAP-11):** convert the pointer position to map units (with `TransformationController.toScene` once zoom exists) and convert the 4 dp and 24 dp distances the same way. `MapHitTester` first checks the dots: one whose center is within 4 dp wins. Otherwise it finds the country under the pointer by checking only rings whose bounding box contains the point, then applying the even-odd rule. Over water, the nearest country or dot within 24 dp wins, measured to its edge.
-- **Scrolling (FR-MAP-17):** at 1×, the viewer doesn't pan, so vertical drags reach the page, and the mouse wheel over the map scrolls the page unless Ctrl or ⌘ is held. Once zoomed in, the map takes drags so it can pan.
+- **Hatching and fading:** all wishlist countries combine into one path, which is clipped once and filled with diagonal stripes. Fading lays the ocean color at 70% over the countries and dots outside the region, which shows them at 30% without a `saveLayer` per country, which is expensive, especially on web.
+- **Constant sizes (FR-MAP-20):** the painters draw through the current `MapView` and divide line widths, dot sizes, and stripe spacing by its pixels per map unit. Stripes are drawn only where they are on screen.
+- **Hit testing (FR-MAP-11):** convert the pointer position to map units with the current `MapView`, and convert the 4 dp and 24 dp distances the same way. `MapHitTester` first checks the dots: one whose center is within 4 dp wins. Otherwise it finds the country under the pointer by checking only rings whose bounding box contains the point, then applying the even-odd rule. Over water, the nearest country or dot within 24 dp wins, measured to its edge.
+- **Gestures and scrolling (FR-MAP-16, FR-MAP-17):** the map has its own pinch and drag recognizer instead of `InteractiveViewer`. At 1×, the page wins vertical drags, so it scrolls. Once zoomed in, the recognizer claims a drag after half the touch slop, before the page can, so the map pans. A plain mouse wheel is left to the page; Ctrl or ⌘ with the wheel, or a trackpad pinch, zooms. Double taps are told from two taps by the pointer events' times, so a single tap still selects at once.
 - **Ink spread:** for each animating country, clip to its path and draw a filled circle that grows from the start point to the farthest corner of the country's bounding box. The start point is the center of the country's largest part for the reveal, and the tap point for the spread from the tap. One `AnimationController` drives the whole reveal, and each country reads its progress from its slot in the stagger. A session flag, like the one for Explore's grid entrance, plays the reveal once per session.
-- **Region focus:** project each region's frame once, sampling its edges rather than only its corners, because Equal Earth's meridians curve. Fit it into the card with 16 dp of padding, and animate from the current matrix with a `Matrix4Tween` and `Curves.easeInOutCubic` over 600 ms. The fade uses the same animation value.
+- **Region focus:** project each region's frame once, sampling its edges rather than only its corners, because Equal Earth's meridians curve. `MapView.fit` fits it into the card with 16 dp of padding, and the flight blends from the current view with `Curves.easeInOutCubic` over 600 ms, zooming at an even pace. The fade uses the same animation value.
 - **Replay (FR-MAP-35 to 40):** each flight path is a curve between the two countries' centers, bent sideways by 20% of the distance between them, and drawn gradually with `PathMetric.extractPath`.
 - **Share my map (FR-MAP-41 to 43):** render a dedicated share layout inside a `RepaintBoundary` and capture it with `toImage(pixelRatio: 3)`. On Android and iOS, `share_plus` opens the share sheet; on web, the PNG downloads.
 
@@ -1232,10 +1234,10 @@ flowchart LR
 
 | Level | What it covers | Examples |
 | --- | --- | --- |
-| Unit | Domain logic | Every row of the merge rules (section 7.3); search normalization; filter and sort; parsing records with missing capitals, borders, or currencies; the Equal Earth projection; map hit testing (a point in Spain is ESP, a point near Bahrain is BHR, western Saudi Arabia is SAU, the ocean is nothing); reveal timings within 1.5 s for 1, 50, and 250 countries |
+| Unit | Domain logic | Every row of the merge rules (section 7.3); search normalization; filter and sort; parsing records with missing capitals, borders, or currencies; the Equal Earth projection; map hit testing (a point in Spain is ESP, a point near Bahrain is BHR, western Saudi Arabia is SAU, the ocean is nothing); reveal timings within 1.5 s for 1, 50, and 250 countries; the map view's zoom around a point, pan limits, and region fits; region frames that keep the Horn of Africa |
 | Repository | Data layer with a mocked API and an in-memory database | Snapshot import; stale-data refresh; a failed page keeps old data; 401, 403, and 429 map to the right errors |
 | Map data | The committed map file against the snapshot | Every dataset country has a shape or a dot except Antarctica and Western Sahara; no shape is coded -99; overseas parts belong to their own countries, so Réunion isn't part of France |
-| Widget | Screens | Explore loading, empty, error, and data states; visit form validation; Arabic layout mirrors; compact and expanded layouts; map colors by status in both themes; the map's tap card actions |
+| Widget | Screens | Explore loading, empty, error, and data states; visit form validation; Arabic layout mirrors; compact and expanded layouts; map colors by status in both themes; the map's tap card actions; zoom by buttons, pinch, double tap, keys, and Ctrl with the wheel; the page scrolling at 1×; region chips, fading, and region bars; the reveal's order, once per session, reduced motion, and tap to skip |
 | Manual | End-to-end flows | Sync between a browser and a phone; airplane mode on mobile; keyboard-only use on web; a full Arabic and dark-mode walkthrough; map smoothness on a mid-range phone, in a phone browser, and in desktop Chrome, Safari, and Firefox |
 
 > **Note:** The world map is tested through its logic and widgets, not golden images, because Flutter renders golden images slightly differently on macOS and on the Linux CI runner.

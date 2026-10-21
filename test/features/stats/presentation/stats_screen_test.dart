@@ -73,7 +73,8 @@ void main() {
   testWidgets('one bar per region (FR-STA-02)', (tester) async {
     await openStats(tester, seed: twoVisits);
 
-    expect(find.text('Europe'), findsOneWidget);
+    // The map has a Europe chip too, so rows are found by their labels.
+    expect(find.bySemanticsLabel('Europe, 1 of 4'), findsOneWidget);
     expect(find.text('1 of 4'), findsOneWidget); // France
     expect(find.text('1 of 2'), findsOneWidget); // Japan, in Asia
     // Africa and the Antarctic: one country each, none visited.
@@ -85,7 +86,14 @@ void main() {
   testWidgets('highlights (FR-STA-03)', (tester) async {
     await openStats(tester, seed: twoVisits);
     // They come after the map and the region bars.
-    await tester.scrollUntilVisible(find.text('First trip'), 200);
+    await tester.scrollUntilVisible(
+      find.text('First trip'),
+      200,
+      scrollable: find.byWidgetPredicate(
+        (widget) =>
+            widget is Scrollable && widget.axisDirection == AxisDirection.down,
+      ),
+    );
 
     expect(find.text('Japan'), findsOneWidget); // Most recent trip.
     expect(find.text('March 14, 2026'), findsOneWidget);
@@ -145,7 +153,7 @@ void main() {
     await openStats(tester, seed: twoVisits, prefs: {'locale': 'ar'});
 
     expect(find.text('من 8 · 25.0% · 1 في قائمة أمنياتك'), findsOneWidget);
-    expect(find.text('أوروبا'), findsOneWidget);
+    expect(find.bySemanticsLabel('أوروبا، 1 من 4'), findsOneWidget);
     final bar = tester.element(find.byType(LinearProgressIndicator).first);
     expect(Directionality.of(bar), TextDirection.rtl);
   });
