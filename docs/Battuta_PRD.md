@@ -6,9 +6,9 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.8 |
+| Version | 1.9 |
 | Status | Ready for development |
-| Date | 20 October 2026 |
+| Date | 21 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
 | Also built and tested | Android and iOS (not published in 1.0) |
 | Technology | Flutter, Firebase |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.9 | 21 Oct 2026 | World map added to the top of the Stats screen (section 6.10). The app draws it from bundled Natural Earth data in the Saudi point-of-view edition (D-11, section 8.7), so it needs no map service. The map card takes over the Stats headline and also shows when nothing is visited yet. About credits Natural Earth. Israel is left out of the app, and the map draws its area as Palestine (D-12). |
 | 1.8 | 21 Oct 2026 | App icons generated for every platform from the logo. The iOS home-screen name follows the device language. Settings has an About section. Arabic dates now use Western digits too (D-5). |
 | 1.7 | 20 Oct 2026 | Accounts and sync built. Security rules now also enforce last write wins and the entry shape. A new `local_data_owner` setting makes sure one account's entries never merge into another's after a session ends without Sign out. Sync is tested against the Firebase emulators. |
 | 1.6 | 20 Oct 2026 | Flutter upgraded to 3.47.7. Drift 2.35.2 or newer is required on web, because older versions don't save transactions to IndexedDB. The web database worker is compiled from source. iOS builds with CocoaPods until Xcode 26.2 or later is available. |
@@ -59,6 +60,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
     - [6.7 Cloud backup and sync (SYNC)](#67-cloud-backup-and-sync-sync)
     - [6.8 Settings (SET)](#68-settings-set)
     - [6.9 Platforms and responsive layout (PLT)](#69-platforms-and-responsive-layout-plt)
+    - [6.10 World map (MAP)](#610-world-map-map)
 - [7. Key user flows](#7-key-user-flows)
     - [7.1 First launch](#71-first-launch)
     - [7.2 Mark a country as visited](#72-mark-a-country-as-visited)
@@ -71,6 +73,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
     - [8.4 Cloud data model](#84-cloud-data-model)
     - [8.5 Local settings](#85-local-settings)
     - [8.6 Validation rules and messages](#86-validation-rules-and-messages)
+    - [8.7 World map data](#87-world-map-data)
 - [9. Non-functional requirements](#9-non-functional-requirements)
 - [10. Experience and interface requirements](#10-experience-and-interface-requirements)
     - [10.1 Visual design](#101-visual-design)
@@ -82,6 +85,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
     - [11.2 Technology stack](#112-technology-stack)
     - [11.3 Project structure](#113-project-structure)
     - [11.4 Platform configuration and secrets](#114-platform-configuration-and-secrets)
+    - [11.5 World map rendering](#115-world-map-rendering)
 - [12. Quality assurance](#12-quality-assurance)
     - [12.1 Test strategy](#121-test-strategy)
     - [12.2 Platform test matrix](#122-platform-test-matrix)
@@ -102,7 +106,7 @@ This document defines what Battuta version 1.0 must do and how it must behave. I
 
 ### 1.2 Product summary
 
-Battuta (بطوطة) is an app for browsing every country in the world, recording the countries a person has visited, and keeping a wishlist of places to go next. It works fully without an account. Signing in with an email address backs up the user's data to the cloud and syncs it across their devices. The app is available in English and Arabic, with full right-to-left support, in light and dark themes.
+Battuta (بطوطة) is an app for browsing every country in the world, recording the countries a person has visited, seeing them on a world map, and keeping a wishlist of places to go next. It works fully without an account. Signing in with an email address backs up the user's data to the cloud and syncs it across their devices. The app is available in English and Arabic, with full right-to-left support, in light and dark themes.
 
 The app is built with Flutter from one codebase for three platforms. The **web app is the production release** for version 1.0. The Android and iOS apps are built and tested from the same code and kept ready to publish, but they are not released to the stores yet.
 
@@ -191,7 +195,7 @@ Release 1.0 is accepted when all of the following are true:
 - **Explore:** browse, search, filter, and sort every country.
 - **Country details:** key facts, neighboring countries, and save actions.
 - **My travels:** a Visited list and a Wishlist, with editing and deletion.
-- **Stats:** progress overall and by region.
+- **Stats:** a world map of visited and wishlist countries, plus progress overall and by region.
 - **Accounts:** email and password sign-in, guest-to-account data merge, and cloud sync.
 - **Settings:** theme and language.
 - **Platforms:** web (production), Android and iOS (built and tested), from one Flutter codebase.
@@ -207,7 +211,7 @@ Release 1.0 is accepted when all of the following are true:
 | Opening the web app with no connection (installable web app) | The web app needs a connection to load; it keeps working if the connection drops later. |
 | Trip planning (itineraries, bookings, budgets) | A different product area. |
 | Social features (sharing lists, following friends) | Needs privacy controls and moderation. |
-| Photos, interactive maps, points of interest | Needs extra APIs, storage, and API keys. |
+| Photos, points of interest, and online map services (street maps, map tiles) | Need extra APIs, storage, and API keys. The world map (section 6.10) is drawn by the app from bundled data, so it needs none of these. |
 | Push notifications | No time-sensitive features in 1.0. |
 | Desktop apps (Windows, macOS, Linux) | The web app covers desktop use. |
 
@@ -225,6 +229,8 @@ Release 1.0 is accepted when all of the following are true:
 | D-8 | Email and password is the only sign-in method in 1.0. | Works the same on all three platforms with no extra provider setup. |
 | D-9 | Country data loads from a snapshot bundled with each build. The API only refreshes it. | Instant first load, and web traffic doesn't use up the shared API quota. |
 | D-10 | The web app is served from the free Firebase Hosting address, battuta-travel.web.app. | No domain cost or DNS setup. A custom domain can be added later without code changes. |
+| D-11 | The world map is drawn by the app from Natural Earth's 1:10m Saudi point-of-view edition, bundled with each build (section 8.7). | No map service, API key, or network use, so the map works offline and stays free. This edition includes every small country tested, makes the smallest complete map file, and draws disputed borders as recognized in the app's main region. Somaliland and Northern Cyprus are part of Somalia and Cyprus, which matches the dataset (section 8.1). Western Sahara is drawn as part of Morocco, so it has no shape of its own, though it still counts in Stats when marked as visited. Israel's area is drawn as Palestine (D-12). |
+| D-12 | The app leaves out Israel. It isn't in the country data, Explore, Stats, or any country's neighbors, and the map draws its area as Palestine. | Follows the map's point of view (D-11). The parser skips Israel the way it skips records without ISO codes (section 8.1), so neither the bundled data nor a refresh brings it back, and data saved before this decision loses it at the next launch. |
 
 ## 4. Users
 
@@ -237,7 +243,7 @@ There are two user types. Both see the same app on every platform; only cloud fe
 | Browse, search, filter, and sort countries | Yes | Yes |
 | View country details | Yes | Yes |
 | Manage Visited and Wishlist | Yes | Yes |
-| View stats | Yes | Yes |
+| View stats and the world map | Yes | Yes |
 | Change theme and language | Yes | Yes |
 | Back up data to the cloud | No | Yes |
 | See the same data on web, Android, and iOS | No | Yes |
@@ -265,6 +271,8 @@ There are two user types. Both see the same app on every platform; only cloud fe
 | US-11 | As a **traveler**, I want to use the app in Arabic or English, in light or dark mode, so it feels natural to me. | Must | FR-SET-01–03 |
 | US-12 | As a **planner**, I want the app to keep working without a connection, so I can use it while traveling. | Must | FR-EXP-10, NFR-02 |
 | US-13 | As a **traveler**, I want to open the app in any browser or on my phone, so I can reach my travels from any device. | Must | FR-PLT-01–08 |
+| US-14 | As a **traveler**, I want to see my visited and wishlist countries on a world map, so I can see where I've been at a glance. | Must | FR-MAP-01–15 |
+| US-15 | As a **planner**, I want to zoom into a region of the map, so I can see what I've covered there and what's left. | Should | FR-MAP-16–25 |
 
 ## 5. Information architecture
 
@@ -292,6 +300,8 @@ flowchart TD
     Details -- "neighbor chip" --> Details
     Details --> Forms
     Travels -- edit --> Forms
+    Stats -- "map card" --> Details
+    Stats -- "map card" --> Forms
     Account --> SignIn
     Account --> Settings
 ```
@@ -306,11 +316,11 @@ On web, every route is a real URL that can be bookmarked, shared, and refreshed 
 | --- | --- | --- | --- |
 | Welcome | `/welcome` | First launch only | Continue as guest, or Sign in |
 | Explore | `/explore` | Main tab (default) | Grid, search, filters, sort |
-| Country details | `/country/:code` | Explore card, My travels entry, neighbor chip, direct URL | :code is the 3-letter ISO code, for example /country/SAU |
-| Visit form | Modal | Country details, Edit entry | Bottom sheet on compact screens, dialog on wider screens |
-| Wishlist form | Modal | Country details, Edit entry | Bottom sheet on compact screens, dialog on wider screens |
+| Country details | `/country/:code` | Explore card, My travels entry, Stats map card, neighbor chip, direct URL | :code is the 3-letter ISO code, for example /country/SAU |
+| Visit form | Modal | Country details, Edit entry, Stats map card | Bottom sheet on compact screens, dialog on wider screens |
+| Wishlist form | Modal | Country details, Edit entry, Stats map card | Bottom sheet on compact screens, dialog on wider screens |
 | My travels | `/travels` | Main tab | Tabs: Visited (default) and Wishlist (?tab=wishlist) |
-| Stats | `/stats` | Main tab |  |
+| Stats | `/stats` | Main tab | World map card, region bars, highlights |
 | Account | `/account` | App bar icon on every tab | Guest view or signed-in view |
 | Sign in | `/account/sign-in` | Welcome, Account | Email and password |
 | Create account | `/account/sign-up` | Sign in |  |
@@ -406,16 +416,16 @@ Requirements are grouped by module. Each module lists its requirements, then the
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-STA-01 | The headline shows the number of countries visited and their share of the dataset total, to one decimal place, for example: 12 of 250 · 4.8%. | Must |
+| FR-STA-01 | The headline, at the top of the world map card (FR-MAP-02), shows the number of countries visited and their share of the dataset total, to one decimal place, for example: 12 of 249 · 4.8%. | Must |
 | FR-STA-02 | One progress bar per region shows visited countries out of that region's total. | Must |
 | FR-STA-03 | Summary figures: wishlist size, most recent trip (country and date), and the year of the first trip. | Should |
 | FR-STA-04 | Numbers count up and bars fill when the screen opens (section 10.2). | Should |
-| FR-STA-05 | With no visits, a zero state invites the user to mark their first country, with a button to Explore. | Must |
+| FR-STA-05 | With no visits, the world map card still shows, without the headline, and a zero state below it invites the user to mark their first country, with a button to Explore. Region bars and highlights are hidden. | Must |
 
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
 | AC-STA-01 | 2 visited countries | the user deletes one and opens Stats | the headline shows 1. |
-| AC-STA-02 | no visited countries | Stats opens | the zero state appears instead of empty bars. |
+| AC-STA-02 | no visited countries and Japan on the wishlist | Stats opens | the map shows Japan hatched, and the zero state appears below it instead of the headline and empty bars. |
 
 ### 6.6 Accounts and authentication (AUTH)
 
@@ -466,7 +476,7 @@ Email and password is the only sign-in method in 1.0 (D-8).
 | FR-SET-01 | Theme: System (default), Light, or Dark. | Must |
 | FR-SET-02 | Language: System (default), English, or Arabic. A change applies instantly, including layout direction. | Must |
 | FR-SET-03 | Settings persist across restarts and page reloads. | Must |
-| FR-SET-04 | An About section shows the app version, the date of the country data, and credits REST Countries as the data source. | Should |
+| FR-SET-04 | An About section shows the app version and the date of the country data. It credits REST Countries for the country data and Natural Earth for the world map, and notes that the map's borders follow the Saudi point of view (D-11). | Should |
 
 ### 6.9 Platforms and responsive layout (PLT)
 
@@ -489,6 +499,166 @@ Email and password is the only sign-in method in 1.0 (D-8).
 | AC-PLT-04 | a keyboard-only user on web | they press Tab from the search field | focus moves visibly to the Filters button. |
 | AC-PLT-05 | the same account on web, Android, and iOS | the core flows in section 7 run on each | all three platforms behave the same. |
 
+### 6.10 World map (MAP)
+
+The top of the Stats screen is a world map of the user's travels: visited countries in Stamp Amber, wishlist countries in teal hatching, and every other country in a plain fill. The app draws the map itself from data bundled with each build (D-11, section 8.7), so it works offline and makes no API requests. Its design is in section 10.1, its motion in section 10.2, and how it is built in section 11.5. When the system setting to reduce motion is on (NFR-09), every map animation, including region flights, jumps straight to its final state.
+
+#### Base map
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-MAP-01 | The top of the Stats screen is a world map card. Every country is colored by its status: Visited in Stamp Amber, Wishlist in teal hatching, and Not yet in white, or a dark fill in dark mode (section 10.1). | Must |
+| FR-MAP-02 | The card's header is the Stats headline (FR-STA-01) followed by the wishlist size, for example: 16 of 249 · 6.4% · 12 on your wishlist. Stats has no separate headline card. | Must |
+| FR-MAP-03 | A legend shows Visited, Wishlist, and Not yet with their swatches. When small countries have dots (FR-MAP-09), it adds the note: Small countries appear as dots. | Must |
+| FR-MAP-04 | Status comes from the travel entries, and soft-deleted entries count as Not yet. The map updates immediately when an entry changes, on this device or through sync. | Must |
+| FR-MAP-05 | The map draws only from the bundled map file (section 8.7). It makes no network requests and works offline on every platform. | Must |
+| FR-MAP-06 | Light and dark themes use the colors in section 10.1 and switch with the app theme. | Must |
+| FR-MAP-07 | Shapes that match no country in the dataset, such as Bir Tawil, draw as Not yet and can't be selected. Dataset countries with no shape or dot, Antarctica and Western Sahara (section 8.7), still count in every total but don't appear on the map. | Must |
+| FR-MAP-08 | Screen readers treat the map as one element with a summary, for example: World map: 16 countries visited, 12 on your wishlist. It has a View as list action that opens My travels. Every map action is also available from Explore, Country details, and My travels, so countries on the map don't need the 48 dp touch targets of NFR-08. | Must |
+
+| ID | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-MAP-01 | Japan is visited and Brazil is on the wishlist | Stats opens | Japan is amber, Brazil is hatched teal, and France is white. |
+| AC-MAP-02 | 16 visited countries and 12 on the wishlist | Stats opens | the map card's header reads 16 of 249 · 6.4% · 12 on your wishlist, and there is no other headline card. |
+| AC-MAP-03 | the Stats screen is open | the user removes Japan from Visited on another screen and returns | Japan is white. |
+| AC-MAP-04 | the device is offline | Stats opens | the map shows normally. |
+| AC-MAP-05 | the app is in dark mode | Stats opens | unvisited countries use the dark fill, not white. |
+
+#### Small countries
+
+Some countries are too small to see or tap on a world map, such as Singapore, Bahrain, Malta, the Maldives, Monaco, and Vatican City. They appear as dots.
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-MAP-09 | A country gets a dot when its largest part fits within 6 × 6 units on the 1,000-unit map (a starting value to tune by eye), or when it has no shape at all. Measuring the largest part, not the whole country, gives dots to island countries spread over a wide area, such as the Maldives and Kiribati. Small shapes still draw under their dots. | Should |
+| FR-MAP-10 | Dots use the status colors and draw above country shapes. | Should |
+| FR-MAP-11 | A dot is selected when the pointer is on it, within its 4 dp radius, over land or water. Otherwise, over land, the country under the pointer is selected, which keeps large countries next to small ones selectable, such as Saudi Arabia next to Bahrain. Over water, the nearest country or dot within 24 dp of its edge is selected: a tap just off a coast selects that country, and a dot in open water is easy to hit. | Should |
+
+| ID | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-MAP-06 | Bahrain is visited | Stats opens | an amber dot appears in the Gulf between Saudi Arabia and Qatar. |
+| AC-MAP-07 | the world view | the user taps the Singapore dot | Singapore's tap card opens. |
+| AC-MAP-08 | the world view on a phone | the user taps western Saudi Arabia, away from the Bahrain and Qatar dots | Saudi Arabia's tap card opens. |
+
+#### Tap card and hover
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-MAP-12 | Tapping or clicking a country highlights its border and opens a card with its flag, name, status, and visit date or target year. | Must |
+| FR-MAP-13 | The card offers the same actions and forms as Country details: Mark as visited and Add to wishlist for a country that isn't saved, Mark as visited and Edit for a wishlist country, and Edit for a visited one. Open details opens /country/:code. Remove stays on Country details and My travels. | Must |
+| FR-MAP-14 | Tapping the ocean or pressing Esc closes the card. | Must |
+| FR-MAP-15 | On web, hovering over a country highlights its border and shows its name in a tooltip. | Must |
+
+| ID | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-MAP-09 | Japan was visited on 14 March 2024 | the user taps Japan | a card shows Japan, Visited, its visit date, Edit, and Open details. |
+| AC-MAP-10 | Japan's tap card is open | the user selects Open details | Japan's details screen opens. |
+| AC-MAP-11 | the web app in a desktop browser | the pointer moves over Spain | Spain's border is highlighted and a tooltip reads Spain. |
+
+#### Zoom and pan
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-MAP-16 | Users can zoom from 1× to 8× by pinching on a touch screen or trackpad, double-tapping, using the Zoom in and Zoom out buttons, or turning the mouse wheel while holding Ctrl or ⌘. | Should |
+| FR-MAP-17 | The map sits inside the scrolling Stats page. At 1×, vertical drags and the mouse wheel scroll the page, not the map. Once zoomed in, dragging pans the map. | Should |
+| FR-MAP-18 | A Reset view button appears while zoomed in and animates back to the world view. | Should |
+| FR-MAP-19 | On web, when the map has focus, the + and − keys zoom and the arrow keys pan. The arrow keys follow the compass in both languages: Left always moves the view west. | Should |
+| FR-MAP-20 | Lines, dots, and hatching keep the same size on screen at every zoom level. | Should |
+
+| ID | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-MAP-12 | the world view | the user pinches in on Europe | the map zooms toward Europe and borders stay thin. |
+| AC-MAP-13 | the world view in a desktop browser | the user scrolls with the mouse wheel over the map | the page scrolls and the map doesn't zoom. |
+| AC-MAP-14 | the map is zoomed in | the user selects Reset view | the map animates back to the world view. |
+
+#### Region focus
+
+Selecting a region flies the map to it. Countries outside the region fade instead of disappearing, so the user can still see where the region sits in the world.
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-MAP-21 | The map card has region chips: All, Africa, Americas, Asia, Europe, and Oceania. Regions come from the countries table, so the map agrees with Explore and Stats. There is no Antarctic chip: Antarctica isn't on the map, and the region's islands are too far apart to frame. | Should |
+| FR-MAP-22 | Selecting a region animates the map to that region's frame (table below) over 600 ms with an ease-in-out curve. Selecting All animates back to the world view. | Should |
+| FR-MAP-23 | Countries outside the selected region fade to 30% opacity over the same 600 ms. They keep their colors and can still be selected. | Should |
+| FR-MAP-24 | A summary on the map shows the region's name and counts, for example: Europe · 4 visited · 3 on your wishlist. | Should |
+| FR-MAP-25 | Tapping a region's progress bar on Stats (FR-STA-02) scrolls the map into view and selects that region. The Antarctic bar has no map region and isn't tappable. | Should |
+
+Starting frames, to adjust by eye during development:
+
+| Region | West | South | East | North |
+| --- | --- | --- | --- | --- |
+| Africa | 20° W | 36° S | 55° E | 38° N |
+| Americas | 170° W | 56° S | 30° W | 74° N |
+| Asia | 25° E | 12° S | 150° E | 56° N |
+| Europe | 25° W | 34° N | 45° E | 72° N |
+| Oceania | 110° E | 48° S | 180° | 5° N |
+
+> **Note:** A frame shows the core of its region, and some parts fall outside it. Most of Russia, which the dataset places in Europe, lies east of the Europe frame. The Pacific islands east of 180°, such as Samoa, Tonga, and French Polynesia, sit at the map's western edge, outside the Oceania frame. Countries outside the frame still count in the region summary and don't fade.
+
+| ID | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-MAP-15 | the world view | the user selects Europe | the map flies to Europe in about 600 ms, other countries fade, and the summary shows Europe's counts. |
+| AC-MAP-16 | Europe is selected | the user taps Turkey's faded shape | Turkey's tap card opens. |
+| AC-MAP-17 | the Stats screen | the user taps the Africa progress bar | the map scrolls into view and flies to Africa. |
+
+#### Reveal
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-MAP-26 | The first time the map appears in each app session, every country starts as Not yet. Visited countries then fill one by one, the color spreading outward from the middle of each country like ink soaking into paper. | Should |
+| FR-MAP-27 | Countries fill in order of visit date, oldest first; undated visits go last. | Should |
+| FR-MAP-28 | Each country's fill takes 400 ms with an ease-out curve, and fills start 60 ms apart. With many countries, the gap shrinks so all fills finish within 1.2 seconds. | Should |
+| FR-MAP-29 | Wishlist hatching fades in over 300 ms after the last fill, so the whole reveal ends within 1.5 seconds. | Should |
+| FR-MAP-30 | The headline numbers count up while the countries fill. | Should |
+| FR-MAP-31 | Tapping the map during the reveal skips to the final state. | Should |
+
+| ID | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-MAP-18 | 16 visited countries | Stats opens for the first time in a session | the countries fill one by one and the reveal ends within 1.5 seconds. |
+| AC-MAP-19 | the reveal has already played | the user leaves Stats and returns | the map shows its final state with no reveal. |
+| AC-MAP-20 | the system setting to reduce motion is on | Stats opens | the final map shows immediately. |
+
+#### Color spread from the tap
+
+When the user marks a country from the tap card, the color spreads from the exact point they tapped, then the passport stamp lands on the card. This ties the map to the app's signature moment.
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-MAP-32 | Marking a country as visited from the tap card spreads amber outward from the tap point over 500 ms, then the passport stamp (section 10.2) plays on the card. | Could |
+| FR-MAP-33 | Adding a country to the wishlist from the tap card fades its hatching in over 300 ms. | Could |
+| FR-MAP-34 | When an entry is removed, its country's color fades out over 250 ms. | Could |
+
+| ID | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-MAP-21 | Italy's tap card is open after a tap on Sicily | the user selects Mark as visited and saves | amber spreads from Sicily across Italy, then the stamp plays. |
+
+#### Replay my travels
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-MAP-35 | A Replay button plays the visited countries in order of visit date. Visits without a date are left out. | Could |
+| FR-MAP-36 | Each step draws a curved, dotted flight path from the previous country to the next, then fills the next country with the ink spread. | Could |
+| FR-MAP-37 | A year label shows the year of the current visit and animates when it changes. | Could |
+| FR-MAP-38 | Each step takes 700 ms. If the replay would run longer than 20 seconds, steps shorten to fit. | Could |
+| FR-MAP-39 | A Skip button ends the replay and shows the final map. | Could |
+| FR-MAP-40 | Replay is hidden when fewer than 2 visits have dates. | Could |
+
+| ID | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-MAP-22 | visits to Egypt (2019), Turkey (2021), and Japan (2024) | the user selects Replay | paths draw from Egypt to Turkey to Japan, the year label shows 2019, 2021, then 2024, and the map ends in its normal state. |
+
+#### Share my map
+
+| ID | Requirement | Priority |
+| --- | --- | --- |
+| FR-MAP-41 | Share my map creates a 1,080 × 1,350 pixel image with the map, the user's counts, the app name, and the web address battuta-travel.web.app. | Could |
+| FR-MAP-42 | On Android and iOS, the image opens the system share sheet. On web, it downloads as a PNG file. | Could |
+| FR-MAP-43 | The image uses the current theme and language. | Could |
+
+| ID | Given | When | Then |
+| --- | --- | --- | --- |
+| AC-MAP-23 | the web app with 16 visited countries | the user selects Share my map | a PNG downloads showing the map and the headline 16 of 249 · 6.4%. |
+
 ## 7. Key user flows
 
 ### 7.1 First launch
@@ -503,7 +673,7 @@ Email and password is the only sign-in method in 1.0 (D-8).
 1. The user selects a card on Explore, and Country details opens.
 2. The user selects **Mark as visited**, optionally fills in date, rating, and notes, and selects **Save**.
 3. The stamp animation plays. The action area now shows Visited with Edit and Remove.
-4. The Explore card shows the Visited badge and Stats updates. If the user is signed in, the change uploads in the background.
+4. The Explore card shows the Visited badge, and Stats and its world map update. If the user is signed in, the change uploads in the background.
 
 ### 7.3 Merge guest data into an account
 
@@ -604,11 +774,11 @@ Authorization: Bearer <RC_API_KEY>
 | `flag.description` | `flagAlt` | Screen-reader label for the flag |
 | `flag.colors.dominant` | `flagColor` | Header tint (FR-DET-07) |
 
-> **Data note:** The API returns 254 records. Four disputed territories (Abkhazia, Northern Cyprus, Somaliland, and South Ossetia) have no ISO codes, so they can't have a route, flag, or entry, and the app skips them. That leaves 250 countries and territories, the total used by Stats (D-3). Missing values arrive as empty strings, not null, so the parser treats empty strings as missing.
+> **Data note:** The API returns 254 records. Four disputed territories (Abkhazia, Northern Cyprus, Somaliland, and South Ossetia) have no ISO codes, so they can't have a route, flag, or entry, and the app skips them. The app also leaves out Israel (D-12). That leaves 249 countries and territories, the total used by Stats (D-3). Missing values arrive as empty strings, not null, so the parser treats empty strings as missing.
 
 ### 8.2 Snapshot and refresh rules
 
-1. Every build bundles `assets/data/countries_snapshot.json`, produced by `tool/fetch_snapshot.dart`, which runs the request above and records when it ran. It keeps only the Arabic translation to stay small. `tool/fetch_flags.dart` downloads a 320 px flag for each country into `assets/flags/`.
+1. Every build bundles `assets/data/countries_snapshot.json`, produced by `tool/fetch_snapshot.dart`, which runs the request above and records when it ran. It keeps only the Arabic translation to stay small, and leaves out Israel (D-12). `tool/fetch_flags.dart` downloads a 320 px flag for each country into `assets/flags/`.
 2. On first launch, or a first visit to the website, the app imports the snapshot into the local database. No API call is made. On later launches, a bundled snapshot newer than the local data (after an app update or a redeploy) replaces it the same way.
 3. On later launches, the app reads from the local database. If the data is older than 7 days and the device is online, it refreshes in the background.
 4. A refresh is all or nothing: if any page fails, keep the previous data. On success, replace all rows in one transaction.
@@ -720,6 +890,99 @@ Firebase Authentication error codes map to these messages:
 | `network-request-failed` | No connection. Check your network and try again. |
 | Any other code | Something went wrong. Please try again. |
 
+### 8.7 World map data
+
+The world map (section 6.10) is drawn from Natural Earth's country boundaries, which are in the public domain. The app bundles a pre-projected copy, `assets/data/world_map.json`, produced by `tool/build_world_map.dart`. Normal builds and CI use the committed file; rebuild it only to change the source or the settings below.
+
+#### Source
+
+Natural Earth publishes three levels of detail, plus point-of-view editions that draw disputed borders as a particular country recognizes them. Three options were measured on 20 October 2026, each simplified with mapshaper 0.7.71 (15% of points kept for 1:110m and 1:50m, 2% for 1:10m, coordinates rounded to 0.01°):
+
+| Source | Shapes | Small countries included (of 19 tested) | Simplified GeoJSON | Map file (gzipped) |
+| --- | --- | --- | --- | --- |
+| 1:110m, default borders | 177 | 0 | 63 KB | 30 KB (10 KB) |
+| 1:50m, default borders | 242 | 19 | 269 KB | 184 KB (66 KB) |
+| 1:10m, Saudi point of view | 249 | 19 | 220 KB | 145 KB (50 KB) |
+
+The small countries tested were Singapore, Bahrain, Malta, the Maldives, Monaco, Vatican City, Andorra, Liechtenstein, San Marino, Seychelles, Mauritius, Barbados, Tonga, Kiribati, Nauru, Tuvalu, Palau, the Marshall Islands, and Micronesia. The app uses the 1:10m Saudi point-of-view edition (D-11): `ne_10m_admin_0_countries_sau.geojson` from the Natural Earth repository, about 13 MB, which isn't committed.
+
+#### Matching the dataset
+
+Shapes match dataset countries by their `ISO_A3_EH` code. Don't use `ISO_A3`, which is -99 for France and Norway, or `ADM0_A3`, which differs from the standard code for some countries (Palestine is PSX instead of PSE). When checked on 21 October 2026, 236 of the 249 dataset countries matched a shape this way. The other 13 are handled as follows:
+
+| Dataset countries | In Natural Earth | Handling |
+| --- | --- | --- |
+| French Guiana, Guadeloupe, Martinique, Mayotte, Réunion | Parts of France's shape | Split out by location |
+| Caribbean Netherlands | Part of the Netherlands' shape | Split out by location |
+| Svalbard and Jan Mayen, Bouvet Island | Parts of Norway's shape | Split out by location; Svalbard and Jan Mayen both go to SJM |
+| Tokelau | Part of New Zealand's shape | Split out by location |
+| Christmas Island, Cocos (Keeling) Islands | The Indian Ocean Territories shape, coded AUS | Split out by location |
+| Kosovo | Coded -99 (KOS in `ADM0_A3`) | A manual table maps it to UNK, the code the countries API uses |
+| Western Sahara | Part of Morocco in this edition (D-11) | Excluded: no shape or dot |
+
+Antarctica matches a shape but is removed with the crop (section 10.1), so it is excluded too. This edition draws Israel's area as Palestine and keeps only a placeholder about 1 km across for Israel, which matches no dataset country (D-12). Other shapes that share a code merge into one country: the Coral Sea Islands and the Ashmore and Cartier Islands join Australia, Brazilian Island joins Brazil, and Clipperton Island joins France. The remaining shapes coded -99 (Akrotiri, Dhekelia, Bir Tawil, the Spratly Islands, Scarborough Reef, and the Guantanamo Bay naval base) match no country: they draw as Not yet and can't be selected (FR-MAP-07).
+
+#### Build script
+
+Run it with `dart run tool/build_world_map.dart <path to ne_10m_admin_0_countries_sau.geojson>`. It needs Node.js and makes no API requests.
+
+1. **Simplify.** The script runs mapshaper through `npx` to drop Antarctica, keep only the fields it needs, and reduce detail:
+
+    ```text
+    npx mapshaper@0.7.71 -i ne_10m_admin_0_countries_sau.geojson \
+      -filter 'CONTINENT != "Antarctica"' \
+      -filter-fields ADM0_A3,ISO_A3_EH,NAME \
+      -simplify 2% keep-shapes \
+      -o precision=0.01 format=geojson world_simplified.geojson
+    ```
+
+2. **Match codes and split overseas parts** as described above.
+3. **Project.** Convert every point with Equal Earth (below), clamp latitude to between 57° south and 84° north, scale to 1,000 units wide, and round to 0.1 unit.
+4. **Choose dots.** Give a dot to every country whose largest part fits within 6 × 6 units, and to every country whose shape vanishes during simplification (FR-MAP-09): 94 countries in all. A dot sits in the middle of the country's largest part. Ten countries' shapes vanish, such as Vatican City and Tuvalu. They are placed from the full-detail source and kept as dots only.
+5. **Write and report.** Write `assets/data/world_map.json`, then list every dataset country with neither a shape nor a dot. Only Antarctica and Western Sahara may be on that list; the script and a test both fail on anything else (section 12.1).
+
+The Equal Earth formula, in Dart:
+
+```dart
+import 'dart:math';
+
+const a1 = 1.340264, a2 = -0.081106, a3 = 0.000893, a4 = 0.003796;
+final m = sqrt(3) / 2;
+
+/// Equal Earth projection. Takes degrees; returns unscaled x and y,
+/// with y pointing north (flip it for screen coordinates).
+(double, double) equalEarth(double lonDeg, double latDeg) {
+  final lambda = lonDeg * pi / 180, phi = latDeg * pi / 180;
+  final t = asin(m * sin(phi)), t2 = t * t, t6 = t2 * t2 * t2;
+  final x = lambda * cos(t) / (m * (a1 + 3 * a2 * t2 + t6 * (7 * a3 + 9 * a4 * t2)));
+  final y = t * (a1 + a2 * t2 + t6 * (a3 + a4 * t2));
+  return (x, y);
+}
+```
+
+#### Map file format
+
+Coordinates are already projected, with y pointing down from 84° north, so the app does no map math at run time:
+
+```json
+{
+  "version": 1,
+  "width": 1000,
+  "height": 435,
+  "shapes": {
+    "SAU": [[595.1, 134.7, 594.2, 135.6, "..."]],
+    "JPN": [[836.6, 80.9, "..."], [845.0, 93.9, "..."]]
+  },
+  "dots": {
+    "BHR": [633.6, 145.8],
+    "SGP": [788.4, 236.3]
+  },
+  "unmatched": [[588.9, 160.1, 590, 161.2, "..."]]
+}
+```
+
+Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes are rings too, so shapes fill with the even-odd rule. `unmatched` lists the rings of shapes that match no country, such as Bir Tawil (FR-MAP-07). The example is shortened.
+
 ## 9. Non-functional requirements
 
 | ID | Category | Requirement | Priority |
@@ -738,6 +1001,7 @@ Firebase Authentication error codes map to these messages:
 | NFR-12 | Maintainability | Static analysis reports zero issues, and code follows the layered structure in section 11. | Must |
 | NFR-13 | API usage | A normal launch or visit makes no API requests. A refresh makes at most 3, and automatic refresh happens at most once every 7 days per device. | Must |
 | NFR-14 | Web performance | On a typical broadband connection, the web app shows Explore within 5 seconds on a first visit and within 3 seconds on repeat visits. | Should |
+| NFR-15 | Performance | The world map draws, zooms, and animates without visible stutter on a mid-range phone, in mobile browsers, and in desktop browsers. | Should |
 
 ## 10. Experience and interface requirements
 
@@ -748,6 +1012,23 @@ Firebase Authentication error codes map to these messages:
 - The Material 3 type scale. Numbers on the Stats screen use tabular figures so they don't shift while counting.
 - Spacing on an 8 dp grid. Cards use 12 dp corner radius; sheets and dialogs use the Material 3 defaults.
 - Material Symbols (rounded) for icons. On web, interactive elements show hover and focus states.
+
+#### World map
+
+- **Projection:** Equal Earth. It shows every country at its true relative size, so Africa isn't shrunk next to Europe as on common web maps, and its rounded sides give an atlas-like look.
+- **Framing:** the map is cropped between 57° south and 84° north, which removes Antarctica and a large empty area. At 1,000 units wide it is 435 units tall, a ratio of about 2.3 to 1, and the card keeps that ratio at every width.
+- **Lines and hatching:** borders are 0.55 dp for Not yet and Visited countries and 0.9 dp for Wishlist countries. Wishlist hatching runs at 45°, repeating every 5 dp, with stripes 1.6 dp wide, so wishlist countries differ from visited ones without relying on color. Dots have a 4 dp radius and a 1.2 dp border. All of these keep their size at every zoom level (FR-MAP-20).
+- **Card layout:** from top to bottom, the headline (FR-MAP-02), the region chips, the map, the selected country's card (FR-MAP-12), and the legend. The region summary sits over the map's top start corner, and the zoom and Reset view buttons over its bottom end corner.
+- **Faded countries** outside a region focus keep their colors at 30% opacity.
+
+| Element | Light theme | Dark theme |
+| --- | --- | --- |
+| Ocean | `#F6F1E6` | `#0F1A1F` |
+| Grid lines, every 10° | `#E8DFCB`, 0.6 dp | `#1C2A31`, 0.6 dp |
+| Not yet | Fill `#FFFFFF`, border `#C3C9D1` | Fill `#22313A`, border `#3A4A54` |
+| Visited | Fill `#F2B24B` (Stamp Amber), border `#D99A35` | Fill `#F2B24B`, border `#B97C1F` |
+| Wishlist | Base `#E3F3F4`, stripes `#0E7C86` at 55% opacity, border `#0E7C86` | Base `#12383C`, stripes `#4FB3BB`, border `#4FB3BB` |
+| Small-country dot | Fill and border in the status colors | Same |
 
 ### 10.2 Motion
 
@@ -761,6 +1042,11 @@ One signature moment, the passport stamp, plus a small set of consistent transit
 | Result count | Filter change | The count rolls to its new value | 200 ms | AnimatedSwitcher |
 | Search results | Query change | Results cross-fade instead of jumping | 200 ms | AnimatedSwitcher |
 | Stats | Screen opens | Numbers count up; region bars fill | 800 ms, ease-out-cubic | TweenAnimationBuilder |
+| Map reveal | The map's first appearance in a session | Visited countries fill one by one from their middles, in order of visit; the headline counts up alongside; wishlist hatching fades in last; a tap skips to the end | 400 ms per country, ease-out, starting 60 ms apart, all fills within 1.2 s; hatching 300 ms; whole reveal within 1.5 s | One AnimationController; a circle clipped to each country |
+| Region focus | Region chip or region bar | The map flies to the region's frame; other countries fade to 30% | 600 ms, ease-in-out-cubic | Matrix4Tween on the TransformationController |
+| Reset view | Reset view or the All chip | The map flies back to the world view | 600 ms, ease-in-out-cubic | Same as region focus |
+| Map spread (Could) | Saving from the map's tap card | Amber spreads from the tap point, then the stamp plays; new wishlist hatching fades in; a removed country's color fades out | 500 ms; hatching 300 ms; fade-out 250 ms | Same as the map reveal |
+| Replay (Could) | Replay button | Dotted flight paths draw from country to country, each followed by its fill; a year label ticks forward | 700 ms per step, at most 20 s in total | PathMetric.extractPath |
 | Delete | Delete an entry | The entry slides out; an Undo snackbar appears | 250 ms; snackbar 4 s | Dismissible, SnackBar |
 | Loading | Waiting for data | Skeleton cards shimmer | 1.2 s loop | Shimmer on placeholders |
 
@@ -771,17 +1057,18 @@ One signature moment, the passport stamp, plus a small set of consistent transit
 | Explore | 8 skeleton cards while bundled data is first imported | No countries match. Clear filters button | Refresh failed: snackbar Couldn't refresh. Showing saved data. | Banner: You're offline. Showing saved data. |
 | Country details | None; data is local | No land borders | Unknown code: Country not found screen | Open in Maps disabled; flag placeholder if never loaded |
 | My travels | None | No visits yet / Your wishlist is empty, with an Explore button | Not applicable | Works normally |
-| Stats | None | Zero state with an Explore button | Not applicable | Works normally |
+| Stats | Map card skeleton until the map file is ready | The map, then the zero state with an Explore button | Not applicable | Works normally |
 | Sign in and Create account | Button shows progress; form disabled | Not applicable | Inline message (section 8.6) | No connection message |
 
 ### 10.4 Localization and right-to-left
 
 - Strings live in `lib/l10n/app_en.arb` and `app_ar.arb`. Keys are camelCase and start with the screen name, for example `exploreSearchHint`.
 - Layouts use start and end, never left and right: `EdgeInsetsDirectional`, `AlignmentDirectional`, and directional icons. Flags never mirror.
+- The world map never mirrors: west stays on the left in both languages, and the arrow keys pan by compass direction (FR-MAP-19). The card around it, including the chips, legend, summary, and tap card, mirrors like any other layout.
 - Dates follow the active language. Numbers use Western digits in both languages (D-5).
 - Country names in Arabic come from the API. When a name is missing, show the English name.
 
-**RTL checklist** for every screen: text aligns to the start edge; back and chevron icons point the right way; swipe actions and the navigation rail mirror; progress bars fill from the start edge; no text is cut off in Arabic.
+**RTL checklist** for every screen: text aligns to the start edge; back and chevron icons point the right way; swipe actions and the navigation rail mirror; progress bars fill from the start edge; the world map and flags don't mirror; no text is cut off in Arabic.
 
 #### Search normalization
 
@@ -853,6 +1140,9 @@ flowchart TB
 | Images | `Image.asset` with bundled flags | Same on every platform; no network or CORS needed (section 11.4) |
 | Connectivity | `connectivity_plus` | Offline banner and refresh checks; browser online and offline events on web |
 | Animation | `flutter_animate` | Staggered and chained effects |
+| World map | `CustomPainter` and `InteractiveViewer` from the Flutter SDK | Draws, zooms, and pans the map from bundled data, with no map package or tile service (section 11.5) |
+| Map data, build time only | Natural Earth, and mapshaper 0.7.71 through `npx` | Country shapes for the map file (section 8.7). Normal builds don't need them. |
+| Sharing | `share_plus` | Share my map on Android and iOS (FR-MAP-42). Added only when that feature is built. |
 | External links | `url_launcher` | Open in Maps |
 | Settings storage | `shared_preferences` | Theme, language, and timestamps |
 | Testing | `flutter_test`, `mocktail` | Unit and widget tests with mocks |
@@ -870,15 +1160,16 @@ lib/
       presentation/     screens, widgets, providers
     travels/            My travels (same three layers)
     stats/
+    world_map/          the Stats map card: map file, painter, hit testing
     auth/               accounts, merge, and sync
     settings/
     onboarding/         Welcome screen
   main.dart
-assets/data/countries_snapshot.json
+assets/data/            countries_snapshot.json, and world_map.json (section 8.7)
 assets/fonts/           Inter and IBM Plex Sans Arabic, with their licenses
 assets/flags/           320 px PNG flag per country (about 3 MB)
 web/                    index.html, icons, sqlite3.wasm, drift_worker.js
-tool/                   snapshot and flag scripts, web database worker source
+tool/                   snapshot, flag, and map scripts, web database worker source
 firebase.json           Hosting configuration
 test/                   mirrors lib/
 ```
@@ -896,16 +1187,58 @@ test/                   mirrors lib/
 
 > **Constraint:** On web, the API key is visible in the browser. Allowed origins stop other websites from using it in their pages, but not scripts running outside a browser. This is accepted for 1.0 because the app falls back to bundled data if the key is blocked. A later release can move API calls to a backend, such as a Cloud Function, which requires Firebase's pay-as-you-go plan.
 
+### 11.5 World map rendering
+
+The app draws the map on Flutter's own canvas, with no map package, tile service, or web view. All map math happens when the map file is built (section 8.7), so at run time the app only draws pre-projected shapes.
+
+```mermaid
+flowchart LR
+    NE["Natural Earth countries<br/>GeoJSON"] --> MS["mapshaper<br/>drop Antarctica, simplify"]
+    MS --> SC["tool/build_world_map.dart<br/>match codes, split overseas parts,<br/>project, choose dots"]
+    SC --> AS["assets/data/world_map.json<br/>about 145 KB"]
+    AS --> LD["App start<br/>one Path per country"]
+    TE[("travel_entries")] --> ST["Status per country"]
+    LD --> PT["WorldMapPainter"]
+    ST --> PT
+```
+
+*Figure 4. World map data flow. Everything before the map file runs only when the file is rebuilt.*
+
+| Part | Responsibility |
+| --- | --- |
+| `worldMapProvider` | Loads the map file once. It parses the JSON with `compute`, which uses a background isolate on Android and iOS and runs on the main thread on web, fast enough at this size. |
+| `worldMapGeometryProvider` | Builds one `Path` per country from the map file, plus the outline and grid lines. |
+| `mapHitTesterProvider` | The `MapHitTester` (FR-MAP-11), in pure Dart. Only countries in the dataset can be selected. |
+| `travelStatusesProvider` | The existing stream of statuses by country code. It skips soft-deleted entries and updates after local changes and sync (FR-MAP-04). |
+| `WorldMapBasePainter`, `WorldMapPainter` | Two `CustomPainter`s that draw the map in the order below: the first draws the ocean, grid lines, and Not yet layer; the second draws statuses, dots, and highlights over it. |
+| `WorldMapCard` | Lays out the headline, the map, the selected country's card, and the legend, and handles taps, hover, and Esc. Zoom wraps its painters in `InteractiveViewer` (FR-MAP-16). |
+| `MapCamera` | Animates Reset view and region focus. |
+| `RevealController` | Runs the reveal, the spread from the tap, and the replay, and gives the painter each country's progress. |
+
+- **Painting order:** ocean and grid lines; every country in the Not yet fill; wishlist hatching; visited fills, including partly filled countries during animations; borders; dots; highlights and flight paths.
+- **Caching:** the base layer (the ocean, grid lines, and every country in the Not yet colors) has its own `RepaintBoundary`. It is drawn once and reused while statuses, highlights, and animations repaint the layer above, and with zoom it redraws only when the zoom changes.
+- **Hatching and fading:** all wishlist countries combine into one path, which is clipped once and filled with diagonal stripes. Faded countries lower the alpha of their paint instead of using `saveLayer` per country, which is expensive, especially on web.
+- **Constant sizes (FR-MAP-20):** the painter reads the zoom with `getMaxScaleOnAxis()` and divides line widths, dot sizes, and stripe spacing by it.
+- **Hit testing (FR-MAP-11):** convert the pointer position to map units (with `TransformationController.toScene` once zoom exists) and convert the 4 dp and 24 dp distances the same way. `MapHitTester` first checks the dots: one whose center is within 4 dp wins. Otherwise it finds the country under the pointer by checking only rings whose bounding box contains the point, then applying the even-odd rule. Over water, the nearest country or dot within 24 dp wins, measured to its edge.
+- **Scrolling (FR-MAP-17):** at 1×, the viewer doesn't pan, so vertical drags reach the page, and the mouse wheel over the map scrolls the page unless Ctrl or ⌘ is held. Once zoomed in, the map takes drags so it can pan.
+- **Ink spread:** for each animating country, clip to its path and draw a filled circle that grows from the start point to the farthest corner of the country's bounding box. The start point is the center of the country's largest part for the reveal, and the tap point for the spread from the tap. One `AnimationController` drives the whole reveal, and each country reads its progress from its slot in the stagger. A session flag, like the one for Explore's grid entrance, plays the reveal once per session.
+- **Region focus:** project each region's frame once, sampling its edges rather than only its corners, because Equal Earth's meridians curve. Fit it into the card with 16 dp of padding, and animate from the current matrix with a `Matrix4Tween` and `Curves.easeInOutCubic` over 600 ms. The fade uses the same animation value.
+- **Replay (FR-MAP-35 to 40):** each flight path is a curve between the two countries' centers, bent sideways by 20% of the distance between them, and drawn gradually with `PathMetric.extractPath`.
+- **Share my map (FR-MAP-41 to 43):** render a dedicated share layout inside a `RepaintBoundary` and capture it with `toImage(pixelRatio: 3)`. On Android and iOS, `share_plus` opens the share sheet; on web, the PNG downloads.
+
 ## 12. Quality assurance
 
 ### 12.1 Test strategy
 
 | Level | What it covers | Examples |
 | --- | --- | --- |
-| Unit | Domain logic | Every row of the merge rules (section 7.3); search normalization; filter and sort; parsing records with missing capitals, borders, or currencies |
+| Unit | Domain logic | Every row of the merge rules (section 7.3); search normalization; filter and sort; parsing records with missing capitals, borders, or currencies; the Equal Earth projection; map hit testing (a point in Spain is ESP, a point near Bahrain is BHR, western Saudi Arabia is SAU, the ocean is nothing); reveal timings within 1.5 s for 1, 50, and 250 countries |
 | Repository | Data layer with a mocked API and an in-memory database | Snapshot import; stale-data refresh; a failed page keeps old data; 401, 403, and 429 map to the right errors |
-| Widget | Screens | Explore loading, empty, error, and data states; visit form validation; Arabic layout mirrors; compact and expanded layouts |
-| Manual | End-to-end flows | Sync between a browser and a phone; airplane mode on mobile; keyboard-only use on web; a full Arabic and dark-mode walkthrough |
+| Map data | The committed map file against the snapshot | Every dataset country has a shape or a dot except Antarctica and Western Sahara; no shape is coded -99; overseas parts belong to their own countries, so Réunion isn't part of France |
+| Widget | Screens | Explore loading, empty, error, and data states; visit form validation; Arabic layout mirrors; compact and expanded layouts; map colors by status in both themes; the map's tap card actions |
+| Manual | End-to-end flows | Sync between a browser and a phone; airplane mode on mobile; keyboard-only use on web; a full Arabic and dark-mode walkthrough; map smoothness on a mid-range phone, in a phone browser, and in desktop Chrome, Safari, and Firefox |
+
+> **Note:** The world map is tested through its logic and widgets, not golden images, because Flutter renders golden images slightly differently on macOS and on the Linux CI runner.
 
 ### 12.2 Platform test matrix
 
@@ -921,7 +1254,7 @@ GitHub Actions runs these steps on every push and pull request unless noted:
 
 1. Install dependencies and run code generation.
 2. Check formatting and run static analysis.
-3. Run all tests with coverage.
+3. Run all tests with coverage, including the world map data check (section 8.7).
 4. Build the web app. On pull requests, deploy it to a Firebase Hosting preview channel.
 5. Build an Android APK, and compile iOS without code signing on a macOS runner, to prove both still build.
 6. On a version tag, deploy the web app to production on Firebase Hosting.
@@ -952,6 +1285,7 @@ A requirement is done when:
 - REST Countries Countries API v5 and its flag image CDN.
 - Firebase Authentication, Cloud Firestore, and Firebase Hosting.
 - GitHub Actions, including a macOS runner for iOS builds.
+- Natural Earth country boundaries and mapshaper, only when the world map file is rebuilt (section 8.7).
 
 #### Constraints
 
@@ -971,6 +1305,11 @@ A requirement is done when:
 | The API key is misused outside a browser | Low | Medium | Allowed origins and quota alerts. If the key is blocked, the app keeps working from bundled data. |
 | API quota runs out | Low | Low | Snapshot-first loading, the weekly redeploy, and the manual refresh limit. |
 | API responses differ from the documentation | Medium | Medium | Inspect real responses before writing the models; parse defensively; cover edge cases in tests. |
+| Disputed borders on the map upset some users | Medium | Medium | Use the point-of-view edition that fits the main audience (D-11) and name it in the About section (FR-SET-04). |
+| Map animations stutter in mobile browsers | Medium | Medium | Cache static layers, avoid `saveLayer`, and test early on a real phone browser (NFR-15). |
+| Map shapes vanish in simplification or color the wrong country | Medium | Low | The build report and the map data test catch both: vanished countries get dots, and overseas parts are split out (section 8.7). |
+| Countries are hard to tap on a phone in the world view | High | Low | Dots for small countries, zoom, and region focus; every map action is also in the lists (FR-MAP-08). |
+| The map card appears slowly on first open | Low | Low | Parse the map file once and show a skeleton until it is ready (section 10.3). |
 | The battuta Hosting name is already taken | Occurred | Low | Resolved: the Firebase project is `battuta-b8451` and the site is `battuta-travel.web.app`. The app name is unchanged. |
 | Another travel app uses the name Battuta | Low | Low | An unrelated tour-company app, Battuta: Travel, is on the App Store. This does not affect the web release; check trademarks before publishing to the stores. |
 | Arabic names missing for some territories | Medium | Low | Fall back to the English name. |
@@ -982,10 +1321,13 @@ A requirement is done when:
 | --- | --- |
 | Allowed origins | The website hostnames that may call the REST Countries API from a browser. |
 | Entry | A user's record for one country, either Visited or Wishlist. |
+| Equal Earth | An equal-area map projection that shows every country at its true relative size; used by the world map. |
 | Guest | A user who hasn't signed in. Their data lives only on the device or in the browser. |
 | Last write wins | A conflict rule: when two copies of an entry differ, the one changed most recently is kept. |
 | Local-first | An approach where the app reads and writes the on-device database first and syncs with the cloud in the background. |
 | Merge | Combining guest entries with a user's cloud entries on first sign-in (section 7.3). |
+| Natural Earth | A public-domain collection of map data, the source of the world map's country shapes (section 8.7). |
+| Point-of-view edition | A version of Natural Earth's boundaries that draws disputed borders as one particular country recognizes them (D-11). |
 | Preview channel | A temporary Firebase Hosting address used to review a pull request before release. |
 | RTL | Right to left: the reading direction of Arabic, which mirrors the layout. |
 | Snapshot | A copy of the country data bundled with each build, so the app never needs a download to start. |
@@ -1000,3 +1342,7 @@ A requirement is done when:
 - REST Countries, plans and quotas: [restcountries.com/plans](https://restcountries.com/plans)
 - Flutter, Display images on the web: [docs.flutter.dev/platform-integration/web/web-images](https://docs.flutter.dev/platform-integration/web/web-images)
 - Drift, Web support: [drift.simonbinder.eu/web](https://drift.simonbinder.eu/web/)
+- Natural Earth, vector data with point-of-view editions: [github.com/nvkelso/natural-earth-vector](https://github.com/nvkelso/natural-earth-vector)
+- Natural Earth, terms of use (public domain): [naturalearthdata.com/about/terms-of-use](https://www.naturalearthdata.com/about/terms-of-use/)
+- mapshaper, the simplification tool: [npmjs.com/package/mapshaper](https://www.npmjs.com/package/mapshaper)
+- Šavrič, Patterson, and Jenny, The Equal Earth map projection: [doi.org/10.1080/13658816.2018.1504949](https://doi.org/10.1080/13658816.2018.1504949)

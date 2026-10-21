@@ -346,6 +346,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonNotAvailable => 'Not available';
 
   @override
+  String get commonClose => 'Close';
+
+  @override
   String get listSeparator => ', ';
 
   @override
@@ -565,8 +568,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsCountriesVisited => 'Countries visited';
 
   @override
-  String statsOfTotal(String total, String percent) {
-    return 'of $total · $percent%';
+  String statsOfTotal(String total, String percent, String wishlist) {
+    return 'of $total · $percent% · $wishlist on your wishlist';
   }
 
   @override
@@ -603,6 +606,32 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get statsEmptyBody =>
       'Mark your first country as visited to see your progress here.';
+
+  @override
+  String mapSemanticsLabel(String visited, String wishlist) {
+    return 'World map: $visited countries visited, $wishlist on your wishlist';
+  }
+
+  @override
+  String get mapViewAsList => 'View as list';
+
+  @override
+  String get mapLegendVisited => 'Visited';
+
+  @override
+  String get mapLegendWishlist => 'Wishlist';
+
+  @override
+  String get mapLegendNotYet => 'Not yet';
+
+  @override
+  String get mapLegendDots => 'Small countries appear as dots';
+
+  @override
+  String get mapNotVisited => 'Not visited yet';
+
+  @override
+  String get mapOpenDetails => 'Open details';
 
   @override
   String get authEmail => 'Email';
@@ -744,6 +773,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsDataSourceValue =>
       'Country data and flags from REST Countries';
+
+  @override
+  String get settingsMapSource => 'Map data';
+
+  @override
+  String get settingsMapSourceValue =>
+      'World map from Natural Earth. Disputed borders are shown as Saudi Arabia recognizes them.';
 
   @override
   String get settingsLicenses => 'Open-source licenses';

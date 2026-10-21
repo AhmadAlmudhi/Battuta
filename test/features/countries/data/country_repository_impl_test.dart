@@ -27,7 +27,7 @@ void main() {
 
   group('ensureSeeded', () {
     test(
-      'imports the real bundled snapshot: 254 records, 250 countries',
+      'imports the real bundled snapshot: 253 records, 249 countries',
       () async {
         final repo = CountryRepositoryImpl(
           db,
@@ -38,7 +38,10 @@ void main() {
         final countries = await repo.watchAll().first;
 
         // 4 disputed territories have no ISO codes and are skipped (D-3).
-        expect(countries, hasLength(250));
+        // Israel is left out of the snapshot and the app (D-12).
+        expect(countries, hasLength(249));
+        expect(await repo.findByCode('ISR'), isNull);
+        expect((await repo.findByCode('PSE'))?.borders, isNot(contains('ISR')));
         expect(
           countries.map((c) => c.nameEn).toList(),
           orderedEquals([...countries.map((c) => c.nameEn)]..sort()),
@@ -63,6 +66,38 @@ void main() {
       )..where((t) => t.code.equals('FRA'))).getSingle();
       expect(row.population, 42);
     });
+
+    test(
+      'removes a country left out after the data was saved (D-12)',
+      () async {
+        await repository(bundledAt: 100).ensureSeeded();
+        await db
+            .into(db.countries)
+            .insert(
+              CountriesCompanion.insert(
+                code: 'ISR',
+                alpha2: 'il',
+                nameEn: 'Israel',
+                nameOfficialEn: 'State of Israel',
+                region: 'Asia',
+                population: 1,
+                languages: const [],
+                currencies: const [],
+                borders: const [],
+                timezones: const [],
+                fetchedAt: 100,
+              ),
+            );
+
+        await repository(bundledAt: 100).ensureSeeded();
+
+        expect(await repository().findByCode('ISR'), isNull);
+        expect(
+          await db.select(db.countries).get(),
+          hasLength(testRecords.length),
+        );
+      },
+    );
 
     test('replaces older local data with a newer bundled snapshot, as after '
         'a redeploy (PRD 8.2, rule 7)', () async {

@@ -9,6 +9,7 @@ import 'package:battuta/features/auth/domain/auth_repository.dart';
 import 'package:battuta/features/auth/presentation/auth_providers.dart';
 import 'package:battuta/features/countries/presentation/country_providers.dart';
 import 'package:battuta/features/settings/presentation/settings_controller.dart';
+import 'package:battuta/features/world_map/presentation/world_map_providers.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fakes.dart';
 import 'test_countries.dart';
+import 'test_world_map.dart';
 
 /// The app under test, with the real repositories on an in-memory database
 /// seeded from [testRecords]. Only the network and connectivity are fake.
@@ -95,6 +97,7 @@ Future<TestApp> pumpApp(
       }),
       authRepositoryProvider.overrideWithValue(auth),
       cloudEntriesProvider.overrideWithValue(cloudEntries),
+      worldMapLoaderProvider.overrideWithValue(() async => testWorldMap),
     ],
   );
   addTearDown(container.dispose);

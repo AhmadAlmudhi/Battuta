@@ -1,11 +1,17 @@
 import '../domain/country.dart';
 
+/// Countries the app leaves out entirely, by 3-letter code (D-12): they
+/// aren't in Explore, Stats, or anyone's neighbors, and the map draws their
+/// area as part of another country.
+const excludedCountryCodes = {'ISR'};
+
 /// Parses one REST Countries v5 record, as returned by the API and stored in
 /// the bundled snapshot (field mapping in PRD section 8.1).
 ///
 /// The API uses empty strings for missing values, so they are read as null.
 /// Returns null for records without ISO codes (a few disputed territories),
-/// because the app keys routes, flags, and entries by code.
+/// because the app keys routes, flags, and entries by code, and for
+/// [excludedCountryCodes].
 Country? parseCountry(Map<String, Object?> json) {
   final codes = _map(json['codes']);
   final code = _string(codes['alpha_3'])?.toUpperCase();
@@ -13,6 +19,7 @@ Country? parseCountry(Map<String, Object?> json) {
   final names = _map(json['names']);
   final nameEn = _string(names['common']);
   if (code == null || alpha2 == null || nameEn == null) return null;
+  if (excludedCountryCodes.contains(code)) return null;
 
   final arabic = _map(_map(names['translations'])['ara']);
   final flag = _map(json['flag']);
@@ -42,7 +49,9 @@ Country? parseCountry(Map<String, Object?> json) {
             symbol: _string(currency['symbol']),
           ),
     ],
-    borders: [for (final border in _list(json['borders'])) ?_string(border)],
+    borders: [
+      for (final border in _list(json['borders'])) ?_string(border),
+    ].where((neighbor) => !excludedCountryCodes.contains(neighbor)).toList(),
     timezones: [for (final zone in _list(json['timezones'])) ?_string(zone)],
     mapsUrl: _string(_map(json['links'])['google_maps']),
     flagAlt: _string(flag['description']),

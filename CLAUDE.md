@@ -20,7 +20,8 @@ Guidance for Claude Code when working in this repository.
   - Stats is complete: headline (visited of the dataset total, one decimal), a bar per region, highlights, count-up animation, and the zero state.
   - Accounts and cloud sync are complete: sign in, create account, reset password, Account screen with sync status, Sync now, and Sign out; guest merge on first sign-in, live two-way sync, and server-enforced last write wins.
   - Settings has its About section (FR-SET-04); app icons and the favicon are generated; the home-screen name is Battuta or بطوطة on Android and iOS.
-  - Not started: CI and the first production deploy.
+  - The world map's first part is built (PRD section 6.10, data in 8.7, rendering in 11.5): the base map at the top of Stats, dots for small countries, and the tap card with hover on web. About credits Natural Earth.
+  - Not started: map zoom, region focus, and the reveal (FR-MAP-16 to 31), the map's Could items, CI, and the first production deploy.
 
 ## Commands
 
@@ -29,6 +30,7 @@ flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # freezed, json_serializable, drift; generated files are committed
 dart run tool/fetch_snapshot.dart                          # refresh assets/data/countries_snapshot.json (3 API requests)
 dart run tool/fetch_flags.dart                             # download missing flags into assets/flags/ (no API quota; --force to redo all)
+dart run tool/build_world_map.dart <ne_10m_admin_0_countries_sau.geojson>  # rebuild assets/data/world_map.json (needs Node.js for mapshaper; no API requests)
 dart format --set-exit-if-changed .
 flutter analyze                                            # must report zero issues (NFR-12)
 flutter test --coverage
@@ -63,13 +65,14 @@ lib/
     countries/     Explore + Country details   (data/ domain/ presentation/)
     travels/       My travels
     stats/
+    world_map/     World map card on Stats (domain/ presentation/)
     auth/          accounts, guest merge, sync
     settings/
     onboarding/    Welcome screen
   app.dart         MaterialApp.router: theme, locale, localization delegates
   main.dart        loads SharedPreferences and Firebase, then runs the app
-assets/data/countries_snapshot.json
-tool/              snapshot script
+assets/data/countries_snapshot.json, world_map.json
+tool/              snapshot, flag, and map scripts
 test/              mirrors lib/
 ```
 
@@ -87,7 +90,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 
 ## Country data facts
 
-- The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them, leaving **250**, the Stats total (D-3).
+- The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them. It also skips Israel (`excludedCountryCodes`, D-12) and drops it from neighbors' borders, leaving **249**, the Stats total (D-3). The snapshot and flags scripts leave Israel out too, `ensureSeeded` deletes it from data saved earlier, and the map draws its area as Palestine.
 - Missing values arrive as empty strings, not null; the parser maps them to null.
 - The snapshot keeps the raw API record shape (trimmed to the Arabic translation) so one parser serves both the snapshot and the live refresh. The request fields live in `lib/features/countries/data/rest_countries.dart` (pure Dart, also imported by the tool); keep them in step with `country_parser.dart`.
 - `ensureSeeded` imports the snapshot when the DB is empty or older than the bundled snapshot (so a redeploy refreshes web visitors for free). Data age is `MAX(countries.fetched_at)`.
@@ -104,7 +107,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 - **Sign out (D-4)** removes the user's entries from the device; the cloud copy stays.
 - **Country data (section 8.2, D-9):** import the bundled snapshot on first launch with zero API calls. Auto-refresh only if data is older than 7 days and online; manual refresh at most once per 60 minutes. Refresh is all-or-nothing (3 pages, `limit=100`, offsets 0/100/200) and replaces all rows in one transaction. A normal launch makes no API requests (NFR-13): the quota is 1,000 requests/month shared by all users.
 - **REST Countries v5 only** (`https://api.restcountries.com/countries/v5`, `Authorization: Bearer <key>`); v1–v4 are retired. Field mapping is in PRD section 8.1. Parse defensively: capitals, borders, currencies, Arabic names may be missing.
-- **Stats total (D-3)** is the number of countries in the dataset (250 today), computed in one place: `TravelStats.total`. Entries for countries that leave the dataset aren't counted anywhere.
+- **Stats total (D-3)** is the number of countries in the dataset (249 today), computed in one place: `TravelStats.total`. Entries for countries that leave the dataset aren't counted anywhere.
 
 ## UI conventions
 
@@ -131,6 +134,15 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 Routes: `/welcome`, `/explore`, `/country/:code` (3-letter ISO), `/travels` (`?tab=wishlist`), `/stats`, `/account`, `/account/sign-in`, `/account/sign-up`, `/account/reset`, `/settings`. Visit and wishlist forms are modals, not routes.
 
 Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must survive refresh and deep linking; browser Back/Forward must work. Explore search/filter/sort state persists across navigation for the session (FR-EXP-09). Web tab title: `Japan · Battuta` / `اليابان · بطوطة`.
+
+## World map
+
+- `assets/data/world_map.json` is committed. `tool/build_world_map.dart` builds it from Natural Earth's 1:10m Saudi point-of-view edition (D-11); download the source GeoJSON from github.com/nvkelso/natural-earth-vector (geojson folder) and don't commit it. `MapFrame.project` (pure Dart, Equal Earth) is shared by the script and the app.
+- Antarctica and Western Sahara have no shape or dot (D-11); the script reads the dataset through `parseCountry`, so Israel (D-12) isn't in it. Overseas parts (French departments, Caribbean Netherlands, Svalbard and Jan Mayen, Bouvet, Tokelau, Christmas and Cocos Islands) are split out by location in `_splitOverseas`. `world_map_asset_test.dart` fails if a dataset country goes missing.
+- A country gets a dot when its largest part fits within 6 × 6 map units, or when its shape vanishes in simplification (then it's placed from the full-detail source).
+- Hit testing (`MapHitTester`, FR-MAP-11): a tap on a dot (within 4 dp of its center) selects it; otherwise over land the country under the tap, and over water the nearest country or dot within 24 dp of its edge, so a tap just off a coast selects that country. Only dataset countries can be selected.
+- The map never mirrors; positions on it are physical in both languages. The card around it mirrors as usual.
+- `pumpApp` overrides `worldMapLoaderProvider` with `testWorldMap` (the real file, read from disk): `compute` and the asset bundle can't finish under the widget-test clock. Map colors are tested by painting to an image and reading pixels, not with golden files.
 
 ## Accounts and sync
 

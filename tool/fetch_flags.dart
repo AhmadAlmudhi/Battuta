@@ -9,6 +9,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:battuta/features/countries/data/country_parser.dart';
+
 const _snapshotPath = 'assets/data/countries_snapshot.json';
 const _flagsDir = 'assets/flags';
 const _flagWidth = 'w320';
@@ -19,11 +21,10 @@ Future<void> main(List<String> args) async {
   final snapshot =
       jsonDecode(File(_snapshotPath).readAsStringSync())
           as Map<String, Object?>;
+  // The same countries the app shows (D-12).
   final codes = <String>{
     for (final record in snapshot['objects'] as List<Object?>)
-      if (((record as Map<String, Object?>)['codes'] as Map?)?['alpha_2']
-          case final String code when code.isNotEmpty)
-        code.toLowerCase(),
+      ?parseCountry(record as Map<String, Object?>)?.alpha2,
   }.toList()..sort();
 
   Directory(_flagsDir).createSync(recursive: true);

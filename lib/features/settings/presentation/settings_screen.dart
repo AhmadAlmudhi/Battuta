@@ -109,12 +109,13 @@ class _Section extends StatelessWidget {
   );
 }
 
-/// App version, date of the country data, and the data source credit
-/// (FR-SET-04).
+/// App version, date of the country data, and the credits for the country
+/// data and the world map (FR-SET-04).
 class _About extends ConsumerWidget {
   const _About();
 
   static final _restCountries = Uri.parse('https://restcountries.com');
+  static final _naturalEarth = Uri.parse('https://www.naturalearthdata.com');
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -152,6 +153,14 @@ class _About extends ConsumerWidget {
             subtitle: Text(l10n.settingsDataSourceValue),
             trailing: const Icon(Icons.open_in_new_rounded),
             onTap: () => ref.read(linkLauncherProvider)(_restCountries),
+          ),
+          // The borders follow the edition chosen in D-11.
+          ListTile(
+            leading: const Icon(Icons.map_outlined),
+            title: Text(l10n.settingsMapSource),
+            subtitle: Text(l10n.settingsMapSourceValue),
+            trailing: const Icon(Icons.open_in_new_rounded),
+            onTap: () => ref.read(linkLauncherProvider)(_naturalEarth),
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined),

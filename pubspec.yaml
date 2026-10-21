@@ -54,6 +54,7 @@ flutter:
   generate: true
   assets:
     - assets/data/countries_snapshot.json
+    - assets/data/world_map.json
     - assets/flags/
     # Shown on the licenses page (OFL requires the license to travel with the fonts).
     - assets/fonts/inter/OFL.txt

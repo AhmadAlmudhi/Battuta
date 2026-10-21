@@ -23,6 +23,10 @@ class CountryRepositoryImpl implements CountryRepository {
 
   @override
   Future<void> ensureSeeded() async {
+    // Data saved before a country was left out still has it (D-12).
+    await (_db.delete(
+      _db.countries,
+    )..where((row) => row.code.isIn(excludedCountryCodes))).go();
     final snapshot = jsonDecode(await _loadSnapshot()) as Map<String, Object?>;
     final bundledAt = snapshot['fetchedAt'] as int;
     final localAt = await dataFetchedAt();

@@ -8,6 +8,7 @@ import '../../../core/widgets/message_view.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../countries/presentation/region_names.dart';
+import '../../world_map/presentation/widgets/world_map_card.dart';
 import '../domain/travel_stats.dart';
 import 'stats_providers.dart';
 
@@ -28,13 +29,19 @@ class StatsScreen extends ConsumerWidget {
       child: TabScaffold(
         title: l10n.navStats,
         body: switch (stats) {
-          // No visits: an invitation instead of empty bars (FR-STA-05).
-          AsyncData(:final value) when value.visited == 0 => MessageView(
-            icon: Icons.public_rounded,
-            title: l10n.statsEmptyTitle,
-            message: l10n.statsEmptyBody,
-            actionLabel: l10n.travelsExplore,
-            onAction: () => context.go('/explore'),
+          // No visits: the map, then an invitation instead of the headline
+          // and empty bars (FR-STA-05).
+          AsyncData(:final value) when value.visited == 0 => _StatsList(
+            children: [
+              WorldMapCard(visited: 0, wishlist: value.wishlistSize),
+              MessageView(
+                icon: Icons.public_rounded,
+                title: l10n.statsEmptyTitle,
+                message: l10n.statsEmptyBody,
+                actionLabel: l10n.travelsExplore,
+                onAction: () => context.go('/explore'),
+              ),
+            ],
           ),
           AsyncData(:final value) => _StatsBody(stats: value),
           AsyncError() => MessageView(
@@ -64,43 +71,54 @@ class _StatsBody extends StatelessWidget {
             regionName(l10n, a.region).compareTo(regionName(l10n, b.region)),
       );
 
-    return Align(
-      alignment: AlignmentDirectional.topCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 720),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _Headline(stats: stats),
-            const SizedBox(height: 24),
-            Text(l10n.statsByRegion, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 12),
-            Card(
-              margin: EdgeInsets.zero,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Column(
-                  children: [
-                    for (final region in regions) _RegionRow(progress: region),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(l10n.statsHighlights, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 12),
-            _Highlights(stats: stats),
-          ],
+    return _StatsList(
+      children: [
+        WorldMapCard(
+          header: _Headline(stats: stats),
+          visited: stats.visited,
+          wishlist: stats.wishlistSize,
         ),
-      ),
+        const SizedBox(height: 24),
+        Text(l10n.statsByRegion, style: theme.textTheme.titleMedium),
+        const SizedBox(height: 12),
+        Card(
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                for (final region in regions) _RegionRow(progress: region),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(l10n.statsHighlights, style: theme.textTheme.titleMedium),
+        const SizedBox(height: 12),
+        _Highlights(stats: stats),
+      ],
     );
   }
 }
 
-/// For example: 12, of 250 · 4.8% (FR-STA-01).
+/// The Stats column, up to 720 dp wide.
+class _StatsList extends StatelessWidget {
+  const _StatsList({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: AlignmentDirectional.topCenter,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 720),
+      child: ListView(padding: const EdgeInsets.all(16), children: children),
+    ),
+  );
+}
+
+/// The top of the map card, for example: 16, of 250 · 6.4% · 12 on your
+/// wishlist (FR-STA-01, FR-MAP-02).
 class _Headline extends StatelessWidget {
   const _Headline({required this.stats});
 
@@ -111,52 +129,48 @@ class _Headline extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final total = context.formatInteger(stats.total);
+    final wishlist = context.formatInteger(stats.wishlistSize);
 
-    // Screen readers get the final figures, not the counting ones.
+    // Screen readers get the final figures, not the counting ones, apart
+    // from the map card around it.
     return Semantics(
+      container: true,
       label: l10n.statsHeadlineLabel(
         context.formatInteger(stats.visited),
         total,
         context.formatPercent(stats.share * 100),
       ),
       child: ExcludeSemantics(
-        child: Card(
-          margin: EdgeInsets.zero,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.statsCountriesVisited,
-                  style: theme.textTheme.labelLarge,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.statsCountriesVisited, style: theme.textTheme.labelLarge),
+            const SizedBox(height: 4),
+            _CountUp(
+              value: stats.visited.toDouble(),
+              builder: (context, value) => Text(
+                context.formatInteger(value.round()),
+                style: theme.textTheme.displayMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  fontFeatures: _tabular,
                 ),
-                const SizedBox(height: 4),
-                _CountUp(
-                  value: stats.visited.toDouble(),
-                  builder: (context, value) => Text(
-                    context.formatInteger(value.round()),
-                    style: theme.textTheme.displayMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: _tabular,
-                    ),
-                  ),
-                ),
-                _CountUp(
-                  value: stats.share * 100,
-                  builder: (context, value) => Text(
-                    l10n.statsOfTotal(total, context.formatPercent(value)),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontFeatures: _tabular,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _ProgressBar(value: stats.share, height: 12),
-              ],
+              ),
             ),
-          ),
+            _CountUp(
+              value: stats.share * 100,
+              builder: (context, value) => Text(
+                l10n.statsOfTotal(
+                  total,
+                  context.formatPercent(value),
+                  wishlist,
+                ),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontFeatures: _tabular,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

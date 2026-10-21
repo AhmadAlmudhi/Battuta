@@ -142,6 +142,7 @@
   "commonCancel": "Cancel",
   "commonUndo": "Undo",
   "commonNotAvailable": "Not available",
+  "commonClose": "Close",
   "listSeparator": ", ",
   "@listSeparator": {
     "description": "Joins list items, for example languages."
@@ -285,14 +286,17 @@
     }
   },
   "statsCountriesVisited": "Countries visited",
-  "statsOfTotal": "of {total} · {percent}%",
+  "statsOfTotal": "of {total} · {percent}% · {wishlist} on your wishlist",
   "@statsOfTotal": {
-    "description": "Under the visited count, for example: of 250 · 4.8% (FR-STA-01).",
+    "description": "Under the visited count, for example: of 250 · 6.4% · 12 on your wishlist (FR-STA-01, FR-MAP-02).",
     "placeholders": {
       "total": {
         "type": "String"
       },
       "percent": {
+        "type": "String"
+      },
+      "wishlist": {
         "type": "String"
       }
     }
@@ -331,6 +335,25 @@
   "statsNoDates": "Add visit dates to see this.",
   "statsEmptyTitle": "No countries visited yet",
   "statsEmptyBody": "Mark your first country as visited to see your progress here.",
+  "mapSemanticsLabel": "World map: {visited} countries visited, {wishlist} on your wishlist",
+  "@mapSemanticsLabel": {
+    "description": "Screen-reader label for the world map (FR-MAP-08).",
+    "placeholders": {
+      "visited": {
+        "type": "String"
+      },
+      "wishlist": {
+        "type": "String"
+      }
+    }
+  },
+  "mapViewAsList": "View as list",
+  "mapLegendVisited": "Visited",
+  "mapLegendWishlist": "Wishlist",
+  "mapLegendNotYet": "Not yet",
+  "mapLegendDots": "Small countries appear as dots",
+  "mapNotVisited": "Not visited yet",
+  "mapOpenDetails": "Open details",
   "authEmail": "Email",
   "authPassword": "Password",
   "authConfirmPassword": "Confirm password",
@@ -392,5 +415,7 @@
   },
   "settingsDataSource": "Data source",
   "settingsDataSourceValue": "Country data and flags from REST Countries",
+  "settingsMapSource": "Map data",
+  "settingsMapSourceValue": "World map from Natural Earth. Disputed borders are shown as Saudi Arabia recognizes them.",
   "settingsLicenses": "Open-source licenses"
 }
