@@ -15,8 +15,11 @@ import '../../../travels/domain/travel_entry.dart';
 import '../../../travels/presentation/travel_providers.dart';
 import '../../domain/map_projection.dart';
 import '../../domain/map_regions.dart';
+import '../../domain/map_replay.dart';
 import '../../domain/map_reveal.dart';
 import '../../domain/map_view.dart';
+import '../map_image_sharer.dart';
+import '../map_share_image.dart';
 import '../world_map_colors.dart';
 import '../world_map_geometry.dart';
 import '../world_map_painter.dart';
@@ -33,6 +36,10 @@ const _flightDuration = Duration(milliseconds: 600);
 /// Zooming with the buttons, the keys, or a double tap.
 const _stepDuration = Duration(milliseconds: 250);
 
+/// The longest change animation: a new visit spreading from the tap point
+/// (FR-MAP-32).
+const _changeDuration = Duration(milliseconds: 500);
+
 /// The world map at the top of Stats (PRD section 6.10): every country
 /// colored by status, zoom and region focus, a card for the selected
 /// country, and the legend.
@@ -42,6 +49,7 @@ class WorldMapCard extends ConsumerStatefulWidget {
     this.header,
     required this.visited,
     required this.wishlist,
+    required this.total,
   });
 
   /// The area that draws the map and takes taps, for tests.
@@ -50,9 +58,11 @@ class WorldMapCard extends ConsumerStatefulWidget {
   /// The Stats headline (FR-MAP-02); null in the zero state (FR-STA-05).
   final Widget? header;
 
-  /// Counts for the screen-reader summary (FR-MAP-08).
+  /// Counts for the screen-reader summary (FR-MAP-08) and the shared image
+  /// (FR-MAP-41).
   final int visited;
   final int wishlist;
+  final int total;
 
   @override
   ConsumerState<WorldMapCard> createState() => _WorldMapCardState();
@@ -65,6 +75,16 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
   late final _flight = AnimationController(vsync: this)
     ..addStatusListener(_onFlightStatus);
   late final _reveal = AnimationController(vsync: this);
+  late final _changes = AnimationController(
+    vsync: this,
+    duration: _changeDuration,
+  );
+  late final _replay = AnimationController(vsync: this)
+    ..addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() => _replayPlan = null);
+      }
+    });
 
   String? _selected;
   String? _hovered;
@@ -98,6 +118,24 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
   Duration? _upTime;
   (Duration, Offset)? _lastTap;
 
+  // Changes made while the map is on screen (FR-MAP-32 to 34): what each
+  // country was and became, and where a new visit's fill starts. Set up
+  // while building, like the reveal, and started after that frame.
+  Map<String, TravelStatus>? _lastStatuses;
+  bool _changesPending = false;
+  Map<String, ({TravelStatus? from, TravelStatus? to})> _changed = const {};
+  Map<String, Offset> _changeOrigins = const {};
+
+  /// Where the selected country was tapped, in map units.
+  Offset? _tapPoint;
+
+  /// The replay playing, if any (FR-MAP-35 to 39).
+  ReplayPlan? _replayPlan;
+
+  /// Whether Share my map is still drawing or showing its share sheet, so a
+  /// second click doesn't share twice.
+  bool _sharing = false;
+
   @override
   void initState() {
     super.initState();
@@ -112,6 +150,8 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
   void dispose() {
     _flight.dispose();
     _reveal.dispose();
+    _changes.dispose();
+    _replay.dispose();
     _mapFocus.dispose();
     _cardFocus.dispose();
     super.dispose();
@@ -222,9 +262,13 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
     }
   }
 
-  /// Ends the reveal, if it is playing, and says whether it was
-  /// (FR-MAP-31).
-  bool _skipReveal() {
+  /// Ends the reveal or the replay, if one is playing, and says whether one
+  /// was (FR-MAP-31, FR-MAP-39).
+  bool _skipMotion() {
+    if (_replay.isAnimating) {
+      _replay.value = 1;
+      return true;
+    }
     if (!_revealPending && !_reveal.isAnimating) return false;
     setState(() => _revealPending = false);
     _reveal.value = 1;
@@ -265,39 +309,214 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
     _revealPending = true;
   }
 
-  MapReveal? _currentReveal() {
-    if (!_revealPending && !_reveal.isAnimating) return null;
-    final ms = _reveal.value * _schedule.duration;
-    return MapReveal(
+  /// What the painter animates now, if anything: the replay, the reveal, or
+  /// a change made while the map is on screen.
+  MapMotion? _currentMotion(WorldMapGeometry geometry) {
+    if (_replayPlan case final plan? when _replay.isAnimating) {
+      return _replayMotion(plan, geometry, _replay.value * plan.duration);
+    }
+    if (_revealPending || _reveal.isAnimating) {
+      final ms = _reveal.value * _schedule.duration;
+      return MapMotion(
+        fills: {
+          for (final (i, code) in _revealOrder.indexed)
+            code: Curves.easeOut.transform(_schedule.fill(i, ms)),
+        },
+        hatching: Curves.easeOut.transform(_schedule.hatching(ms)),
+      );
+    }
+    if (_changesPending || _changes.isAnimating) {
+      return _changeMotion(
+        _changesPending ? 0 : _changes.value * _changeDuration.inMilliseconds,
+      );
+    }
+    return null;
+  }
+
+  /// A country just marked visited fills from the tap point over 500 ms, a
+  /// new wishlist country's hatching fades in over 300 ms, and a removed
+  /// country's color fades out over 250 ms (FR-MAP-32 to 34).
+  MapMotion _changeMotion(double ms) {
+    double over(double duration) =>
+        Curves.easeOut.transform((ms / duration).clamp(0.0, 1.0));
+    return MapMotion(
       fills: {
-        for (final (i, code) in _revealOrder.indexed)
-          code: Curves.easeOut.transform(_schedule.fill(i, ms)),
+        for (final MapEntry(:key, :value) in _changed.entries)
+          if (value.to == TravelStatus.visited) key: over(500),
       },
-      hatching: Curves.easeOut.transform(_schedule.hatching(ms)),
+      origins: _changeOrigins,
+      hatchings: {
+        for (final MapEntry(:key, :value) in _changed.entries)
+          if (value.to == TravelStatus.wishlist) key: over(300),
+      },
+      // The old status shows under the new one: a wishlist country being
+      // visited keeps its hatching until the amber covers it, and amber
+      // fades out under hatching fading in.
+      fading: {
+        for (final MapEntry(:key, value: (:from, :to)) in _changed.entries)
+          if (from != null)
+            key: (
+              from,
+              switch (to) {
+                null => 1 - (ms / 250).clamp(0.0, 1.0),
+                TravelStatus.visited => 1,
+                TravelStatus.wishlist => 1 - over(300),
+              },
+            ),
+      },
     );
+  }
+
+  /// The replay at [ms] (FR-MAP-35 to 37): visits fill in order of date,
+  /// each after a dotted flight path from the one before. Undated visits and
+  /// the wishlist wait for the end, when the map is back to normal.
+  MapMotion _replayMotion(
+    ReplayPlan plan,
+    WorldMapGeometry geometry,
+    double ms,
+  ) {
+    final now = plan.at(ms);
+    final steps = plan.steps;
+    Offset anchor(String code) => geometry.countries.containsKey(code)
+        ? geometry.spreadStart(code)
+        : geometry.dots[code] ?? Offset.zero;
+    return MapMotion(
+      fills: {
+        for (final MapEntry(:key, :value)
+            in (_lastStatuses ?? const <String, TravelStatus>{}).entries)
+          if (value == TravelStatus.visited) key: 0,
+        for (final (i, step) in steps.indexed)
+          step.code: i < now.step
+              ? 1
+              : i == now.step
+              ? Curves.easeOut.transform(now.fill)
+              : 0,
+      },
+      hatching: 0,
+      flight: now.step > 0 && now.step < steps.length && now.path > 0
+          ? MapFlight(
+              from: anchor(steps[now.step - 1].code),
+              to: anchor(steps[now.step].code),
+              progress: Curves.easeInOut.transform(now.path),
+            )
+          : null,
+    );
+  }
+
+  /// Notices statuses that changed since the last build, so they can
+  /// animate (FR-MAP-32 to 34). Changes that arrive while another animation
+  /// plays, with reduced motion, or while Stats is hidden just show.
+  void _noticeChanges(Map<String, TravelStatus> statuses) {
+    final last = _lastStatuses;
+    _lastStatuses = statuses;
+    if (last == null ||
+        identical(last, statuses) ||
+        _revealPending ||
+        _reveal.isAnimating ||
+        _replay.isAnimating ||
+        MediaQuery.disableAnimationsOf(context) ||
+        !TickerMode.valuesOf(context).enabled) {
+      return;
+    }
+    final changed = {
+      for (final code in {...last.keys, ...statuses.keys})
+        if (last[code] != statuses[code])
+          code: (from: last[code], to: statuses[code]),
+    };
+    if (changed.isEmpty) return;
+    final (selected, tap) = (_selected, _tapPoint);
+    _changed = changed;
+    _changeOrigins = {
+      if (selected != null &&
+          tap != null &&
+          changed[selected]?.to == TravelStatus.visited)
+        selected: tap,
+    };
+    _changesPending = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_changesPending) return;
+      setState(() => _changesPending = false);
+      _changes.forward(from: 0);
+    });
+  }
+
+  /// Plays the dated visits in order, from the world view (FR-MAP-35).
+  void _startReplay(ReplayPlan plan) {
+    _skipMotion();
+    _changes.value = 1;
+    setState(() {
+      _changesPending = false;
+      _selected = null;
+      _tapPoint = null;
+      _replayPlan = plan;
+    });
+    _resetView();
+    _replay
+      ..duration = Duration(milliseconds: plan.duration.round())
+      ..forward(from: 0);
+  }
+
+  /// Draws the shared image and hands it to the platform (FR-MAP-41,
+  /// FR-MAP-42). [button] anchors the share sheet on iPad.
+  Future<void> _shareMap(BuildContext button) async {
+    final geometry = ref.read(worldMapGeometryProvider).valueOrNull;
+    final statuses = ref.read(travelStatusesProvider).valueOrNull;
+    if (_sharing || geometry == null || statuses == null) return;
+    _sharing = true;
+    try {
+      final box = button.findRenderObject() as RenderBox?;
+      final origin = box == null
+          ? null
+          : box.localToGlobal(Offset.zero) & box.size;
+      final png = await renderMapShareImage(
+        geometry: geometry,
+        statuses: statuses,
+        theme: Theme.of(context),
+        direction: Directionality.of(context),
+        texts: MapShareTexts.of(
+          context,
+          visited: widget.visited,
+          total: widget.total,
+          wishlist: widget.wishlist,
+        ),
+      );
+      if (!mounted) return;
+      await ref.read(mapImageSharerProvider)(
+        png,
+        fileName: 'battuta-map.png',
+        origin: origin,
+      );
+    } finally {
+      _sharing = false;
+    }
+  }
+
+  /// The map point under a point on the map, in dp.
+  Offset _mapPoint(Offset position) {
+    final (x, y) = _currentView.toMap(
+      position.dx,
+      position.dy,
+      _viewport.width,
+      _viewport.height,
+    );
+    return Offset(x, y);
   }
 
   /// The selectable country under a point on the map, in dp.
   String? _hit(Offset position) {
     final hitTester = ref.read(mapHitTesterProvider);
     if (hitTester == null || _viewport.isEmpty) return null;
-    final view = _currentView;
-    final (x, y) = view.toMap(
-      position.dx,
-      position.dy,
-      _viewport.width,
-      _viewport.height,
-    );
-    final unitsPerDp = 1 / view.pixelsPerUnit(_viewport.width);
+    final point = _mapPoint(position);
+    final unitsPerDp = 1 / _currentView.pixelsPerUnit(_viewport.width);
     return hitTester.hitTest(
-      (x: x, y: y),
+      (x: point.dx, y: point.dy),
       dotRadius: MapSizes.dotRadius * unitsPerDp,
       reach: 24 * unitsPerDp,
     );
   }
 
   void _onTapUp(TapUpDetails details) {
-    if (_skipReveal()) return;
+    if (_skipMotion()) return;
     _focusedByPointer = true;
     _mapFocus.requestFocus();
     final at = details.localPosition;
@@ -311,11 +530,15 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
       return;
     }
     _lastTap = _upTime == null ? null : (_upTime!, at);
-    setState(() => _selected = _hit(at));
+    final hit = _hit(at);
+    setState(() {
+      _selected = hit;
+      _tapPoint = hit == null ? null : _mapPoint(at);
+    });
   }
 
   void _onScaleStart(ScaleStartDetails details) {
-    _skipReveal();
+    _skipMotion();
     _settle();
     _gestureScale = 1;
   }
@@ -354,7 +577,7 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
     };
     if (factor == null) return;
     GestureBinding.instance.pointerSignalResolver.register(event, (event) {
-      _skipReveal();
+      _skipMotion();
       _settle();
       setState(() {
         _view = _view.zoomedBy(
@@ -419,8 +642,10 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
         hitTester != null &&
         statuses != null &&
         entries != null;
+    final replay = entries == null ? null : ReplayPlan(entries);
     if (ready) {
       _prepareReveal(geometry, statuses, entries);
+      _noticeChanges(statuses);
       // A region chosen before this card was built, for example in the
       // zero state.
       if (!_regionRestored) {
@@ -479,6 +704,26 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                 padding: EdgeInsetsDirectional.fromSTEB(20, 12, 20, 0),
                 child: MapLegend(),
               ),
+              if (replay != null)
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 12, 0),
+                  child: switch (_replayPlan) {
+                    final plan? => _ReplayBar(
+                      plan: plan,
+                      progress: _replay,
+                      onSkip: _skipMotion,
+                    ),
+                    null => _MapActions(
+                      // Replay is only animation, so reduced motion hides it.
+                      canReplay:
+                          replay.canPlay &&
+                          !MediaQuery.disableAnimationsOf(context),
+                      canShare: widget.visited > 0,
+                      onReplay: () => _startReplay(replay),
+                      onShare: _shareMap,
+                    ),
+                  },
+                ),
             ],
           ),
         ),
@@ -510,7 +755,7 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                 FocusHighlightMode.traditional;
 
         final map = AnimatedBuilder(
-          animation: Listenable.merge([_flight, _reveal]),
+          animation: Listenable.merge([_flight, _reveal, _changes, _replay]),
           builder: (context, _) {
             final view = _currentView;
             final faded = _fadedRegion;
@@ -535,7 +780,7 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                     view: view,
                     selected: _selected,
                     hovered: _hovered,
-                    reveal: _currentReveal(),
+                    motion: _currentMotion(geometry),
                     outside: faded == null
                         ? null
                         : geometry.outside(faded, regions),
@@ -627,28 +872,31 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                     ),
                   ),
                 ),
-              if (region != null)
-                PositionedDirectional(
-                  top: 8,
-                  start: 8,
-                  child: IgnorePointer(
-                    child: _RegionSummary(
-                      region: region,
-                      statuses: statuses,
-                      regions: regions,
+              // The replay keeps the map clear of controls.
+              if (_replayPlan == null) ...[
+                if (region != null)
+                  PositionedDirectional(
+                    top: 8,
+                    start: 8,
+                    child: IgnorePointer(
+                      child: _RegionSummary(
+                        region: region,
+                        statuses: statuses,
+                        regions: regions,
+                      ),
                     ),
                   ),
+                PositionedDirectional(
+                  bottom: 0,
+                  end: 0,
+                  child: _ZoomButtons(
+                    view: _targetView,
+                    onZoomIn: () => _zoomBy(2),
+                    onZoomOut: () => _zoomBy(0.5),
+                    onReset: _resetView,
+                  ),
                 ),
-              PositionedDirectional(
-                bottom: 0,
-                end: 0,
-                child: _ZoomButtons(
-                  view: _targetView,
-                  onZoomIn: () => _zoomBy(2),
-                  onZoomOut: () => _zoomBy(0.5),
-                  onReset: _resetView,
-                ),
-              ),
+              ],
             ],
           ),
         );
@@ -754,6 +1002,109 @@ class _RegionSummary extends StatelessWidget {
           style: theme.textTheme.labelMedium,
         ),
       ),
+    );
+  }
+}
+
+/// Replay my travels and Share my map, under the legend (FR-MAP-35,
+/// FR-MAP-41).
+class _MapActions extends StatelessWidget {
+  const _MapActions({
+    required this.canReplay,
+    required this.canShare,
+    required this.onReplay,
+    required this.onShare,
+  });
+
+  final bool canReplay;
+  final bool canShare;
+  final VoidCallback onReplay;
+  final ValueChanged<BuildContext> onShare;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Wrap(
+      spacing: 4,
+      children: [
+        if (canReplay)
+          TextButton.icon(
+            onPressed: onReplay,
+            icon: const Icon(Icons.play_arrow_rounded),
+            label: Text(l10n.mapReplay),
+          ),
+        if (canShare)
+          Builder(
+            builder: (button) => TextButton.icon(
+              onPressed: () => onShare(button),
+              icon: const Icon(Icons.ios_share_rounded),
+              label: Text(l10n.mapShare),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Takes the place of the actions while the replay plays: the year of the
+/// visit it's on, which slides in when it changes, and Skip (FR-MAP-37,
+/// FR-MAP-39). Under the map, neither covers a country.
+class _ReplayBar extends StatelessWidget {
+  const _ReplayBar({
+    required this.plan,
+    required this.progress,
+    required this.onSkip,
+  });
+
+  final ReplayPlan plan;
+  final Animation<double> progress;
+  final VoidCallback onSkip;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: 8),
+          child: AnimatedBuilder(
+            animation: progress,
+            builder: (context, _) {
+              final now = plan.at(progress.value * plan.duration);
+              final year =
+                  plan.steps[min(now.step, plan.steps.length - 1)].year;
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 250),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween(
+                      begin: const Offset(0, 0.4),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                ),
+                child: Text(
+                  '$year',
+                  key: ValueKey(year),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const Spacer(),
+        TextButton.icon(
+          onPressed: onSkip,
+          icon: const Icon(Icons.skip_next_rounded),
+          label: Text(l10n.mapReplaySkip),
+        ),
+      ],
     );
   }
 }

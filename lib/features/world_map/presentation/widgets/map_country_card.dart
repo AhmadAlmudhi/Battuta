@@ -10,6 +10,7 @@ import '../../../countries/presentation/widgets/flag_image.dart';
 import '../../../travels/domain/travel_entry.dart';
 import '../../../travels/presentation/travel_forms.dart';
 import '../../../travels/presentation/travel_providers.dart';
+import '../../../travels/presentation/widgets/visit_stamp.dart';
 
 /// The card for the country selected on the map (FR-MAP-12, FR-MAP-13): its
 /// flag, name, and status, with the same actions and forms as Country
@@ -54,17 +55,41 @@ class MapCountryCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: SizedBox(
-                    width: 48,
-                    height: 32,
-                    child: FlagImage(
-                      country: country,
-                      fit: BoxFit.cover,
-                      excludeFromSemantics: true,
+                // The passport stamp lands on the flag after the map's color
+                // spread (FR-MAP-32), as it does on Country details.
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: SizedBox(
+                        width: 48,
+                        height: 32,
+                        child: FlagImage(
+                          country: country,
+                          fit: BoxFit.cover,
+                          excludeFromSemantics: true,
+                        ),
+                      ),
                     ),
-                  ),
+                    PositionedDirectional(
+                      end: -10,
+                      bottom: -12,
+                      child: IgnorePointer(
+                        child: ExcludeSemantics(
+                          child: SizedBox.square(
+                            dimension: 32,
+                            child: FittedBox(
+                              child: VisitStamp(
+                                countryCode: code,
+                                delay: const Duration(milliseconds: 500),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(width: 12),
                 Expanded(

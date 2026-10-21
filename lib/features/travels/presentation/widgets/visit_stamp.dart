@@ -17,9 +17,17 @@ import '../travel_providers.dart';
 /// Android and iOS give a light haptic tap (FR-TRV-02, FR-PLT-08). A country
 /// that was already visited shows the stamp still.
 class VisitStamp extends ConsumerStatefulWidget {
-  const VisitStamp({super.key, required this.countryCode});
+  const VisitStamp({
+    super.key,
+    required this.countryCode,
+    this.delay = Duration.zero,
+  });
 
   final String countryCode;
+
+  /// How long the stamp waits before landing, so the map's color spread
+  /// can finish first (FR-MAP-32).
+  final Duration delay;
 
   @override
   ConsumerState<VisitStamp> createState() => _VisitStampState();
@@ -29,7 +37,7 @@ class _VisitStampState extends ConsumerState<VisitStamp>
     with SingleTickerProviderStateMixin {
   late final _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 600),
+    duration: const Duration(milliseconds: 600) + widget.delay,
     value: _isVisited(ref.read(travelEntryProvider(widget.countryCode)))
         ? 1
         : 0,
@@ -76,22 +84,29 @@ class _VisitStampState extends ConsumerState<VisitStamp>
         ?.visitedOn
         ?.year;
 
-    final scale = Tween<double>(
-      begin: 1.6,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
-    final turn = Tween<double>(
-      begin: -20,
-      end: -12,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    // The landing runs after the delay.
+    final start =
+        widget.delay.inMicroseconds / _controller.duration!.inMicroseconds;
+    final scale = Tween<double>(begin: 1.6, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(start, 1, curve: Curves.easeOutBack),
+      ),
+    );
+    final turn = Tween<double>(begin: -20, end: -12).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(start, 1, curve: Curves.easeOut),
+      ),
+    );
     final opacity = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0, 0.35),
+      curve: Interval(start, start + (1 - start) * 0.35),
     );
 
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) => _controller.value == 0
+      builder: (context, child) => _controller.value <= start
           ? const SizedBox.shrink()
           : Opacity(
               opacity: opacity.value,

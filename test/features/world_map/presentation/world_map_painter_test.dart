@@ -27,6 +27,7 @@ class _Rendered {
     MapView view = MapView.world,
     MapOutside? outside,
     double fade = 0,
+    MapMotion? motion,
   }) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
@@ -39,6 +40,7 @@ class _Rendered {
         view: view,
         outside: outside,
         fade: fade,
+        motion: motion,
       ),
     ]) {
       canvas.save();
@@ -149,6 +151,45 @@ void main() {
     ]) {
       expect(actual, closeTo(wanted, 2 / 255));
     }
+  });
+
+  test('a wishlist country being visited keeps its hatching until the '
+      'amber covers it (FR-MAP-32)', () async {
+    const colors = WorldMapColors.light;
+    final map = await _Rendered.of(
+      {'BRA': TravelStatus.visited, 'BHR': TravelStatus.visited},
+      colors,
+      motion: const MapMotion(
+        fills: {'BRA': 0, 'BHR': 0},
+        fading: {
+          'BRA': (TravelStatus.wishlist, 1),
+          'BHR': (TravelStatus.wishlist, 1),
+        },
+      ),
+    );
+    final bahrain = testWorldMap.dots['BHR']!;
+
+    final row = [for (var i = 0; i < 40; i++) map.at(brazil, right: i)];
+    expect(row, contains(colors.wishlistBase));
+    expect(row, isNot(contains(colors.visitedFill)));
+    // A dot starts from its old color too.
+    expect(map.atMapPoint(bahrain.x, bahrain.y), colors.wishlistBase);
+  });
+
+  test('flight paths arc upward in both directions (FR-MAP-36)', () {
+    const west = Offset(100, 200);
+    const east = Offset(300, 200);
+
+    // 20% of the 200-unit flight, above the middle.
+    expect(flightBend(west, east), const Offset(200, 160));
+    expect(flightBend(east, west), const Offset(200, 160));
+    // A flight south still bends by 20%, to one side.
+    expect(
+      (flightBend(const Offset(0, 0), const Offset(0, 100)) -
+              const Offset(0, 50))
+          .distance,
+      closeTo(20, 1e-9),
+    );
   });
 
   test('dark mode uses the dark fill, not white (AC-MAP-05)', () async {

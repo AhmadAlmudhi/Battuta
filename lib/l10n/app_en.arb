@@ -358,6 +358,9 @@
   "mapZoomIn": "Zoom in",
   "mapZoomOut": "Zoom out",
   "mapResetView": "Reset view",
+  "mapReplay": "Replay my travels",
+  "mapReplaySkip": "Skip",
+  "mapShare": "Share my map",
   "mapRegionSummary": "{region} · {visited} visited · {wishlist} on your wishlist",
   "@mapRegionSummary": {
     "description": "Over the map during a region focus, for example: Europe · 4 visited · 3 on your wishlist (FR-MAP-24).",

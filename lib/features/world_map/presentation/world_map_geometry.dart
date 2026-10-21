@@ -38,7 +38,7 @@ class WorldMapGeometry {
   late final Path land = union([...countries.values, unmatched]);
 
   final _starts = <String, Offset>{};
-  final _reaches = <String, double>{};
+  final _bounds = <String, Rect>{};
   final _outside = <(String, Map<String, String>), MapOutside>{};
 
   /// Where a country's ink spread starts: the middle of its largest part
@@ -57,17 +57,20 @@ class WorldMapGeometry {
     return Offset(x / (6 * area), y / (6 * area));
   });
 
-  /// How far the spread must grow from [spreadStart] to cover every part.
-  double spreadReach(String code) => _reaches.putIfAbsent(code, () {
-    final start = spreadStart(code);
-    final bounds = countries[code]!.getBounds();
+  /// How far a spread from [start] must grow to cover every part: to the
+  /// farthest corner of the country's bounds.
+  double spreadReach(String code, Offset start) {
+    final bounds = _bounds.putIfAbsent(
+      code,
+      () => countries[code]!.getBounds(),
+    );
     return [
       bounds.topLeft,
       bounds.topRight,
       bounds.bottomLeft,
       bounds.bottomRight,
     ].map((corner) => (corner - start).distance).reduce(max);
-  });
+  }
 
   /// The shapes and dots outside [region], given each country's region,
   /// which fade during a region focus (FR-MAP-23).

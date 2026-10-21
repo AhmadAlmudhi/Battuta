@@ -57,6 +57,7 @@ Future<TestApp> pumpApp(
   bool online = true,
   AuthUser? signedIn,
   FakeCloudEntries? cloud,
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -98,6 +99,7 @@ Future<TestApp> pumpApp(
       authRepositoryProvider.overrideWithValue(auth),
       cloudEntriesProvider.overrideWithValue(cloudEntries),
       worldMapLoaderProvider.overrideWithValue(() async => testWorldMap),
+      ...overrides,
     ],
   );
   addTearDown(container.dispose);

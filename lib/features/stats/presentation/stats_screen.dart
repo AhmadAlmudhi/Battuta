@@ -64,6 +64,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 key: _mapCard,
                 visited: 0,
                 wishlist: value.wishlistSize,
+                total: value.total,
               ),
               MessageView(
                 icon: Icons.public_rounded,
@@ -119,6 +120,7 @@ class _StatsBody extends StatelessWidget {
           header: _Headline(stats: stats),
           visited: stats.visited,
           wishlist: stats.wishlistSize,
+          total: stats.total,
         ),
         const SizedBox(height: 24),
         Text(l10n.statsByRegion, style: theme.textTheme.titleMedium),

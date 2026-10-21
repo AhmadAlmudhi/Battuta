@@ -656,6 +656,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mapResetView => 'إعادة تعيين العرض';
 
   @override
+  String get mapReplay => 'استعرض رحلاتي';
+
+  @override
+  String get mapReplaySkip => 'تخطي';
+
+  @override
+  String get mapShare => 'شارك خريطتي';
+
+  @override
   String mapRegionSummary(String region, String visited, String wishlist) {
     return '$region · زرت $visited · $wishlist في قائمة أمنياتك';
   }

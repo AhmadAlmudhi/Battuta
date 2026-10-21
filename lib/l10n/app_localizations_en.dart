@@ -646,6 +646,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapResetView => 'Reset view';
 
   @override
+  String get mapReplay => 'Replay my travels';
+
+  @override
+  String get mapReplaySkip => 'Skip';
+
+  @override
+  String get mapShare => 'Share my map';
+
+  @override
   String mapRegionSummary(String region, String visited, String wishlist) {
     return '$region · $visited visited · $wishlist on your wishlist';
   }
