@@ -90,7 +90,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 
 ## Country data facts
 
-- The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them, leaving **250**, the Stats total (D-3).
+- The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them. It also skips Israel (`excludedCountryCodes`, D-12) and drops it from neighbors' borders, leaving **249**, the Stats total (D-3). The snapshot and flags scripts leave Israel out too, `ensureSeeded` deletes it from data saved earlier, and the map draws its area as Palestine.
 - Missing values arrive as empty strings, not null; the parser maps them to null.
 - The snapshot keeps the raw API record shape (trimmed to the Arabic translation) so one parser serves both the snapshot and the live refresh. The request fields live in `lib/features/countries/data/rest_countries.dart` (pure Dart, also imported by the tool); keep them in step with `country_parser.dart`.
 - `ensureSeeded` imports the snapshot when the DB is empty or older than the bundled snapshot (so a redeploy refreshes web visitors for free). Data age is `MAX(countries.fetched_at)`.
@@ -107,7 +107,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 - **Sign out (D-4)** removes the user's entries from the device; the cloud copy stays.
 - **Country data (section 8.2, D-9):** import the bundled snapshot on first launch with zero API calls. Auto-refresh only if data is older than 7 days and online; manual refresh at most once per 60 minutes. Refresh is all-or-nothing (3 pages, `limit=100`, offsets 0/100/200) and replaces all rows in one transaction. A normal launch makes no API requests (NFR-13): the quota is 1,000 requests/month shared by all users.
 - **REST Countries v5 only** (`https://api.restcountries.com/countries/v5`, `Authorization: Bearer <key>`); v1–v4 are retired. Field mapping is in PRD section 8.1. Parse defensively: capitals, borders, currencies, Arabic names may be missing.
-- **Stats total (D-3)** is the number of countries in the dataset (250 today), computed in one place: `TravelStats.total`. Entries for countries that leave the dataset aren't counted anywhere.
+- **Stats total (D-3)** is the number of countries in the dataset (249 today), computed in one place: `TravelStats.total`. Entries for countries that leave the dataset aren't counted anywhere.
 
 ## UI conventions
 
@@ -138,7 +138,7 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 ## World map
 
 - `assets/data/world_map.json` is committed. `tool/build_world_map.dart` builds it from Natural Earth's 1:10m Saudi point-of-view edition (D-11); download the source GeoJSON from github.com/nvkelso/natural-earth-vector (geojson folder) and don't commit it. `MapFrame.project` (pure Dart, Equal Earth) is shared by the script and the app.
-- Antarctica, Western Sahara, and Israel have no shape or dot (D-11). Overseas parts (French departments, Caribbean Netherlands, Svalbard and Jan Mayen, Bouvet, Tokelau, Christmas and Cocos Islands) are split out by location in `_splitOverseas`. `world_map_asset_test.dart` fails if a dataset country goes missing.
+- Antarctica and Western Sahara have no shape or dot (D-11); the script reads the dataset through `parseCountry`, so Israel (D-12) isn't in it. Overseas parts (French departments, Caribbean Netherlands, Svalbard and Jan Mayen, Bouvet, Tokelau, Christmas and Cocos Islands) are split out by location in `_splitOverseas`. `world_map_asset_test.dart` fails if a dataset country goes missing.
 - A country gets a dot when its largest part fits within 6 × 6 map units, or when its shape vanishes in simplification (then it's placed from the full-detail source).
 - Hit testing (`MapHitTester`, FR-MAP-11): a tap on a dot (within 4 dp of its center) selects it; otherwise over land the country under the tap, and over water the nearest country or dot within 24 dp of its edge, so a tap just off a coast selects that country. Only dataset countries can be selected.
 - The map never mirrors; positions on it are physical in both languages. The card around it mirrors as usual.

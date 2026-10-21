@@ -4,10 +4,12 @@
 // Usage: dart run tool/fetch_snapshot.dart
 //
 // Reads RC_API_KEY from env.json, or from the RC_API_KEY environment variable
-// in CI. Costs 3 API requests.
+// in CI. Costs 3 API requests. Leaves out the countries the app excludes
+// (D-12).
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:battuta/features/countries/data/country_parser.dart';
 import 'package:battuta/features/countries/data/rest_countries.dart';
 
 const _outputPath = 'assets/data/countries_snapshot.json';
@@ -36,7 +38,7 @@ Future<void> main() async {
               as Map<String, Object?>;
       final records = data['objects'] as List<Object?>;
       final meta = data['meta'] as Map<String, Object?>;
-      objects.addAll(records.map(_trim));
+      objects.addAll(records.where(_kept).map(_trim));
       stdout.writeln('Fetched ${objects.length} of ${meta['total']}');
 
       if (meta['more'] != true || records.isEmpty) break;
@@ -55,6 +57,11 @@ Future<void> main() async {
   await file.writeAsString(jsonEncode(snapshot));
   stdout.writeln('Wrote ${objects.length} records to $_outputPath');
 }
+
+bool _kept(Object? record) => !excludedCountryCodes.contains(
+  (((record as Map<String, Object?>)['codes'] as Map?)?['alpha_3'] as String?)
+      ?.toUpperCase(),
+);
 
 /// Keeps only the Arabic translation and drops API metadata, which cuts the
 /// snapshot size by most of its weight without changing the record shape.

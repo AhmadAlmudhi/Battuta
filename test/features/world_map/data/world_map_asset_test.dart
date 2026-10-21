@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:battuta/features/countries/data/country_parser.dart';
 import 'package:battuta/features/world_map/domain/map_hit_tester.dart';
 import 'package:battuta/features/world_map/domain/map_projection.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,19 +15,18 @@ void main() {
   final snapshot =
       jsonDecode(File('assets/data/countries_snapshot.json').readAsStringSync())
           as Map<String, Object?>;
+  // The countries the app shows, read the way the app reads them.
   final dataset = {
     for (final record in snapshot['objects'] as List<Object?>)
-      if (((record as Map<String, Object?>)['codes']
-              as Map<String, Object?>)['alpha_3']
-          case final String code when code.isNotEmpty)
-        code,
+      ?parseCountry(record as Map<String, Object?>)?.code,
   };
   final onMap = {...map.shapes.keys, ...map.dots.keys};
   final tester = MapHitTester(map, selectable: dataset);
 
-  test('every dataset country has a shape or a dot, except Antarctica, '
-      'Western Sahara, and Israel (D-11)', () {
-    expect(dataset.difference(onMap), {'ATA', 'ESH', 'ISR'});
+  test('every dataset country has a shape or a dot, except Antarctica and '
+      'Western Sahara (D-11)', () {
+    expect(dataset, hasLength(249));
+    expect(dataset.difference(onMap), {'ATA', 'ESH'});
   });
 
   test('shapes and dots belong to dataset countries; none is coded -99', () {
@@ -68,7 +68,9 @@ void main() {
     expect(west, greaterThan(widestWest));
   });
 
-  test('this edition draws Israel\'s area as Palestine (D-11)', () {
+  test('Israel isn\'t in the dataset, and its area is Palestine on the map '
+      '(D-11, D-12)', () {
+    expect(dataset, isNot(contains('ISR')));
     expect(tester.countryAt(mapPointOf(34.78, 32.08)), 'PSE');
   });
 

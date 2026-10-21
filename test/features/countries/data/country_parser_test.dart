@@ -86,6 +86,20 @@ void main() {
       );
     });
 
+    test('leaves Israel out, including from neighbors\' borders (D-12)', () {
+      expect(
+        parseCountry(_record(codes: {'alpha_2': 'IL', 'alpha_3': 'ISR'})),
+        isNull,
+      );
+      final palestine = parseCountry(
+        _record(
+          codes: {'alpha_2': 'PS', 'alpha_3': 'PSE'},
+          borders: ['EGY', 'ISR', 'JOR'],
+        ),
+      );
+      expect(palestine!.borders, ['EGY', 'JOR']);
+    });
+
     test('picks the primary capital, else the first', () {
       final bolivia = parseCountry(
         _record(

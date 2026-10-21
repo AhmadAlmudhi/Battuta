@@ -17,7 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
-| 1.9 | 21 Oct 2026 | World map added to the top of the Stats screen (section 6.10). The app draws it from bundled Natural Earth data in the Saudi point-of-view edition (D-11, section 8.7), so it needs no map service. The map card takes over the Stats headline and also shows when nothing is visited yet. About credits Natural Earth. |
+| 1.9 | 21 Oct 2026 | World map added to the top of the Stats screen (section 6.10). The app draws it from bundled Natural Earth data in the Saudi point-of-view edition (D-11, section 8.7), so it needs no map service. The map card takes over the Stats headline and also shows when nothing is visited yet. About credits Natural Earth. Israel is left out of the app, and the map draws its area as Palestine (D-12). |
 | 1.8 | 21 Oct 2026 | App icons generated for every platform from the logo. The iOS home-screen name follows the device language. Settings has an About section. Arabic dates now use Western digits too (D-5). |
 | 1.7 | 20 Oct 2026 | Accounts and sync built. Security rules now also enforce last write wins and the entry shape. A new `local_data_owner` setting makes sure one account's entries never merge into another's after a session ends without Sign out. Sync is tested against the Firebase emulators. |
 | 1.6 | 20 Oct 2026 | Flutter upgraded to 3.47.7. Drift 2.35.2 or newer is required on web, because older versions don't save transactions to IndexedDB. The web database worker is compiled from source. iOS builds with CocoaPods until Xcode 26.2 or later is available. |
@@ -229,7 +229,8 @@ Release 1.0 is accepted when all of the following are true:
 | D-8 | Email and password is the only sign-in method in 1.0. | Works the same on all three platforms with no extra provider setup. |
 | D-9 | Country data loads from a snapshot bundled with each build. The API only refreshes it. | Instant first load, and web traffic doesn't use up the shared API quota. |
 | D-10 | The web app is served from the free Firebase Hosting address, battuta-travel.web.app. | No domain cost or DNS setup. A custom domain can be added later without code changes. |
-| D-11 | The world map is drawn by the app from Natural Earth's 1:10m Saudi point-of-view edition, bundled with each build (section 8.7). | No map service, API key, or network use, so the map works offline and stays free. This edition includes every small country tested, makes the smallest complete map file, and draws disputed borders as recognized in the app's main region. Somaliland and Northern Cyprus are part of Somalia and Cyprus, which matches the dataset (section 8.1). Western Sahara is drawn as part of Morocco, and Israel's area as Palestine, with only a placeholder about 1 km across left for Israel. So neither country has a shape of its own, though both still count in Stats when marked as visited. |
+| D-11 | The world map is drawn by the app from Natural Earth's 1:10m Saudi point-of-view edition, bundled with each build (section 8.7). | No map service, API key, or network use, so the map works offline and stays free. This edition includes every small country tested, makes the smallest complete map file, and draws disputed borders as recognized in the app's main region. Somaliland and Northern Cyprus are part of Somalia and Cyprus, which matches the dataset (section 8.1). Western Sahara is drawn as part of Morocco, so it has no shape of its own, though it still counts in Stats when marked as visited. Israel's area is drawn as Palestine (D-12). |
+| D-12 | The app leaves out Israel. It isn't in the country data, Explore, Stats, or any country's neighbors, and the map draws its area as Palestine. | Follows the map's point of view (D-11). The parser skips Israel the way it skips records without ISO codes (section 8.1), so neither the bundled data nor a refresh brings it back, and data saved before this decision loses it at the next launch. |
 
 ## 4. Users
 
@@ -415,7 +416,7 @@ Requirements are grouped by module. Each module lists its requirements, then the
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-STA-01 | The headline, at the top of the world map card (FR-MAP-02), shows the number of countries visited and their share of the dataset total, to one decimal place, for example: 12 of 250 · 4.8%. | Must |
+| FR-STA-01 | The headline, at the top of the world map card (FR-MAP-02), shows the number of countries visited and their share of the dataset total, to one decimal place, for example: 12 of 249 · 4.8%. | Must |
 | FR-STA-02 | One progress bar per region shows visited countries out of that region's total. | Must |
 | FR-STA-03 | Summary figures: wishlist size, most recent trip (country and date), and the year of the first trip. | Should |
 | FR-STA-04 | Numbers count up and bars fill when the screen opens (section 10.2). | Should |
@@ -507,18 +508,18 @@ The top of the Stats screen is a world map of the user's travels: visited countr
 | ID | Requirement | Priority |
 | --- | --- | --- |
 | FR-MAP-01 | The top of the Stats screen is a world map card. Every country is colored by its status: Visited in Stamp Amber, Wishlist in teal hatching, and Not yet in white, or a dark fill in dark mode (section 10.1). | Must |
-| FR-MAP-02 | The card's header is the Stats headline (FR-STA-01) followed by the wishlist size, for example: 16 of 250 · 6.4% · 12 on your wishlist. Stats has no separate headline card. | Must |
+| FR-MAP-02 | The card's header is the Stats headline (FR-STA-01) followed by the wishlist size, for example: 16 of 249 · 6.4% · 12 on your wishlist. Stats has no separate headline card. | Must |
 | FR-MAP-03 | A legend shows Visited, Wishlist, and Not yet with their swatches. When small countries have dots (FR-MAP-09), it adds the note: Small countries appear as dots. | Must |
 | FR-MAP-04 | Status comes from the travel entries, and soft-deleted entries count as Not yet. The map updates immediately when an entry changes, on this device or through sync. | Must |
 | FR-MAP-05 | The map draws only from the bundled map file (section 8.7). It makes no network requests and works offline on every platform. | Must |
 | FR-MAP-06 | Light and dark themes use the colors in section 10.1 and switch with the app theme. | Must |
-| FR-MAP-07 | Shapes that match no country in the dataset, such as Bir Tawil, draw as Not yet and can't be selected. Dataset countries with no shape or dot, Antarctica, Western Sahara, and Israel (section 8.7), still count in every total but don't appear on the map. | Must |
+| FR-MAP-07 | Shapes that match no country in the dataset, such as Bir Tawil, draw as Not yet and can't be selected. Dataset countries with no shape or dot, Antarctica and Western Sahara (section 8.7), still count in every total but don't appear on the map. | Must |
 | FR-MAP-08 | Screen readers treat the map as one element with a summary, for example: World map: 16 countries visited, 12 on your wishlist. It has a View as list action that opens My travels. Every map action is also available from Explore, Country details, and My travels, so countries on the map don't need the 48 dp touch targets of NFR-08. | Must |
 
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
 | AC-MAP-01 | Japan is visited and Brazil is on the wishlist | Stats opens | Japan is amber, Brazil is hatched teal, and France is white. |
-| AC-MAP-02 | 16 visited countries and 12 on the wishlist | Stats opens | the map card's header reads 16 of 250 · 6.4% · 12 on your wishlist, and there is no other headline card. |
+| AC-MAP-02 | 16 visited countries and 12 on the wishlist | Stats opens | the map card's header reads 16 of 249 · 6.4% · 12 on your wishlist, and there is no other headline card. |
 | AC-MAP-03 | the Stats screen is open | the user removes Japan from Visited on another screen and returns | Japan is white. |
 | AC-MAP-04 | the device is offline | Stats opens | the map shows normally. |
 | AC-MAP-05 | the app is in dark mode | Stats opens | unvisited countries use the dark fill, not white. |
@@ -656,7 +657,7 @@ When the user marks a country from the tap card, the color spreads from the exac
 
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
-| AC-MAP-23 | the web app with 16 visited countries | the user selects Share my map | a PNG downloads showing the map and the headline 16 of 250 · 6.4%. |
+| AC-MAP-23 | the web app with 16 visited countries | the user selects Share my map | a PNG downloads showing the map and the headline 16 of 249 · 6.4%. |
 
 ## 7. Key user flows
 
@@ -773,11 +774,11 @@ Authorization: Bearer <RC_API_KEY>
 | `flag.description` | `flagAlt` | Screen-reader label for the flag |
 | `flag.colors.dominant` | `flagColor` | Header tint (FR-DET-07) |
 
-> **Data note:** The API returns 254 records. Four disputed territories (Abkhazia, Northern Cyprus, Somaliland, and South Ossetia) have no ISO codes, so they can't have a route, flag, or entry, and the app skips them. That leaves 250 countries and territories, the total used by Stats (D-3). Missing values arrive as empty strings, not null, so the parser treats empty strings as missing.
+> **Data note:** The API returns 254 records. Four disputed territories (Abkhazia, Northern Cyprus, Somaliland, and South Ossetia) have no ISO codes, so they can't have a route, flag, or entry, and the app skips them. The app also leaves out Israel (D-12). That leaves 249 countries and territories, the total used by Stats (D-3). Missing values arrive as empty strings, not null, so the parser treats empty strings as missing.
 
 ### 8.2 Snapshot and refresh rules
 
-1. Every build bundles `assets/data/countries_snapshot.json`, produced by `tool/fetch_snapshot.dart`, which runs the request above and records when it ran. It keeps only the Arabic translation to stay small. `tool/fetch_flags.dart` downloads a 320 px flag for each country into `assets/flags/`.
+1. Every build bundles `assets/data/countries_snapshot.json`, produced by `tool/fetch_snapshot.dart`, which runs the request above and records when it ran. It keeps only the Arabic translation to stay small, and leaves out Israel (D-12). `tool/fetch_flags.dart` downloads a 320 px flag for each country into `assets/flags/`.
 2. On first launch, or a first visit to the website, the app imports the snapshot into the local database. No API call is made. On later launches, a bundled snapshot newer than the local data (after an app update or a redeploy) replaces it the same way.
 3. On later launches, the app reads from the local database. If the data is older than 7 days and the device is online, it refreshes in the background.
 4. A refresh is all or nothing: if any page fails, keep the previous data. On success, replace all rows in one transaction.
@@ -907,7 +908,7 @@ The small countries tested were Singapore, Bahrain, Malta, the Maldives, Monaco,
 
 #### Matching the dataset
 
-Shapes match dataset countries by their `ISO_A3_EH` code. Don't use `ISO_A3`, which is -99 for France and Norway, or `ADM0_A3`, which differs from the standard code for some countries (Palestine is PSX instead of PSE). When checked on 21 October 2026, 237 of the 250 dataset countries matched a shape this way. The other 13 are handled as follows:
+Shapes match dataset countries by their `ISO_A3_EH` code. Don't use `ISO_A3`, which is -99 for France and Norway, or `ADM0_A3`, which differs from the standard code for some countries (Palestine is PSX instead of PSE). When checked on 21 October 2026, 236 of the 249 dataset countries matched a shape this way. The other 13 are handled as follows:
 
 | Dataset countries | In Natural Earth | Handling |
 | --- | --- | --- |
@@ -919,7 +920,7 @@ Shapes match dataset countries by their `ISO_A3_EH` code. Don't use `ISO_A3`, wh
 | Kosovo | Coded -99 (KOS in `ADM0_A3`) | A manual table maps it to UNK, the code the countries API uses |
 | Western Sahara | Part of Morocco in this edition (D-11) | Excluded: no shape or dot |
 
-Antarctica matches a shape but is removed with the crop (section 10.1). Israel matches only a placeholder about 1 km across near Jerusalem, because this edition draws Israel's area as Palestine (D-11). Both are excluded too. Other shapes that share a code merge into one country: the Coral Sea Islands and the Ashmore and Cartier Islands join Australia, Brazilian Island joins Brazil, and Clipperton Island joins France. The remaining shapes coded -99 (Akrotiri, Dhekelia, Bir Tawil, the Spratly Islands, Scarborough Reef, and the Guantanamo Bay naval base) match no country: they draw as Not yet and can't be selected (FR-MAP-07).
+Antarctica matches a shape but is removed with the crop (section 10.1), so it is excluded too. This edition draws Israel's area as Palestine and keeps only a placeholder about 1 km across for Israel, which matches no dataset country (D-12). Other shapes that share a code merge into one country: the Coral Sea Islands and the Ashmore and Cartier Islands join Australia, Brazilian Island joins Brazil, and Clipperton Island joins France. The remaining shapes coded -99 (Akrotiri, Dhekelia, Bir Tawil, the Spratly Islands, Scarborough Reef, and the Guantanamo Bay naval base) match no country: they draw as Not yet and can't be selected (FR-MAP-07).
 
 #### Build script
 
@@ -938,7 +939,7 @@ Run it with `dart run tool/build_world_map.dart <path to ne_10m_admin_0_countrie
 2. **Match codes and split overseas parts** as described above.
 3. **Project.** Convert every point with Equal Earth (below), clamp latitude to between 57° south and 84° north, scale to 1,000 units wide, and round to 0.1 unit.
 4. **Choose dots.** Give a dot to every country whose largest part fits within 6 × 6 units, and to every country whose shape vanishes during simplification (FR-MAP-09): 94 countries in all. A dot sits in the middle of the country's largest part. Ten countries' shapes vanish, such as Vatican City and Tuvalu. They are placed from the full-detail source and kept as dots only.
-5. **Write and report.** Write `assets/data/world_map.json`, then list every dataset country with neither a shape nor a dot. Only Antarctica, Western Sahara, and Israel may be on that list; the script and a test both fail on anything else (section 12.1).
+5. **Write and report.** Write `assets/data/world_map.json`, then list every dataset country with neither a shape nor a dot. Only Antarctica and Western Sahara may be on that list; the script and a test both fail on anything else (section 12.1).
 
 The Equal Earth formula, in Dart:
 
@@ -1233,7 +1234,7 @@ flowchart LR
 | --- | --- | --- |
 | Unit | Domain logic | Every row of the merge rules (section 7.3); search normalization; filter and sort; parsing records with missing capitals, borders, or currencies; the Equal Earth projection; map hit testing (a point in Spain is ESP, a point near Bahrain is BHR, western Saudi Arabia is SAU, the ocean is nothing); reveal timings within 1.5 s for 1, 50, and 250 countries |
 | Repository | Data layer with a mocked API and an in-memory database | Snapshot import; stale-data refresh; a failed page keeps old data; 401, 403, and 429 map to the right errors |
-| Map data | The committed map file against the snapshot | Every dataset country has a shape or a dot except Antarctica, Western Sahara, and Israel; no shape is coded -99; overseas parts belong to their own countries, so Réunion isn't part of France |
+| Map data | The committed map file against the snapshot | Every dataset country has a shape or a dot except Antarctica and Western Sahara; no shape is coded -99; overseas parts belong to their own countries, so Réunion isn't part of France |
 | Widget | Screens | Explore loading, empty, error, and data states; visit form validation; Arabic layout mirrors; compact and expanded layouts; map colors by status in both themes; the map's tap card actions |
 | Manual | End-to-end flows | Sync between a browser and a phone; airplane mode on mobile; keyboard-only use on web; a full Arabic and dark-mode walkthrough; map smoothness on a mid-range phone, in a phone browser, and in desktop Chrome, Safari, and Firefox |
 

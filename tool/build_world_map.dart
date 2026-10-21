@@ -11,15 +11,17 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:battuta/features/countries/data/country_parser.dart';
 import 'package:battuta/features/world_map/domain/map_projection.dart';
 
 const _outputPath = 'assets/data/world_map.json';
 const _snapshotPath = 'assets/data/countries_snapshot.json';
 
 /// Dataset countries that aren't on the map (D-11): Antarctica is cropped
-/// off, this edition draws Western Sahara as part of Morocco, and it draws
-/// Israel's area as Palestine, keeping only a placeholder about 1 km across.
-const _excluded = {'ATA', 'ESH', 'ISR'};
+/// off, and this edition draws Western Sahara as part of Morocco. Israel
+/// isn't in the dataset at all (D-12); this edition draws its area as
+/// Palestine.
+const _excluded = {'ATA', 'ESH'};
 
 /// Shapes coded -99 that still match a dataset country, by ADM0_A3.
 const _manualCodes = {'KOS': 'UNK'};
@@ -115,16 +117,14 @@ Future<void> main(List<String> args) async {
   );
 }
 
+/// The countries the app shows, read the way the app reads them.
 Set<String> _datasetCodes() {
   final snapshot =
       jsonDecode(File(_snapshotPath).readAsStringSync())
           as Map<String, Object?>;
   return {
     for (final record in snapshot['objects'] as List<Object?>)
-      if (((record as Map<String, Object?>)['codes']
-              as Map<String, Object?>)['alpha_3']
-          case final String code when code.isNotEmpty)
-        code,
+      ?parseCountry(record as Map<String, Object?>)?.code,
   };
 }
 
