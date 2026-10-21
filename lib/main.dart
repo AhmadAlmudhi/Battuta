@@ -7,6 +7,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'features/settings/presentation/about_providers.dart';
 import 'features/settings/presentation/settings_controller.dart';
 import 'firebase_options.dart';
 
@@ -18,6 +19,7 @@ Future<void> main() async {
     Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
   ).wait;
   if (_useEmulators) await _connectToEmulators();
+  registerFontLicenses();
   runApp(
     ProviderScope(
       overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],

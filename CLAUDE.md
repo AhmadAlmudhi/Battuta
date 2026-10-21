@@ -19,7 +19,8 @@ Guidance for Claude Code when working in this repository.
   - My travels is complete: Visited and Wishlist tabs with counts and their own URLs, sorting, search, region filter, swipe and menu Edit/Delete with Undo, and empty states.
   - Stats is complete: headline (visited of the dataset total, one decimal), a bar per region, highlights, count-up animation, and the zero state.
   - Accounts and cloud sync are complete: sign in, create account, reset password, Account screen with sync status, Sync now, and Sign out; guest merge on first sign-in, live two-way sync, and server-enforced last write wins.
-  - Not started: the Settings About section (FR-SET-04), the app icon and favicon, the Arabic iOS home-screen name, CI, and the first production deploy.
+  - Settings has its About section (FR-SET-04); app icons and the favicon are generated; the home-screen name is Battuta or بطوطة on Android and iOS.
+  - Not started: CI and the first production deploy.
 
 ## Commands
 
@@ -41,6 +42,8 @@ flutter build ios --no-codesign --dart-define-from-file=env.json
 firebase deploy --only firestore:rules                     # after editing firestore.rules
 firebase deploy --only hosting                             # production deploy; only when asked
 flutterfire configure --project=battuta-b8451              # regenerate configs after adding a Firebase plugin/platform
+
+dart run flutter_launcher_icons                            # regenerate app icons; then revert its project.pbxproj change (see flutter_launcher_icons.yaml)
 
 # Firebase emulators (need Java: Homebrew openjdk@21, not on the system PATH)
 PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH" firebase emulators:start --only auth,firestore --project battuta-b8451
@@ -118,7 +121,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 
 - All user-facing text comes from `lib/l10n/app_en.arb` and `app_ar.arb`. Keys are camelCase prefixed with the screen name (`exploreSearchHint`). No hard-coded strings.
 - Use `EdgeInsetsDirectional`, `AlignmentDirectional`, start/end, and directional icons. Never left/right. Flags never mirror.
-- Western digits (0–9) in both languages (D-5). Dates follow the active locale.
+- Western digits (0–9) in both languages (D-5). Dates follow the active locale. Flutter's Arabic date data defaults to Arabic-Indic digits, so `BattutaApp` calls `useWesternDigits()` before the localizations build; always format dates through `context.formatDate` / `formatDateTime`.
 - Arabic country name falls back to the English name.
 - Search normalization (section 10.4) applies to both query and stored fields: Latin lowercased, trimmed, accents stripped; Arabic `أ إ آ ٱ → ا`, `ة → ه`, `ى → ي`, diacritics U+064B–U+0652 and tatweel U+0640 removed.
 - Validation and Firebase auth error messages are listed in PRD section 8.6.
@@ -152,6 +155,7 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 
 - After adding or removing a plugin, run `flutter clean` if the web app throws `MissingPluginException`: the web plugin registrant in `.dart_tool/flutter_build/` can go stale. Widget tests won't catch it because they mock plugins.
 - Android uses Kotlin Gradle plugin 2.3.20 (Firebase Android SDK metadata is Kotlin 2.4) and the `kotlin { compilerOptions { ... } }` DSL.
+- The iOS home-screen name comes from `ios/Runner/{en,ar}.lproj/InfoPlist.strings` (a localized resource in the Runner target; Arabic is in the project's known regions and `CFBundleLocalizations`). Edit the Xcode project with the `xcodeproj` Ruby library that ships with CocoaPods (`GEM_HOME=/opt/homebrew/Cellar/cocoapods/<version>/libexec /opt/homebrew/opt/ruby/bin/ruby -rxcodeproj`), not by hand.
 - The iOS deployment target is 15.0 (required by `cloud_firestore`, and the PRD minimum). If `pod install` says the specs repo is out of date, run `cd ios && pod install --repo-update`.
 - iOS builds with CocoaPods: `pubspec.yaml` sets `flutter: config: enable-swift-package-manager: false`, because Firebase's Swift Package Manager release (13.x) needs Xcode 26.2 or later and this Mac has Xcode 26.1. Firebase stopped publishing new CocoaPods releases after 12.19.0 (October 2026), so after updating Xcode, remove that setting to move iOS to Swift Package Manager.
 - Gradle 8.14 and Android Gradle Plugin 8.11 work but Flutter warns their support will be dropped; moving to AGP 9 is a pending, separate change.

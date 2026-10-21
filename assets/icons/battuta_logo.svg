@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="ws-bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0" stop-color="#15909A"/><stop offset="1" stop-color="#0B6770"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#ws-bg)"/>
+  <g transform="rotate(-12 512 512)" fill="none" stroke-linecap="round">
+    <circle cx="512" cy="512" r="288" stroke="#FBEFD9" stroke-width="34"/>
+    <circle cx="512" cy="512" r="238" stroke="#FBEFD9" stroke-width="10"/>
+    <circle cx="255" cy="512" r="11" fill="#FBEFD9" stroke="none"/>
+    <circle cx="769" cy="512" r="11" fill="#FBEFD9" stroke="none"/>
+    <circle cx="512" cy="512" r="160" stroke="#F2B24B" stroke-width="26"/>
+    <ellipse cx="512" cy="512" rx="68" ry="160" stroke="#F2B24B" stroke-width="18"/>
+    <line x1="352" y1="512" x2="672" y2="512" stroke="#F2B24B" stroke-width="18"/>
+    <line x1="374" y1="432" x2="650" y2="432" stroke="#F2B24B" stroke-width="14"/>
+    <line x1="374" y1="592" x2="650" y2="592" stroke="#F2B24B" stroke-width="14"/>
+  </g>
+</svg>

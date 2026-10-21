@@ -1,8 +1,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
-/// Numbers and dates in the app language. Both locales use Western digits
-/// (D-5), which is intl's default for `ar`.
+/// Western digits (0 to 9) for dates in Arabic too (D-5). Flutter's Arabic
+/// date data defaults to Arabic-Indic digits; numbers already use Western
+/// digits. Call before the app starts, so Material's own dates, such as in
+/// the date picker, follow it as well.
+void useWesternDigits() => DateFormat.useNativeDigitsByDefaultFor('ar', false);
+
+/// Numbers and dates in the app language, with Western digits in both
+/// languages (D-5).
 extension LocaleFormatting on BuildContext {
   String get _localeTag => Localizations.localeOf(this).toLanguageTag();
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/format/formatters.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/auth_providers.dart';
@@ -14,6 +15,8 @@ class BattutaApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Before the localizations below build their date formats (D-5).
+    useWesternDigits();
     final settings = ref.watch(settingsProvider);
     // Sync follows the signed-in account for the whole session, whichever
     // screen is open (PRD section 6.7).

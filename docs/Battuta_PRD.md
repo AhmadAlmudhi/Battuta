@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.7 |
+| Version | 1.8 |
 | Status | Ready for development |
 | Date | 20 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.8 | 21 Oct 2026 | App icons generated for every platform from the logo. The iOS home-screen name follows the device language. Settings has an About section. Arabic dates now use Western digits too (D-5). |
 | 1.7 | 20 Oct 2026 | Accounts and sync built. Security rules now also enforce last write wins and the entry shape. A new `local_data_owner` setting makes sure one account's entries never merge into another's after a session ends without Sign out. Sync is tested against the Firebase emulators. |
 | 1.6 | 20 Oct 2026 | Flutter upgraded to 3.47.7. Drift 2.35.2 or newer is required on web, because older versions don't save transactions to IndexedDB. The web database worker is compiled from source. iOS builds with CocoaPods until Xcode 26.2 or later is available. |
 | 1.5 | 20 Oct 2026 | Flags are bundled as assets because the flag CDN sends no CORS headers. A newer bundled snapshot replaces older local data. Search runs in memory, so `search_en` and `search_ar` are removed; `name_official_ar` is added (schema 2). Refresh attempt times are stored in `auto_refresh_at` and `manual_refresh_at`. `connectivity_plus` added; `cached_network_image` removed. |
@@ -126,7 +127,7 @@ The product is named **بطوطة**, written **Battuta** in Latin letters. It is
 | Name | Arabic: بطوطة. Latin: Battuta (double t in the middle). The name follows the interface language: بطوطة in Arabic and Battuta in English, including the Android launcher label and the iOS home-screen name. |
 | Code identifiers | Flutter package name: `battuta`. Android application ID and iOS bundle ID: `com.ahmadalmudhi.battuta`. Firebase project ID: `battuta-b8451`. Hosting site: `battuta-travel`. These identifiers never appear in the interface; the app is always called Battuta (بطوطة). |
 | Tagline | English: Every country, stamped. Arabic: كل دولة، بختمها |
-| App icon | A cream passport stamp, tilted 12 degrees, with an amber globe at its center, on a Lagoon Teal background. The icon has no text, so it works in both languages. The artwork stays within the central 60% of the canvas, so round and rounded-square masks never clip it. Source files: `battuta-icon.svg` and a 1,024 px PNG. Generate every platform size, including the web favicon, with `flutter_launcher_icons`. |
+| App icon | A cream passport stamp, tilted 12 degrees, with an amber globe at its center, on a Lagoon Teal background. The icon has no text, so it works in both languages. The artwork stays within the central 60% of the canvas, so round and rounded-square masks never clip it. Source files in `assets/icons/`: `battuta_logo.svg`, rendered to `battuta_icon.png` (1,024 px), plus the stamp alone (`battuta_icon_foreground.png`) and the background alone (`battuta_icon_background.png`) for the Android adaptive icon. Every platform size, including the web favicon, is generated with `flutter_launcher_icons` (`flutter_launcher_icons.yaml`). |
 | Production URL | `battuta-travel.web.app`, a free Firebase Hosting address, which Firebase also serves at `battuta-travel.firebaseapp.com`. The names `battuta` and `battuta-app` were taken by other projects. The `-travel` suffix appears only in the web address, never in the app name. |
 | Typography | Inter for Latin text and IBM Plex Sans Arabic for Arabic text, including the بطوطة wordmark in Bold. Both use the SIL Open Font License and are bundled as assets, so the web app never fetches fonts at run time. |
 
@@ -218,7 +219,7 @@ Release 1.0 is accepted when all of the following are true:
 | D-2 | Each country has at most one entry, either Visited or Wishlist. | No duplicates and a simple merge keyed by country code. |
 | D-3 | Stats percentages use all countries and territories in the dataset (about 250) as the total. | Users can record any place in the dataset. The total is one constant, so it can change later. |
 | D-4 | Signing out removes the user's entries from the device; the cloud copy stays. | Protects privacy on shared devices and browsers. |
-| D-5 | Numbers use Western digits (0 to 9) in both languages. | Consistent with the API data and common in regional apps. |
+| D-5 | Numbers use Western digits (0 to 9) in both languages. | Consistent with the API data and common in regional apps. Flutter's Arabic date data defaults to Arabic-Indic digits, so the app turns native digits off for Arabic dates. |
 | D-6 | Conflicts between devices resolve by last write wins, per country. | Simple, predictable, and enough for one user's own devices. |
 | D-7 | Web is the only production platform for 1.0. Android and iOS are built and tested but not published. | A link is the fastest way to reach users; store releases need extra review, assets, and accounts. |
 | D-8 | Email and password is the only sign-in method in 1.0. | Works the same on all three platforms with no extra provider setup. |

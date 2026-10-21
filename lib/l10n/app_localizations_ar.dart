@@ -735,4 +735,28 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get settingsAbout => 'حول التطبيق';
+
+  @override
+  String get settingsVersion => 'الإصدار';
+
+  @override
+  String get settingsCountryData => 'بيانات الدول';
+
+  @override
+  String settingsCountryDataUpdated(String date) {
+    return 'حُدّثت في $date';
+  }
+
+  @override
+  String get settingsDataSource => 'مصدر البيانات';
+
+  @override
+  String get settingsDataSourceValue =>
+      'بيانات الدول والأعلام من REST Countries';
+
+  @override
+  String get settingsLicenses => 'تراخيص المصادر المفتوحة';
 }

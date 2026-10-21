@@ -378,5 +378,19 @@
         "type": "int"
       }
     }
-  }
+  },
+  "settingsAbout": "About",
+  "settingsVersion": "Version",
+  "settingsCountryData": "Country data",
+  "settingsCountryDataUpdated": "Updated {date}",
+  "@settingsCountryDataUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDataSource": "Data source",
+  "settingsDataSourceValue": "Country data and flags from REST Countries",
+  "settingsLicenses": "Open-source licenses"
 }

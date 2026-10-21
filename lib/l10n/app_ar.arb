@@ -209,5 +209,12 @@
   "accountSyncFailed": "تعذّرت المزامنة. سنحاول مرة أخرى.",
   "accountSignOutTitle": "تسجيل الخروج؟",
   "accountSignOutBody": "تبقى رحلاتك محفوظة في حسابك، وستُزال من هذا الجهاز.",
-  "accountSignOutUnsynced": "{count, plural, =1{تغيير واحد لم يُحفظ احتياطيًا بعد وسيُفقد.} =2{تغييران لم يُحفظا احتياطيًا بعد وسيُفقدان.} few{{count} تغييرات لم تُحفظ احتياطيًا بعد وستُفقد.} other{{count} تغييرًا لم تُحفظ احتياطيًا بعد وستُفقد.}}"
+  "accountSignOutUnsynced": "{count, plural, =1{تغيير واحد لم يُحفظ احتياطيًا بعد وسيُفقد.} =2{تغييران لم يُحفظا احتياطيًا بعد وسيُفقدان.} few{{count} تغييرات لم تُحفظ احتياطيًا بعد وستُفقد.} other{{count} تغييرًا لم تُحفظ احتياطيًا بعد وستُفقد.}}",
+  "settingsAbout": "حول التطبيق",
+  "settingsVersion": "الإصدار",
+  "settingsCountryData": "بيانات الدول",
+  "settingsCountryDataUpdated": "حُدّثت في {date}",
+  "settingsDataSource": "مصدر البيانات",
+  "settingsDataSourceValue": "بيانات الدول والأعلام من REST Countries",
+  "settingsLicenses": "تراخيص المصادر المفتوحة"
 }
