@@ -27,6 +27,18 @@ final worldMapGeometryProvider = Provider<AsyncValue<WorldMapGeometry>>(
   (ref) => ref.watch(worldMapProvider).whenData(WorldMapGeometry.new),
 );
 
+/// The region the map focuses on, or null for the whole world (FR-MAP-21).
+/// Set by the region chips and the region bars on Stats (FR-MAP-25).
+final mapRegionProvider = StateProvider<String?>((ref) => null);
+
+/// Each country's region, by code, for the region focus and its summary.
+final countryRegionsProvider = Provider<Map<String, String>>(
+  (ref) => {
+    for (final country in ref.watch(countriesProvider).valueOrNull ?? [])
+      country.code: country.region,
+  },
+);
+
 /// Null until the map and the countries have loaded. Only countries in the
 /// dataset can be selected (FR-MAP-07).
 final mapHitTesterProvider = Provider<MapHitTester?>((ref) {

@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:battuta/features/travels/domain/travel_entry.dart';
 import 'package:battuta/features/world_map/domain/map_projection.dart';
+import 'package:battuta/features/world_map/domain/map_view.dart';
 import 'package:battuta/features/world_map/presentation/world_map_colors.dart';
 import 'package:battuta/features/world_map/presentation/world_map_geometry.dart';
 import 'package:battuta/features/world_map/presentation/world_map_painter.dart';
@@ -15,20 +16,30 @@ import '../../../helpers/test_world_map.dart';
 /// be read back where countries are. Exact colors in the middle of shapes,
 /// not golden images (PRD section 12.1).
 class _Rendered {
-  _Rendered._(this._bytes);
+  _Rendered._(this._bytes, this._view);
 
   static const _size = Size(2000, 870);
+  static final _geometry = WorldMapGeometry(testWorldMap);
 
   static Future<_Rendered> of(
     Map<String, TravelStatus> statuses,
-    WorldMapColors colors,
-  ) async {
-    final geometry = WorldMapGeometry(testWorldMap);
+    WorldMapColors colors, {
+    MapView view = MapView.world,
+    MapOutside? outside,
+    double fade = 0,
+  }) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     for (final layer in <CustomPainter>[
-      WorldMapBasePainter(geometry: geometry, colors: colors),
-      WorldMapPainter(geometry: geometry, statuses: statuses, colors: colors),
+      WorldMapBasePainter(geometry: _geometry, colors: colors, view: view),
+      WorldMapPainter(
+        geometry: _geometry,
+        statuses: statuses,
+        colors: colors,
+        view: view,
+        outside: outside,
+        fade: fade,
+      ),
     ]) {
       canvas.save();
       layer.paint(canvas, _size);
@@ -38,10 +49,11 @@ class _Rendered {
       _size.width.toInt(),
       _size.height.toInt(),
     );
-    return _Rendered._((await image.toByteData())!);
+    return _Rendered._((await image.toByteData())!, view);
   }
 
   final ByteData _bytes;
+  final MapView _view;
 
   /// The color at a place, or [right] pixels to the right of it.
   Color at((double, double) place, {int right = 0}) {
@@ -49,10 +61,9 @@ class _Rendered {
     return atMapPoint(x, y, right: right);
   }
 
-  Color atMapPoint(double x, double y, {int right = 0}) {
-    final scale = _size.width / MapFrame.width;
-    final i = ((y * scale).round() * _size.width + (x * scale).round() + right)
-        .toInt();
+  Color atMapPoint(double x, double y, {int right = 0, int down = 0}) {
+    final (vx, vy) = _view.toView(x, y, _size.width, _size.height);
+    final i = ((vy.round() + down) * _size.width + vx.round() + right).toInt();
     return Color.fromARGB(
       _bytes.getUint8(i * 4 + 3),
       _bytes.getUint8(i * 4),
@@ -91,6 +102,53 @@ void main() {
     final bahrain = testWorldMap.dots['BHR']!;
 
     expect(map.atMapPoint(bahrain.x, bahrain.y), colors.visitedFill);
+  });
+
+  test('at 8× a border is still a thin line (FR-MAP-20, AC-MAP-12)', () async {
+    const colors = WorldMapColors.light;
+    // The Pyrenees at 0° E, between France and Spain, both Not yet.
+    final (x, y) = MapFrame.project(0, 42.7);
+    final map = await _Rendered.of(
+      const {},
+      colors,
+      view: MapView(scale: 8, centerX: x, centerY: y),
+    );
+    final (_, north) = MapFrame.project(0, 43.6);
+    final (_, south) = MapFrame.project(0, 41.8);
+    final column = [
+      for (var down = 0; down <= ((south - north) * 16).round(); down++)
+        map.atMapPoint(x, north, down: down),
+    ];
+
+    // A 0.55 dp border scaled with the zoom would be over 4 px wide here.
+    final line = column.where((color) => color != colors.notYetFill);
+    expect(line, isNotEmpty);
+    expect(line.length, lessThanOrEqualTo(2));
+  });
+
+  test('outside a focused region, countries show at 30% (FR-MAP-23)', () async {
+    const colors = WorldMapColors.light;
+    final geometry = _Rendered._geometry;
+    final map = await _Rendered.of(
+      {'FRA': TravelStatus.visited, 'JPN': TravelStatus.visited},
+      colors,
+      outside: geometry.outside('Europe', const {
+        'FRA': 'Europe',
+        'JPN': 'Asia',
+      }),
+      fade: 1,
+    );
+
+    expect(map.at(france), colors.visitedFill);
+    final faded = map.at(japan);
+    final expected = Color.lerp(colors.visitedFill, colors.ocean, 0.7)!;
+    for (final (actual, wanted) in [
+      (faded.r, expected.r),
+      (faded.g, expected.g),
+      (faded.b, expected.b),
+    ]) {
+      expect(actual, closeTo(wanted, 2 / 255));
+    }
   });
 
   test('dark mode uses the dark fill, not white (AC-MAP-05)', () async {

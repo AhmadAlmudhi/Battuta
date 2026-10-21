@@ -354,6 +354,38 @@
   "mapLegendDots": "Small countries appear as dots",
   "mapNotVisited": "Not visited yet",
   "mapOpenDetails": "Open details",
+  "mapRegionAll": "All",
+  "mapZoomIn": "Zoom in",
+  "mapZoomOut": "Zoom out",
+  "mapResetView": "Reset view",
+  "mapRegionSummary": "{region} · {visited} visited · {wishlist} on your wishlist",
+  "@mapRegionSummary": {
+    "description": "Over the map during a region focus, for example: Europe · 4 visited · 3 on your wishlist (FR-MAP-24).",
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "visited": {
+        "type": "String"
+      },
+      "wishlist": {
+        "type": "String"
+      }
+    }
+  },
+  "statsShowOnMap": "Show on the map",
+  "statsRegionLabel": "{region}, {count}",
+  "@statsRegionLabel": {
+    "description": "Screen-reader label for a region bar, for example: Europe, 4 of 53.",
+    "placeholders": {
+      "region": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "authEmail": "Email",
   "authPassword": "Password",
   "authConfirmPassword": "Confirm password",

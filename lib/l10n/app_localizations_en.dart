@@ -634,6 +634,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapOpenDetails => 'Open details';
 
   @override
+  String get mapRegionAll => 'All';
+
+  @override
+  String get mapZoomIn => 'Zoom in';
+
+  @override
+  String get mapZoomOut => 'Zoom out';
+
+  @override
+  String get mapResetView => 'Reset view';
+
+  @override
+  String mapRegionSummary(String region, String visited, String wishlist) {
+    return '$region · $visited visited · $wishlist on your wishlist';
+  }
+
+  @override
+  String get statsShowOnMap => 'Show on the map';
+
+  @override
+  String statsRegionLabel(String region, String count) {
+    return '$region, $count';
+  }
+
+  @override
   String get authEmail => 'Email';
 
   @override

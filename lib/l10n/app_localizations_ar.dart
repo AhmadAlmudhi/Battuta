@@ -644,6 +644,31 @@ class AppLocalizationsAr extends AppLocalizations {
   String get mapOpenDetails => 'عرض التفاصيل';
 
   @override
+  String get mapRegionAll => 'الكل';
+
+  @override
+  String get mapZoomIn => 'تكبير';
+
+  @override
+  String get mapZoomOut => 'تصغير';
+
+  @override
+  String get mapResetView => 'إعادة تعيين العرض';
+
+  @override
+  String mapRegionSummary(String region, String visited, String wishlist) {
+    return '$region · زرت $visited · $wishlist في قائمة أمنياتك';
+  }
+
+  @override
+  String get statsShowOnMap => 'عرض على الخريطة';
+
+  @override
+  String statsRegionLabel(String region, String count) {
+    return '$region، $count';
+  }
+
+  @override
   String get authEmail => 'البريد الإلكتروني';
 
   @override
