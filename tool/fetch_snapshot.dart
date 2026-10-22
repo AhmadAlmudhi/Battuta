@@ -5,7 +5,9 @@
 //
 // Reads RC_API_KEY from env.json, or from the RC_API_KEY environment variable
 // in CI. Costs 3 API requests. Leaves out the countries the app excludes
-// (D-12).
+// (D-12). Exits with an error, writing nothing, when a page is missing or the
+// records no longer parse, because production deploys ship the snapshot
+// without review (PRD section 12.3).
 import 'dart:convert';
 import 'dart:io';
 
@@ -14,10 +16,17 @@ import 'package:battuta/features/countries/data/rest_countries.dart';
 
 const _outputPath = 'assets/data/countries_snapshot.json';
 
+/// A few below the 249 countries in the dataset today (D-3): a country or
+/// two joining or leaving passes, and a response in a shape the parser
+/// doesn't expect doesn't.
+const _minimumCountries = 240;
+
 Future<void> main() async {
   final apiKey = _readApiKey();
   final client = HttpClient()..connectionTimeout = const Duration(seconds: 15);
   final objects = <Object?>[];
+  var fetched = 0;
+  int? total;
 
   try {
     for (var page = 0; page < restCountriesMaxPages; page++) {
@@ -38,13 +47,32 @@ Future<void> main() async {
               as Map<String, Object?>;
       final records = data['objects'] as List<Object?>;
       final meta = data['meta'] as Map<String, Object?>;
+      fetched += records.length;
+      if (meta['total'] case final int count) total ??= count;
       objects.addAll(records.where(_kept).map(_trim));
-      stdout.writeln('Fetched ${objects.length} of ${meta['total']}');
+      stdout.writeln('Fetched $fetched of $total');
 
       if (meta['more'] != true || records.isEmpty) break;
     }
   } finally {
     client.close();
+  }
+
+  // Like the app's refresh, a short dataset counts as a failure (rule 4).
+  if (total != null && fetched < total) {
+    stderr.writeln('Got $fetched of $total records.');
+    exit(1);
+  }
+  final countries = [
+    for (final record in objects)
+      if (record is Map<String, Object?>) ?parseCountry(record),
+  ];
+  if (countries.length < _minimumCountries) {
+    stderr.writeln(
+      'Only ${countries.length} records parse as countries; '
+      'expected at least $_minimumCountries.',
+    );
+    exit(1);
   }
 
   final snapshot = {
@@ -55,7 +83,10 @@ Future<void> main() async {
   final file = File(_outputPath);
   await file.parent.create(recursive: true);
   await file.writeAsString(jsonEncode(snapshot));
-  stdout.writeln('Wrote ${objects.length} records to $_outputPath');
+  stdout.writeln(
+    'Wrote ${objects.length} records (${countries.length} countries) to '
+    '$_outputPath',
+  );
 }
 
 bool _kept(Object? record) => !excludedCountryCodes.contains(
