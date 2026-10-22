@@ -1232,6 +1232,24 @@ abstract class AppLocalizations {
   /// **'Reset view'**
   String get mapResetView;
 
+  /// No description provided for @mapReplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay my travels'**
+  String get mapReplay;
+
+  /// No description provided for @mapReplaySkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get mapReplaySkip;
+
+  /// No description provided for @mapShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share my map'**
+  String get mapShare;
+
   /// Over the map during a region focus, for example: Europe · 4 visited · 3 on your wishlist (FR-MAP-24).
   ///
   /// In en, this message translates to:

@@ -128,8 +128,15 @@ class CountryRepositoryImpl implements CountryRepository {
     population: row.population,
     areaKm2: row.areaKm2,
     languages: row.languages,
-    currencies: row.currencies,
-    borders: row.borders,
+    // Data saved before D-12 can still hold what it leaves out.
+    currencies: [
+      for (final currency in row.currencies)
+        if (!excludedCurrencyCodes.contains(currency.code)) currency,
+    ],
+    borders: [
+      for (final border in row.borders)
+        if (!excludedCountryCodes.contains(border)) border,
+    ],
     timezones: row.timezones,
     mapsUrl: row.mapsUrl,
     flagAlt: row.flagAlt,

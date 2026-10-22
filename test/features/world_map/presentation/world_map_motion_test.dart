@@ -341,26 +341,26 @@ void main() {
       tester,
     ) async {
       await openWithoutSettling(tester);
-      expect(painter(tester).reveal?.fills, {'FRA': 0.0, 'JPN': 0.0});
+      expect(painter(tester).motion?.fills, {'FRA': 0.0, 'JPN': 0.0});
 
       await tester.pump(const Duration(milliseconds: 100));
       await tester.pump(const Duration(milliseconds: 100));
-      final fills = painter(tester).reveal!.fills;
+      final fills = painter(tester).motion!.fills;
       expect(fills['FRA'], greaterThan(fills['JPN']!));
 
       await tester.pump(const Duration(milliseconds: 1300));
-      expect(painter(tester).reveal, isNull);
+      expect(painter(tester).motion, isNull);
     });
 
     testWidgets('once played, it doesn\'t play again this session '
         '(AC-MAP-19)', (tester) async {
       final app = await openStats(tester);
-      expect(painter(tester).reveal, isNull);
+      expect(painter(tester).motion, isNull);
 
       await app.goTo(tester, '/explore');
       app.container.read(routerProvider).go('/stats');
       await tester.pump();
-      expect(painter(tester).reveal, isNull);
+      expect(painter(tester).motion, isNull);
     });
 
     testWidgets('with reduced motion the final map shows at once, and region '
@@ -371,7 +371,7 @@ void main() {
         tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
       );
       await openWithoutSettling(tester);
-      expect(painter(tester).reveal, isNull);
+      expect(painter(tester).motion, isNull);
 
       await tester.pumpAndSettle();
       await tapChip(tester, 'Europe');
@@ -384,12 +384,12 @@ void main() {
         '(FR-MAP-31)', (tester) async {
       await openWithoutSettling(tester);
       await tester.pump(const Duration(milliseconds: 100));
-      expect(painter(tester).reveal, isNotNull);
+      expect(painter(tester).motion, isNotNull);
 
       await tester.tapAt(onMap(tester, japan));
       await tester.pump();
 
-      expect(painter(tester).reveal, isNull);
+      expect(painter(tester).motion, isNull);
       expect(find.byType(MapCountryCard), findsNothing);
     });
   });

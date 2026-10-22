@@ -20,8 +20,8 @@ Guidance for Claude Code when working in this repository.
   - Stats is complete: headline (visited of the dataset total, one decimal), a bar per region, highlights, count-up animation, and the zero state.
   - Accounts and cloud sync are complete: sign in, create account, reset password, Account screen with sync status, Sync now, and Sign out; guest merge on first sign-in, live two-way sync, and server-enforced last write wins.
   - Settings has its About section (FR-SET-04); app icons and the favicon are generated; the home-screen name is Battuta or بطوطة on Android and iOS.
-  - The world map is built (PRD section 6.10, data in 8.7, rendering in 11.5): the base map at the top of Stats, dots for small countries, the tap card with hover on web, zoom and pan, region focus, and the reveal. About credits Natural Earth.
-  - Not started: the map's Could items (spread from the tap, replay, share: FR-MAP-32 to 43), CI, and the first production deploy.
+  - The world map is built (PRD section 6.10, data in 8.7, rendering in 11.5): the base map at the top of Stats, dots for small countries, the tap card with hover on web, zoom and pan, region focus, the reveal, and the Could items: the spread from the tap with the stamp on the tap card, Replay my travels, and Share my map. About credits Natural Earth.
+  - Not started: CI and the first production deploy.
 
 ## Commands
 
@@ -80,7 +80,7 @@ test/              mirrors lib/
 - **domain:** entities, repository interfaces, pure logic (merge, search normalization, filter, sort). No Flutter or I/O imports.
 - **data:** `CountryRepository`, `TravelRepository`, `SyncService`, `AuthRepository`, implementing domain interfaces.
 
-Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, `drift` + `drift_flutter`, `firebase_auth`, `cloud_firestore`, `shared_preferences`, `flutter_animate`, `url_launcher`, `connectivity_plus`, `flutter_localizations` + `intl`, `mocktail`.
+Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, `drift` + `drift_flutter`, `firebase_auth`, `cloud_firestore`, `shared_preferences`, `flutter_animate`, `url_launcher`, `connectivity_plus`, `share_plus` (with `web` for the download on web), `flutter_localizations` + `intl`, `mocktail`.
 
 ## Dependency constraints
 
@@ -90,7 +90,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 
 ## Country data facts
 
-- The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them. It also skips Israel (`excludedCountryCodes`, D-12) and drops it from neighbors' borders, leaving **249**, the Stats total (D-3). The snapshot and flags scripts leave Israel out too, `ensureSeeded` deletes it from data saved earlier, and the map draws its area as Palestine.
+- The API returns 254 records. 4 disputed territories (Abkhazia, Northern Cyprus, Somaliland, South Ossetia) have no ISO codes and `parseCountry` skips them. It also skips Israel (`excludedCountryCodes`, D-12), drops it from neighbors' borders, and drops the Israeli new shekel (`excludedCurrencyCodes`), leaving **249**, the Stats total (D-3). The snapshot and flags scripts leave them out too; for data saved earlier, `ensureSeeded` deletes Israel's row and the repository filters currencies and borders when reading. The map draws Israel's area as Palestine.
 - Missing values arrive as empty strings, not null; the parser maps them to null.
 - The snapshot keeps the raw API record shape (trimmed to the Arabic translation) so one parser serves both the snapshot and the live refresh. The request fields live in `lib/features/countries/data/rest_countries.dart` (pure Dart, also imported by the tool); keep them in step with `country_parser.dart`.
 - `ensureSeeded` imports the snapshot when the DB is empty or older than the bundled snapshot (so a redeploy refreshes web visitors for free). Data age is `MAX(countries.fetched_at)`.
@@ -142,10 +142,12 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 - A country gets a dot when its largest part fits within 6 × 6 map units, or when its shape vanishes in simplification (then it's placed from the full-detail source).
 - Hit testing (`MapHitTester`, FR-MAP-11): a tap on a dot (within 4 dp of its center) selects it; otherwise over land the country under the tap, and over water the nearest country or dot within 24 dp of its edge, so a tap just off a coast selects that country. Only dataset countries can be selected.
 - The map never mirrors; positions on it are physical in both languages. The card around it mirrors as usual.
-- The view is a `MapView` (pure Dart: zoom and center in map units, so it survives resizes). The card draws through it and handles its own gestures: `_MapGestureRecognizer` claims drags only when zoomed, so the page scrolls at 1×; the plain wheel is left to the page, Ctrl/⌘ + wheel zooms. Flights (600 ms) and the reveal (once per session, `_revealPlayedProvider`) run on `AnimationController`s; reduced motion jumps to the end.
+- The view is a `MapView` (pure Dart: zoom and center in map units, so it survives resizes). The card draws through it and handles its own gestures: `_MapGestureRecognizer` claims drags only when zoomed, so the page scrolls at 1×; the plain wheel is left to the page, Ctrl/⌘ + wheel zooms. Flights (600 ms), the reveal (once per session, `_revealPlayedProvider`), changes from the tap card, and the replay run on `AnimationController`s; reduced motion jumps to the end and hides Replay.
+- Every animation reaches `WorldMapPainter` as one `MapMotion` (fills and their origins, hatching, `fading` old statuses, the flight path), built in `_currentMotion`: replay first, then the reveal, then changes. `_noticeChanges` compares each new statuses map with the last one; a change from one status to another paints the old one underneath.
+- Share my map: `renderMapShareImage` paints the image on a `PictureRecorder` canvas (no widget tree), and `mapImageSharerProvider` hands it to `share_plus` or, on web, downloads it (conditional import on `dart.library.js_interop`). Tests override the provider; `toImage` needs `tester.runAsync`.
 - `mapRegionProvider` holds the focused region; Stats' region bars set it and scroll the map card into view through a `GlobalKey`, which also keeps the map's state when the first visit replaces the zero state.
 - In widget tests, an animation started by a tap gets its first tick on the next frame: `pump()` once before `pump(duration)`. To see the reveal's start, pump without moving the clock until the map appears (see `world_map_motion_test.dart`).
-- `pumpApp` overrides `worldMapLoaderProvider` with `testWorldMap` (the real file, read from disk): `compute` and the asset bundle can't finish under the widget-test clock. Map colors are tested by painting to an image and reading pixels, not with golden files.
+- `pumpApp` overrides `worldMapLoaderProvider` with `testWorldMap` (the real file, read from disk): `compute` and the asset bundle can't finish under the widget-test clock. It takes extra `overrides`. Map colors are tested by painting to an image and reading pixels, not with golden files.
 
 ## Accounts and sync
 
