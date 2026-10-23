@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.11 |
+| Version | 1.12 |
 | Status | Ready for development |
 | Date | 22 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.12 | 22 Oct 2026 | CI and production deploys set up with GitHub Actions (section 12.3). Every production deploy, from a version tag or the weekly run, fetches a fresh country snapshot first, and the weekly run redeploys the latest release, never unreleased code. The snapshot script stops without writing when data is missing or doesn't parse. The app version is 1.0.0. |
 | 1.11 | 22 Oct 2026 | The map's Could items built: the color spread from the tap card, Replay my travels, and Share my map (FR-MAP-32 to 43). The replay's year label and Skip sit under the map, in place of its actions, so they cover no country; Replay is hidden when motion is reduced. The shared image is drawn straight to a canvas, not captured from the screen (section 11.5). The Israeli new shekel is left out with Israel (D-12). |
 | 1.10 | 21 Oct 2026 | World map zoom, region focus, and the reveal built. The map handles its own gestures instead of `InteractiveViewer`, so the page still scrolls at 1× and the map pans once zoomed (section 11.5). Region bars on Stats are their own screen-reader items. |
 | 1.9 | 21 Oct 2026 | World map added to the top of the Stats screen (section 6.10). The app draws it from bundled Natural Earth data in the Saudi point-of-view edition (D-11, section 8.7), so it needs no map service. The map card takes over the Stats headline and also shows when nothing is visited yet. About credits Natural Earth. Israel is left out of the app, and the map draws its area as Palestine (D-12). |
@@ -780,13 +781,13 @@ Authorization: Bearer <RC_API_KEY>
 
 ### 8.2 Snapshot and refresh rules
 
-1. Every build bundles `assets/data/countries_snapshot.json`, produced by `tool/fetch_snapshot.dart`, which runs the request above and records when it ran. It keeps only the Arabic translation to stay small, and leaves out Israel, its currency, and its place in other countries' borders (D-12). `tool/fetch_flags.dart` downloads a 320 px flag for each country into `assets/flags/`.
+1. Every build bundles `assets/data/countries_snapshot.json`, produced by `tool/fetch_snapshot.dart`, which runs the request above and records when it ran. It keeps only the Arabic translation to stay small, and leaves out Israel, its currency, and its place in other countries' borders (D-12). It stops without writing anything when the API returns fewer records than it reports, or when fewer than 240 records parse as countries. `tool/fetch_flags.dart` downloads a 320 px flag for each country into `assets/flags/`.
 2. On first launch, or a first visit to the website, the app imports the snapshot into the local database. No API call is made. On later launches, a bundled snapshot newer than the local data (after an app update or a redeploy) replaces it the same way.
 3. On later launches, the app reads from the local database. If the data is older than 7 days and the device is online, it refreshes in the background.
 4. A refresh is all or nothing: if any page fails, keep the previous data. On success, replace all rows in one transaction.
 5. Manual refresh (FR-EXP-11) calls the API at most once per 60 minutes per device. Otherwise it ends immediately with: Data is up to date.
 6. No screen calls the API directly. Details, filters, and stats always read from the local database.
-7. A scheduled CI job rebuilds and redeploys the web app every week with a fresh snapshot, so web visitors rarely need a refresh (section 12.3).
+7. Every production deploy fetches a fresh snapshot before it builds, and a scheduled CI job redeploys the latest release every week. The bundled data is never more than a week old, so web visitors rarely need a refresh (section 12.3).
 
 > **Quota:** The API key and its 1,000 monthly requests are shared by every website visitor and app install. Because data comes from the bundled snapshot and the weekly redeploy keeps it fresh, a normal visit costs no API requests. Requests come only from stale data or manual refreshes, at most 3 each. A large audience needs a paid plan or a backend proxy.
 
@@ -1180,7 +1181,8 @@ test/                   mirrors lib/
 
 ### 11.4 Platform configuration and secrets
 
-- **API key:** stored in `env.json`, which is git-ignored, and passed at build time with `--dart-define-from-file=env.json`. A committed `env.example.json` documents the expected keys. CI receives it from an encrypted GitHub secret.
+- **API key:** stored in `env.json`, which is git-ignored, and passed at build time with `--dart-define-from-file=env.json`. A committed `env.example.json` documents the expected keys. CI receives it from the encrypted GitHub secret `RC_API_KEY`.
+- **Deploy credentials:** Hosting deploys from CI use a Firebase service account key in the GitHub secret `FIREBASE_SERVICE_ACCOUNT_BATTUTA_B8451`, created by `firebase init hosting:github`. The key never leaves GitHub's secret store.
 - **Allowed origins:** the REST Countries key must list `localhost` for development and both production hostnames, `battuta-travel.web.app` and `battuta-travel.firebaseapp.com`. Without them, browsers block the refresh calls. Preview builds don't need the API because they use the bundled snapshot.
 - **Firebase:** configured for web, Android, and iOS with the FlutterFire CLI. Email and password is the only sign-in provider enabled.
 - **Firebase emulators:** `firebase.json` configures the Auth (port 9099) and Firestore (port 8080) emulators for testing accounts, sync, and security rules locally. A build made with `--dart-define=USE_FIREBASE_EMULATORS=true` connects to them instead of the real project.
@@ -1259,15 +1261,22 @@ flowchart LR
 
 ### 12.3 CI pipeline
 
-GitHub Actions runs these steps on every push and pull request unless noted:
+GitHub Actions runs these steps on every push to `main` and every pull request unless noted:
 
-1. Install dependencies and run code generation.
+1. Install dependencies and run code generation. The run fails if the generated files differ from the committed ones.
 2. Check formatting and run static analysis.
 3. Run all tests with coverage, including the world map data check (section 8.7).
-4. Build the web app. On pull requests, deploy it to a Firebase Hosting preview channel.
+4. Build the web app. On pull requests from the repository itself, deploy it to a Firebase Hosting preview channel that expires after 7 days. Pull requests from forks get no secrets, so they build without a preview.
 5. Build an Android APK, and compile iOS without code signing on a macOS runner, to prove both still build.
-6. On a version tag, deploy the web app to production on Firebase Hosting.
-7. Every week, regenerate the country snapshot, rebuild, and redeploy the web app (section 8.2).
+6. On a version tag such as `v1.0.0`, deploy the web app to production on Firebase Hosting. The tag must match the version in `pubspec.yaml`. The deploy runs the tests again, fetches a fresh snapshot, and builds.
+7. Every Monday, redeploy the latest release the same way, with a fresh snapshot (section 8.2). It never deploys unreleased code from `main`.
+
+| Workflow | Runs on | Steps |
+| --- | --- | --- |
+| `.github/workflows/ci.yml` | Pushes to `main` and pull requests | 1 to 5 |
+| `.github/workflows/deploy.yml` | Version tags, Mondays at 03:23 UTC, and manual runs | 6 and 7 |
+
+To release, set `version` in `pubspec.yaml` in a pull request, merge it once CI passes, then tag the merge commit `v` plus that version and push the tag. Third-party actions are pinned to commit hashes, because they handle the deploy credentials.
 
 ### 12.4 Definition of done
 

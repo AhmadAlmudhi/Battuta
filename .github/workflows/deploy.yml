@@ -1,0 +1,99 @@
+# Deploys the web app to production on Firebase Hosting (PRD section 12.3):
+# when a version tag is pushed, and every Monday, which redeploys the latest
+# release with fresh country data (section 8.2). Every deploy fetches a new
+# snapshot first, so a normal visit never needs the API (NFR-13).
+name: Deploy
+
+on:
+  push:
+    tags: ['v*']
+  schedule:
+    - cron: '23 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Deploys wait for each other instead of overlapping.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  # Keep in step with the Flutter version in CLAUDE.md and ci.yml.
+  FLUTTER_VERSION: 3.47.7
+
+jobs:
+  release:
+    name: Find the release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.find.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: find
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            tag=$GITHUB_REF_NAME
+          else
+            # The weekly run redeploys the latest release, never unreleased
+            # code from main.
+            tag=$(git tag --list 'v*' --sort=-version:refname | head -n 1)
+          fi
+          if [ -z "$tag" ]; then
+            echo "::notice::There is no release to deploy yet."
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Production
+    needs: release
+    if: needs.release.outputs.tag != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://battuta-travel.web.app
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+      - name: Check the version
+        # The tag names the version Settings shows (FR-SET-04).
+        run: |
+          version=$(sed -n 's/^version: *\([^+]*\).*/\1/p' pubspec.yaml)
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::$TAG doesn't match version $version in pubspec.yaml."
+            exit 1
+          fi
+        env:
+          TAG: ${{ needs.release.outputs.tag }}
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          pub-cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      # Tests read the committed snapshot, so they run before it's replaced.
+      - run: flutter test --timeout=90s
+      - name: Fetch a fresh country snapshot
+        # 3 API requests. The tool fails, and the deploy stops, if a page is
+        # missing or the records don't parse.
+        run: dart run tool/fetch_snapshot.dart
+        env:
+          RC_API_KEY: ${{ secrets.RC_API_KEY }}
+      - name: Build
+        run: flutter build web --dart-define=RC_API_KEY="$RC_API_KEY"
+        env:
+          RC_API_KEY: ${{ secrets.RC_API_KEY }}
+      - name: Deploy
+        uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0.11.0
+        with:
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BATTUTA_B8451 }}
+          projectId: battuta-b8451
+          channelId: live
+          firebaseToolsVersion: 15.34.0

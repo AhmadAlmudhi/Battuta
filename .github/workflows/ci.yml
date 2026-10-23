@@ -1,0 +1,120 @@
+# Checks every push to main and every pull request (PRD section 12.3):
+# generated code, formatting, analysis, and tests, then builds for web,
+# Android, and iOS. A pull request's web build goes to a Firebase Hosting
+# preview channel.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request replaces the run in
+# progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Keep in step with the Flutter version in CLAUDE.md and deploy.yml.
+  FLUTTER_VERSION: 3.47.7
+
+jobs:
+  check:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          pub-cache: true
+      - run: flutter pub get
+      - name: Check that generated code is committed
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
+          if [ -n "$(git status --porcelain)" ]; then
+            git status --short
+            echo "::error::Generated files are out of date. Run build_runner and flutter gen-l10n, then commit the results."
+            exit 1
+          fi
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: flutter analyze
+      - run: flutter test --coverage --timeout=90s
+      - uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/lcov.info
+
+  web:
+    name: Web
+    # Only code that passes the checks gets a preview.
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          pub-cache: true
+      - run: flutter pub get
+      - name: Build
+        run: flutter build web --dart-define=RC_API_KEY="$RC_API_KEY"
+        env:
+          RC_API_KEY: ${{ secrets.RC_API_KEY }}
+      - name: Deploy a preview
+        # Pull requests from forks get no secrets, so they build without a
+        # preview.
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: FirebaseExtended/action-hosting-deploy@500ac625ca2dd40cbd15f7659af953801858032a # v0.11.0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BATTUTA_B8451 }}
+          projectId: battuta-b8451
+          expires: 7d
+          firebaseToolsVersion: 15.34.0
+
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          pub-cache: true
+      - run: flutter pub get
+      - run: flutter build apk
+
+  ios:
+    name: iOS
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          pub-cache: true
+      - run: flutter pub get
+      - run: flutter build ios --no-codesign

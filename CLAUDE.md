@@ -21,7 +21,7 @@ Guidance for Claude Code when working in this repository.
   - Accounts and cloud sync are complete: sign in, create account, reset password, Account screen with sync status, Sync now, and Sign out; guest merge on first sign-in, live two-way sync, and server-enforced last write wins.
   - Settings has its About section (FR-SET-04); app icons and the favicon are generated; the home-screen name is Battuta or بطوطة on Android and iOS.
   - The world map is built (PRD section 6.10, data in 8.7, rendering in 11.5): the base map at the top of Stats, dots for small countries, the tap card with hover on web, zoom and pan, region focus, the reveal, and the Could items: the spread from the tap with the stamp on the tap card, Replay my travels, and Share my map. About credits Natural Earth.
-  - Not started: CI and the first production deploy.
+  - CI and production deploys are set up with GitHub Actions (see CI and deploys). Releases are version tags, starting with `v1.0.0`.
 
 ## Commands
 
@@ -42,7 +42,8 @@ flutter build apk --dart-define-from-file=env.json
 flutter build ios --no-codesign --dart-define-from-file=env.json
 
 firebase deploy --only firestore:rules                     # after editing firestore.rules
-firebase deploy --only hosting                             # production deploy; only when asked
+git tag v1.0.0 <main commit> && git push origin v1.0.0     # release: deploy.yml deploys it to production; only when asked
+firebase deploy --only hosting                             # manual production deploy, bypassing CI; only when asked
 flutterfire configure --project=battuta-b8451              # regenerate configs after adding a Firebase plugin/platform
 
 dart run flutter_launcher_icons                            # regenerate app icons; then revert its project.pbxproj change (see flutter_launcher_icons.yaml)
@@ -191,6 +192,16 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 - To check web persistence, restart the browser, not just the page: drift's shared worker keeps the database in memory across reloads in one session, which hides unsaved writes. Launch headless Chrome with a fixed `--user-data-dir`, save, close it, start it again with the same directory, and check the data.
 - Headless Chrome has no WebGL by default, and Flutter's CPU fallback doesn't paint images. For screenshots, launch Chrome with `--use-angle=swiftshader --enable-unsafe-swiftshader`.
 - The API key is visible in the browser; it is restricted by allowed origins (`localhost`, `battuta-travel.web.app`, `battuta-travel.firebaseapp.com`).
+
+## CI and deploys
+
+- `.github/workflows/ci.yml` runs on pushes to main and on pull requests (PRD section 12.3). It checks that build_runner and `flutter gen-l10n` reproduce the committed files, then runs format, analyze, and tests with coverage. It also builds web (pull requests from this repo get a 7-day preview channel), an Android APK, and iOS without signing on `macos-26` (CocoaPods, like this Mac).
+- `.github/workflows/deploy.yml` deploys production only from a `v*` tag that matches `version` in `pubspec.yaml`, and every Monday redeploys the latest tag. Each run tests the tagged code, fetches a fresh snapshot (3 API requests), builds, and deploys to the `live` channel. `fetch_snapshot.dart` exits without writing when pages are missing or fewer than 240 records parse, so a broken API response stops the deploy.
+- Secrets: `RC_API_KEY`, and `FIREBASE_SERVICE_ACCOUNT_BATTUTA_B8451`, a service account key created by `firebase init hosting:github`. It lives only in GitHub's secret store, never in the repo.
+- `FLUTTER_VERSION` in both workflows must match the Flutter version above. Third-party actions are pinned to commit SHAs because they see the deploy key, and `firebase-tools` is pinned in the deploy steps.
+- Pushing files under `.github/workflows/` needs a GitHub token with the `workflow` scope (`gh auth refresh -h github.com -s workflow`).
+- Preview channels aren't among the REST Countries key's allowed origins, so Refresh data on a preview says "Couldn't refresh". That's expected.
+- GitHub turns off scheduled workflows after 60 days without repository activity; turn the weekly deploy back on in the Actions tab.
 
 ## Testing and done
 

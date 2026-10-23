@@ -5,7 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../countries/presentation/country_providers.dart';
 
-/// The app version from pubspec.yaml, such as 0.1.0 (1) (FR-SET-04).
+/// The app version from pubspec.yaml, such as 1.0.0 (1) (FR-SET-04).
 final appVersionProvider = FutureProvider<String>((ref) async {
   final info = await PackageInfo.fromPlatform();
   return info.buildNumber.isEmpty
