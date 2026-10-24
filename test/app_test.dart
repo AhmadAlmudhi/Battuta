@@ -41,11 +41,37 @@ void main() {
 
       await tester.tap(find.text('Continue as guest'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, 'Japan'), findsOneWidget);
+      expect(appBarOf('Japan'), findsOneWidget);
     });
   });
 
   group('navigation', () {
+    testWidgets('every app bar shows the app\'s name in the middle, and names '
+        'its screen for screen readers (FR-PLT-09)', (tester) async {
+      final semantics = tester.ensureSemantics();
+      final app = await pumpApp(tester, prefs: returningUser);
+
+      for (final (location, screen) in [
+        ('/explore', 'Explore'),
+        ('/country/JPN', 'Japan'),
+        ('/settings', 'Settings'),
+      ]) {
+        await app.goTo(tester, location);
+        final title = find.descendant(
+          of: find.byType(AppBar),
+          matching: find.text('Battuta'),
+        );
+        expect(title, findsOneWidget, reason: location);
+        expect(
+          tester.getCenter(title).dx,
+          moreOrLessEquals(tester.getCenter(find.byType(AppBar)).dx),
+          reason: location,
+        );
+        expect(find.bySemanticsLabel('$screen · Battuta'), findsOneWidget);
+      }
+      semantics.dispose();
+    });
+
     testWidgets('an unknown country code shows Country not found '
         '(AC-DET-04)', (tester) async {
       final app = await pumpApp(tester, prefs: returningUser);
@@ -70,7 +96,7 @@ void main() {
       await pumpApp(tester, prefs: returningUser);
       await tester.tap(find.text('Japan'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, 'Japan'), findsOneWidget);
+      expect(appBarOf('Japan'), findsOneWidget);
 
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
@@ -86,7 +112,7 @@ void main() {
 
       await tester.tap(find.byType(BackButtonIcon));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, 'Account'), findsOneWidget);
+      expect(appBarOf('Account'), findsOneWidget);
     });
 
     testWidgets('compact screens use a bottom navigation bar', (tester) async {
@@ -112,11 +138,11 @@ void main() {
 
       await tester.tap(find.text('My travels'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, 'My travels'), findsOneWidget);
+      expect(appBarOf('My travels'), findsOneWidget);
 
       await tester.tap(find.text('Stats'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, 'Stats'), findsOneWidget);
+      expect(appBarOf('Stats'), findsOneWidget);
     });
   });
 
@@ -129,7 +155,7 @@ void main() {
           .setLanguage(AppLanguage.ar);
       await tester.pumpAndSettle();
 
-      expect(find.widgetWithText(AppBar, 'استكشف'), findsOneWidget);
+      expect(appBarOf('استكشف'), findsOneWidget);
       expect(find.text('فرنسا'), findsOneWidget);
       final context = tester.element(find.text('فرنسا'));
       expect(Directionality.of(context), TextDirection.rtl);

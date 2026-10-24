@@ -15,6 +15,7 @@ import '../../features/stats/presentation/stats_screen.dart';
 import '../../features/travels/presentation/travels_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../layout/app_shell.dart';
+import '../widgets/app_title.dart';
 import '../widgets/message_view.dart';
 import '../widgets/screen_title.dart';
 import '../widgets/up_button.dart';
@@ -154,7 +155,10 @@ class _PageNotFoundScreen extends StatelessWidget {
     return ScreenTitle(
       screen: l10n.pageNotFoundTitle,
       child: Scaffold(
-        appBar: AppBar(leading: upButton(context, fallback: '/explore')),
+        appBar: AppBar(
+          leading: upButton(context, fallback: '/explore'),
+          title: AppTitle(screen: l10n.pageNotFoundTitle),
+        ),
         body: MessageView(
           icon: Icons.explore_off_rounded,
           title: l10n.pageNotFoundTitle,

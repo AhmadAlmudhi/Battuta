@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/app_title.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../core/widgets/up_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -62,7 +63,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       child: Scaffold(
         appBar: AppBar(
           leading: upButton(context, fallback: '/account/sign-in'),
-          title: Text(l10n.signUpTitle),
+          title: AppTitle(screen: l10n.signUpTitle),
         ),
         body: Form(
           key: _form,

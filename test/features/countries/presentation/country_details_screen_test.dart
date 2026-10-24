@@ -83,11 +83,11 @@ void main() {
 
       await tester.tap(find.widgetWithText(ActionChip, 'Spain'));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, 'Spain'), findsOneWidget);
+      expect(appBarOf('Spain'), findsOneWidget);
 
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, 'France'), findsOneWidget);
+      expect(appBarOf('France'), findsOneWidget);
     });
   });
 

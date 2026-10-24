@@ -53,40 +53,48 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
     return ScreenTitle(
       screen: l10n.navStats,
-      child: TabScaffold(
-        title: l10n.navStats,
-        body: switch (stats) {
-          // No visits: the map, then an invitation instead of the headline
-          // and empty bars (FR-STA-05).
-          AsyncData(:final value) when value.visited == 0 => _StatsList(
-            children: [
-              WorldMapCard(
-                key: _mapCard,
-                visited: 0,
-                wishlist: value.wishlistSize,
-                total: value.total,
-              ),
-              MessageView(
-                icon: Icons.public_rounded,
-                title: l10n.statsEmptyTitle,
-                message: l10n.statsEmptyBody,
-                actionLabel: l10n.travelsExplore,
-                onAction: () => context.go('/explore'),
-              ),
-            ],
-          ),
-          AsyncData(:final value) => _StatsBody(
-            stats: value,
-            mapCard: _mapCard,
-            onShowRegion: _showRegion,
-          ),
-          AsyncError() => MessageView(
-            icon: Icons.error_outline_rounded,
-            title: l10n.exploreLoadError,
-            message: '',
-          ),
-          _ => const Center(child: CircularProgressIndicator()),
-        },
+      // A tap anywhere else on the page closes the map's country card
+      // (FR-MAP-14). Buttons and the map handle their own taps first, and a
+      // scroll isn't a tap.
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTapUp: (details) =>
+            WorldMapCard.tapOutside(_mapCard, details.globalPosition),
+        child: TabScaffold(
+          title: l10n.navStats,
+          body: switch (stats) {
+            // No visits: the map, then an invitation instead of the headline
+            // and empty bars (FR-STA-05).
+            AsyncData(:final value) when value.visited == 0 => _StatsList(
+              children: [
+                WorldMapCard(
+                  key: _mapCard,
+                  visited: 0,
+                  wishlist: value.wishlistSize,
+                  total: value.total,
+                ),
+                MessageView(
+                  icon: Icons.public_rounded,
+                  title: l10n.statsEmptyTitle,
+                  message: l10n.statsEmptyBody,
+                  actionLabel: l10n.travelsExplore,
+                  onAction: () => context.go('/explore'),
+                ),
+              ],
+            ),
+            AsyncData(:final value) => _StatsBody(
+              stats: value,
+              mapCard: _mapCard,
+              onShowRegion: _showRegion,
+            ),
+            AsyncError() => MessageView(
+              icon: Icons.error_outline_rounded,
+              title: l10n.exploreLoadError,
+              message: '',
+            ),
+            _ => const Center(child: CircularProgressIndicator()),
+          },
+        ),
       ),
     );
   }

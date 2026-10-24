@@ -289,7 +289,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.widgetWithText(AppBar, 'France'), findsOneWidget);
+    expect(appBarOf('France'), findsOneWidget);
     expect(find.text('Visited'), findsOneWidget);
   });
 }

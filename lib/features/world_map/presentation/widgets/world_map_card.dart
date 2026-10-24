@@ -55,6 +55,16 @@ class WorldMapCard extends ConsumerStatefulWidget {
   /// The area that draws the map and takes taps, for tests.
   static const mapKey = ValueKey('world-map');
 
+  /// Closes the selected country's card after a tap at [position], in
+  /// global coordinates, unless the tap was on the card itself (FR-MAP-14).
+  /// Stats calls this for taps on the page outside the map; the map's own
+  /// taps never reach it.
+  static void tapOutside(GlobalKey card, Offset position) {
+    if (card.currentState case final _WorldMapCardState state) {
+      state._tapOutside(position);
+    }
+  }
+
   /// The Stats headline (FR-MAP-02); null in the zero state (FR-STA-05).
   final Widget? header;
 
@@ -72,6 +82,9 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
     with TickerProviderStateMixin {
   final _cardFocus = FocusNode(debugLabel: 'World map card');
   final _mapFocus = FocusNode(debugLabel: 'World map');
+
+  /// The selected country's card, which taps outside the map leave open.
+  final _countryCard = GlobalKey();
   late final _flight = AnimationController(vsync: this)
     ..addStatusListener(_onFlightStatus);
   late final _reveal = AnimationController(vsync: this);
@@ -88,6 +101,11 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
 
   String? _selected;
   String? _hovered;
+
+  /// A country whose card was just closed while the pointer is over it. It
+  /// shows no hover highlight until the pointer leaves it, so it doesn't
+  /// look selected (FR-MAP-14).
+  String? _hoverHidden;
   Offset? _pointer;
 
   /// The view at rest, or where the current flight started.
@@ -531,10 +549,45 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
     }
     _lastTap = _upTime == null ? null : (_upTime!, at);
     final hit = _hit(at);
+    // Tapping the selected country again closes its card (FR-MAP-14).
+    if (hit != null && hit == _selected) {
+      _closeCard();
+      return;
+    }
     setState(() {
       _selected = hit;
       _tapPoint = hit == null ? null : _mapPoint(at);
+      _hoverHidden = null;
     });
+  }
+
+  /// Closes the selected country's card and clears every highlight on it,
+  /// including the hover highlight while the pointer is still over it
+  /// (FR-MAP-14).
+  void _closeCard() {
+    final closed = _selected;
+    if (closed == null) return;
+    setState(() {
+      _selected = null;
+      _tapPoint = null;
+      if (_hovered == closed) {
+        _hovered = null;
+        _hoverHidden = closed;
+      }
+    });
+  }
+
+  void _tapOutside(Offset position) {
+    final card = _countryCard.currentContext?.findRenderObject();
+    if (card is RenderBox &&
+        card.hasSize &&
+        (card.localToGlobal(Offset.zero) & card.size).contains(position)) {
+      return;
+    }
+    // The map lets go of the keyboard too, so its keys stop zooming and
+    // panning it.
+    if (_mapFocus.hasFocus) _mapFocus.unfocus();
+    _closeCard();
   }
 
   void _onScaleStart(ScaleStartDetails details) {
@@ -623,7 +676,7 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
         event.logicalKey != LogicalKeyboardKey.escape) {
       return KeyEventResult.ignored;
     }
-    setState(() => _selected = null);
+    _closeCard();
     return KeyEventResult.handled;
   }
 
@@ -683,20 +736,37 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                     ? _map(context, geometry, statuses, region)
                     : const _MapPlaceholder(),
               ),
-              AnimatedSize(
-                duration: MediaQuery.disableAnimationsOf(context)
-                    ? Duration.zero
-                    : const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                alignment: AlignmentDirectional.topCenter,
+              // A focused region's counts sit under the map, where they
+              // cover none of it (FR-MAP-24).
+              _Resizing(
+                child: switch ((region, statuses)) {
+                  (final region?, final statuses?) when _replayPlan == null =>
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        20,
+                        10,
+                        20,
+                        0,
+                      ),
+                      child: _RegionSummary(
+                        region: region,
+                        statuses: statuses,
+                        regions: ref.watch(countryRegionsProvider),
+                      ),
+                    ),
+                  _ => const SizedBox(width: double.infinity),
+                },
+              ),
+              _Resizing(
                 child: selected == null
                     ? const SizedBox(width: double.infinity)
                     : Padding(
+                        key: _countryCard,
                         padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
                         child: MapCountryCard(
                           key: ValueKey(selected),
                           code: selected,
-                          onClose: () => setState(() => _selected = null),
+                          onClose: _closeCard,
                         ),
                       ),
               ),
@@ -844,11 +914,14 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                               ? MouseCursor.defer
                               : SystemMouseCursors.click,
                           onHover: (event) => setState(() {
-                            _hovered = _hit(event.localPosition);
+                            final hit = _hit(event.localPosition);
+                            if (hit != _hoverHidden) _hoverHidden = null;
+                            _hovered = hit == _hoverHidden ? null : hit;
                             _pointer = event.localPosition;
                           }),
                           onExit: (_) => setState(() {
                             _hovered = null;
+                            _hoverHidden = null;
                             _pointer = null;
                           }),
                           child: ClipRect(key: WorldMapCard.mapKey, child: map),
@@ -873,19 +946,7 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                   ),
                 ),
               // The replay keeps the map clear of controls.
-              if (_replayPlan == null) ...[
-                if (region != null)
-                  PositionedDirectional(
-                    top: 8,
-                    start: 8,
-                    child: IgnorePointer(
-                      child: _RegionSummary(
-                        region: region,
-                        statuses: statuses,
-                        regions: regions,
-                      ),
-                    ),
-                  ),
+              if (_replayPlan == null)
                 PositionedDirectional(
                   bottom: 0,
                   end: 0,
@@ -896,7 +957,6 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                     onReset: _resetView,
                   ),
                 ),
-              ],
             ],
           ),
         );
@@ -986,24 +1046,43 @@ class _RegionSummary extends StatelessWidget {
     int count(TravelStatus status) => statuses.entries
         .where((entry) => entry.value == status && regions[entry.key] == region)
         .length;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Text(
-          l10n.mapRegionSummary(
-            regionName(l10n, region),
-            context.formatInteger(count(TravelStatus.visited)),
-            context.formatInteger(count(TravelStatus.wishlist)),
+    return Row(
+      children: [
+        Icon(Icons.public_rounded, size: 18, color: theme.colorScheme.primary),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            l10n.mapRegionSummary(
+              regionName(l10n, region),
+              context.formatInteger(count(TravelStatus.visited)),
+              context.formatInteger(count(TravelStatus.wishlist)),
+            ),
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
-          style: theme.textTheme.labelMedium,
         ),
-      ),
+      ],
     );
   }
+}
+
+/// Grows and shrinks with its child, or changes size at once when motion is
+/// reduced (NFR-09): AnimatedSize can't run with a zero duration.
+class _Resizing extends StatelessWidget {
+  const _Resizing({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => MediaQuery.disableAnimationsOf(context)
+      ? child
+      : AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          alignment: AlignmentDirectional.topCenter,
+          child: child,
+        );
 }
 
 /// Replay my travels and Share my map, under the legend (FR-MAP-35,

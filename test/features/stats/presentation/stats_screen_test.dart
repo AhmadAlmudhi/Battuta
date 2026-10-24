@@ -54,7 +54,7 @@ void main() {
 
     await tester.tap(find.text('Explore countries'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(AppBar, 'Explore'), findsOneWidget);
+    expect(appBarOf('Explore'), findsOneWidget);
   });
 
   testWidgets('the headline shows visited out of the dataset total with one '

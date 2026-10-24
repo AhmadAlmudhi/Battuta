@@ -188,6 +188,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get exploreUpToDate => 'البيانات محدّثة.';
 
   @override
+  String get exploreRefreshing =>
+      'جارٍ تحديث بيانات الدول، وقد يستغرق ذلك حتى دقيقة.';
+
+  @override
   String get exploreRefreshed => 'تم تحديث بيانات الدول.';
 
   @override
@@ -203,7 +207,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get exploreVisited => 'تمت زيارتها';
 
   @override
-  String get exploreOnWishlist => 'في قائمة الأمنيات';
+  String get exploreWishlist => 'في الأمنيات';
 
   @override
   String flagLabel(String country) {

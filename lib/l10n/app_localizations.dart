@@ -404,6 +404,12 @@ abstract class AppLocalizations {
   /// **'Data is up to date.'**
   String get exploreUpToDate;
 
+  /// Shown while a manual refresh downloads country data (FR-EXP-11).
+  ///
+  /// In en, this message translates to:
+  /// **'Updating country data. This can take up to a minute.'**
+  String get exploreRefreshing;
+
   /// No description provided for @exploreRefreshed.
   ///
   /// In en, this message translates to:
@@ -434,11 +440,11 @@ abstract class AppLocalizations {
   /// **'Visited'**
   String get exploreVisited;
 
-  /// No description provided for @exploreOnWishlist.
+  /// No description provided for @exploreWishlist.
   ///
   /// In en, this message translates to:
-  /// **'On wishlist'**
-  String get exploreOnWishlist;
+  /// **'Wishlist'**
+  String get exploreWishlist;
 
   /// No description provided for @flagLabel.
   ///

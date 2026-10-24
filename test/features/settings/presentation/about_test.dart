@@ -75,7 +75,7 @@ void main() {
     expect(find.text('بيانات الخريطة'), findsOneWidget);
   });
 
-  test('both fonts\' licenses are registered', () async {
+  test('the font\'s license is registered', () async {
     TestWidgetsFlutterBinding.ensureInitialized();
     addTearDown(LicenseRegistry.reset);
     registerFontLicenses();
@@ -85,6 +85,6 @@ void main() {
         ...entry.packages,
     };
 
-    expect(packages, containsAll(['Inter', 'IBM Plex Sans Arabic']));
+    expect(packages, contains('Alexandria'));
   });
 }

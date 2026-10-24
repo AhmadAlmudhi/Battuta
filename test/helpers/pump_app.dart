@@ -5,6 +5,7 @@ import 'package:battuta/core/database/database_provider.dart';
 import 'package:battuta/core/network/connectivity.dart';
 import 'package:battuta/core/platform/link_launcher.dart';
 import 'package:battuta/core/router/app_router.dart';
+import 'package:battuta/core/widgets/app_title.dart';
 import 'package:battuta/features/auth/domain/auth_repository.dart';
 import 'package:battuta/features/auth/presentation/auth_providers.dart';
 import 'package:battuta/features/countries/presentation/country_providers.dart';
@@ -124,6 +125,12 @@ final testNow = DateTime(2026, 10, 20, 12);
 
 /// When the test country data was fetched.
 final testDataDate = DateTime(2026, 10, 1);
+
+/// The app bar of the screen named [screen]. Every app bar shows the app's
+/// name and names its screen only for screen readers (FR-PLT-09).
+Finder appBarOf(String screen) => find.byWidgetPredicate(
+  (widget) => widget is AppTitle && widget.screen == screen,
+);
 
 /// Saved settings for a returning user, so tests start on Explore.
 const returningUser = {'onboarding_done': true};

@@ -30,10 +30,11 @@ abstract final class AppTheme {
 
   static ThemeData _build(ColorScheme scheme) => ThemeData(
     colorScheme: scheme,
-    // Inter has no Arabic glyphs, so Arabic text falls back to IBM Plex Sans
-    // Arabic in every language, and Latin text always uses Inter.
-    fontFamily: 'Inter',
-    fontFamilyFallback: const ['IBMPlexSansArabic'],
+    // One family for both scripts, so Latin text on Arabic screens, such as
+    // capitals, matches the Arabic around it.
+    fontFamily: 'Alexandria',
+    // Every app bar shows the app's name in the middle (FR-PLT-09).
+    appBarTheme: const AppBarTheme(centerTitle: true),
     cardTheme: const CardThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),
