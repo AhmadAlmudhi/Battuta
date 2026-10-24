@@ -245,6 +245,60 @@ void main() {
     expect(find.byType(MapCountryCard), findsNothing);
   });
 
+  testWidgets('closing the card clears the country\'s highlight, even with '
+      'the mouse still over it (FR-MAP-14)', (tester) async {
+    await openStats(tester, size: desktop);
+    final spot = onMap(tester, japan);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: Offset.zero);
+    await mouse.moveTo(spot);
+    await tester.pump();
+    // Clicks a second apart, so they aren't a double click.
+    Future<void> click(int second) async {
+      await mouse.down(spot, timeStamp: Duration(seconds: second));
+      await mouse.up(timeStamp: Duration(seconds: second));
+      await tester.pumpAndSettle();
+    }
+
+    await click(1);
+    expect(painter(tester).selected, 'JPN');
+    await click(2);
+    expect(find.byType(MapCountryCard), findsNothing);
+    expect(painter(tester).selected, isNull);
+    expect(painter(tester).hovered, isNull);
+    expect(
+      find.descendant(
+        of: find.byKey(WorldMapCard.mapKey),
+        matching: find.text('Japan'),
+      ),
+      findsNothing,
+    );
+
+    // Moving on to another country highlights it, and coming back to Japan
+    // highlights Japan again.
+    await mouse.moveTo(onMap(tester, saudiArabia));
+    await tester.pump();
+    expect(painter(tester).hovered, 'SAU');
+    await mouse.moveTo(spot);
+    await tester.pump();
+    expect(painter(tester).hovered, 'JPN');
+  });
+
+  testWidgets('a tap outside the map also takes the keyboard from it', (
+    tester,
+  ) async {
+    await openStats(tester);
+    await tapOnMap(tester, japan);
+    expect(FocusManager.instance.primaryFocus?.debugLabel, 'World map');
+
+    await tester.tap(find.text('Countries visited'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MapCountryCard), findsNothing);
+    expect(FocusManager.instance.primaryFocus?.debugLabel, isNot('World map'));
+  });
+
   testWidgets('scrolling the page leaves the card open', (tester) async {
     await openStats(tester);
     await tapOnMap(tester, japan);

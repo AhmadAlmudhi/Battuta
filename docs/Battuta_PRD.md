@@ -551,7 +551,7 @@ Some countries are too small to see or tap on a world map, such as Singapore, Ba
 | --- | --- | --- |
 | FR-MAP-12 | Tapping or clicking a country highlights its border and opens a card with its flag, name, status, and visit date or target year. | Must |
 | FR-MAP-13 | The card offers the same actions and forms as Country details: Mark as visited and Add to wishlist for a country that isn't saved, Mark as visited and Edit for a wishlist country, and Edit for a visited one. Open details opens /country/:code. Remove stays on Country details and My travels. | Must |
-| FR-MAP-14 | Tapping the selected country again, the ocean, or anywhere else on the page closes the card, as does pressing Esc. Scrolling the page and tapping the card itself leave it open. | Must |
+| FR-MAP-14 | Tapping the selected country again, the ocean, or anywhere else on the page closes the card, as does pressing Esc. Closing it also clears the country's highlight, even while the mouse is still over it, until the pointer moves to another country; a tap outside the map also takes the keyboard from the map. Scrolling the page and tapping the card itself leave it open. | Must |
 | FR-MAP-15 | On web, hovering over a country highlights its border and shows its name in a tooltip. | Must |
 
 | ID | Given | When | Then |

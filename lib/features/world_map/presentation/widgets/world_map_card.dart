@@ -101,6 +101,11 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
 
   String? _selected;
   String? _hovered;
+
+  /// A country whose card was just closed while the pointer is over it. It
+  /// shows no hover highlight until the pointer leaves it, so it doesn't
+  /// look selected (FR-MAP-14).
+  String? _hoverHidden;
   Offset? _pointer;
 
   /// The view at rest, or where the current flight started.
@@ -543,24 +548,46 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
       return;
     }
     _lastTap = _upTime == null ? null : (_upTime!, at);
+    final hit = _hit(at);
     // Tapping the selected country again closes its card (FR-MAP-14).
-    final tapped = _hit(at);
-    final hit = tapped == _selected ? null : tapped;
+    if (hit != null && hit == _selected) {
+      _closeCard();
+      return;
+    }
     setState(() {
       _selected = hit;
       _tapPoint = hit == null ? null : _mapPoint(at);
+      _hoverHidden = null;
+    });
+  }
+
+  /// Closes the selected country's card and clears every highlight on it,
+  /// including the hover highlight while the pointer is still over it
+  /// (FR-MAP-14).
+  void _closeCard() {
+    final closed = _selected;
+    if (closed == null) return;
+    setState(() {
+      _selected = null;
+      _tapPoint = null;
+      if (_hovered == closed) {
+        _hovered = null;
+        _hoverHidden = closed;
+      }
     });
   }
 
   void _tapOutside(Offset position) {
-    if (_selected == null) return;
     final card = _countryCard.currentContext?.findRenderObject();
     if (card is RenderBox &&
         card.hasSize &&
         (card.localToGlobal(Offset.zero) & card.size).contains(position)) {
       return;
     }
-    setState(() => _selected = null);
+    // The map lets go of the keyboard too, so its keys stop zooming and
+    // panning it.
+    if (_mapFocus.hasFocus) _mapFocus.unfocus();
+    _closeCard();
   }
 
   void _onScaleStart(ScaleStartDetails details) {
@@ -649,7 +676,7 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
         event.logicalKey != LogicalKeyboardKey.escape) {
       return KeyEventResult.ignored;
     }
-    setState(() => _selected = null);
+    _closeCard();
     return KeyEventResult.handled;
   }
 
@@ -739,7 +766,7 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                         child: MapCountryCard(
                           key: ValueKey(selected),
                           code: selected,
-                          onClose: () => setState(() => _selected = null),
+                          onClose: _closeCard,
                         ),
                       ),
               ),
@@ -887,11 +914,14 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                               ? MouseCursor.defer
                               : SystemMouseCursors.click,
                           onHover: (event) => setState(() {
-                            _hovered = _hit(event.localPosition);
+                            final hit = _hit(event.localPosition);
+                            if (hit != _hoverHidden) _hoverHidden = null;
+                            _hovered = hit == _hoverHidden ? null : hit;
                             _pointer = event.localPosition;
                           }),
                           onExit: (_) => setState(() {
                             _hovered = null;
+                            _hoverHidden = null;
                             _pointer = null;
                           }),
                           child: ClipRect(key: WorldMapCard.mapKey, child: map),
