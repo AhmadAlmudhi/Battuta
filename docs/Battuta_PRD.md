@@ -17,7 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
-| 1.13 | 24 Oct 2026 | The app uses Alexandria, one typeface for Latin and Arabic, instead of Inter and IBM Plex Sans Arabic. Every app bar shows the app's name, centered (FR-PLT-09). Explore cards are circles filled with the flag, with the name and region on a translucent band and a status badge on the edge (FR-EXP-01, FR-EXP-02). Flags elsewhere are framed like printed cards, and every flag decodes once at full size, so flights between screens draw it at once (NFR-03). On the world map, tapping the selected country again or anywhere else on the page closes its card (FR-MAP-14), and a region's summary moved under the map (FR-MAP-24). A manual refresh says it can take up to a minute (FR-EXP-11). |
+| 1.13 | 24 Oct 2026 | The app uses Alexandria, one typeface for Latin and Arabic, instead of Inter and IBM Plex Sans Arabic. Every app bar shows the app's name, centered (FR-PLT-09). Explore cards are circles filled with the flag, with the name and region on a translucent band and a status badge on the edge (FR-EXP-01, FR-EXP-02). Flags elsewhere are framed like printed cards, and every flag decodes once at full size, so flights between screens draw it at once (NFR-03); on the way, the circle morphs into the framed shape. On the world map, tapping the selected country again or anywhere else on the page closes its card (FR-MAP-14), and a region's summary moved under the map (FR-MAP-24). A manual refresh says it can take up to a minute (FR-EXP-11). |
 | 1.12 | 22 Oct 2026 | CI and production deploys set up with GitHub Actions (section 12.3). Every production deploy, from a version tag or the weekly run, fetches a fresh country snapshot first, and the weekly run redeploys the latest release, never unreleased code. The snapshot script stops without writing when data is missing or doesn't parse. The app version is 1.0.0. |
 | 1.11 | 22 Oct 2026 | The map's Could items built: the color spread from the tap card, Replay my travels, and Share my map (FR-MAP-32 to 43). The replay's year label and Skip sit under the map, in place of its actions, so they cover no country; Replay is hidden when motion is reduced. The shared image is drawn straight to a canvas, not captured from the screen (section 11.5). The Israeli new shekel is left out with Israel (D-12). |
 | 1.10 | 21 Oct 2026 | World map zoom, region focus, and the reveal built. The map handles its own gestures instead of `InteractiveViewer`, so the page still scrolls at 1× and the map pans once zoomed (section 11.5). Region bars on Stats are their own screen-reader items. |
@@ -1017,7 +1017,7 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes
 - The Material 3 type scale. Numbers on the Stats screen use tabular figures so they don't shift while counting.
 - Spacing on an 8 dp grid. Cards use 12 dp corner radius; sheets and dialogs use the Material 3 defaults.
 - Explore cards are circles filled with the flag, cropped to fit. The name and region sit over the lower part in white, on a black band at 55% opacity, which keeps white text readable over white flags.
-- Flags on Country details and My travels keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. A flag flying between Explore and Country details keeps that frame.
+- Flags on Country details and My travels keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. A flag flying from an Explore card to Country details morphs from the circle into that frame, and back.
 - Material Symbols (rounded) for icons. On web, interactive elements show hover and focus states.
 
 #### World map
@@ -1044,7 +1044,7 @@ One signature moment, the passport stamp, plus a small set of consistent transit
 | Moment | Trigger | Behavior | Timing | Implementation |
 | --- | --- | --- | --- | --- |
 | Passport stamp | Saving a visit | A Stamp Amber stamp scales from 1.6× to 1× over the flag with a slight rotation; on Android and iOS, a light haptic tap follows | About 600 ms, ease-out-back | AnimationController, HapticFeedback |
-| Flag transition | Card to details | The flag moves from the card into the header | About 300 ms (default) | Hero, tag flag-{code} |
+| Flag transition | Card to details, and back | The flag flies from the card into the header. On the way, the card's circle opens into the flag's own shape with rounded corners while its frame fades in; going back, it closes into the circle again | About 300 ms (default) | Hero, tag flag-{code}, with `FlagFlight` as the in-flight widget |
 | Grid entrance | First Explore load | Visible cards fade in and rise 16 dp in a 40 ms stagger | 250 ms each, ease-out | flutter_animate |
 | Result count | Filter change | The count rolls to its new value | 200 ms | AnimatedSwitcher |
 | Search results | Query change | Results cross-fade instead of jumping | 200 ms | AnimatedSwitcher |

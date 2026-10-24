@@ -83,10 +83,14 @@ class _CountryCardState extends State<CountryCard> {
                           children: [
                             Hero(
                               tag: flagHeroTag(country.code),
-                              // Both ways, the flag flies in its framed
-                              // shape, not stretched from a circle.
-                              flightShuttleBuilder: (_, _, _, _, _) =>
-                                  FramedFlag(country: country, radius: 10),
+                              // Both ways, the circle opens into the
+                              // flag's framed shape as it flies, or closes
+                              // back into it.
+                              flightShuttleBuilder: (_, animation, _, _, _) =>
+                                  FlagFlight(
+                                    country: country,
+                                    progress: animation,
+                                  ),
                               child: FlagImage(
                                 country: country,
                                 fit: BoxFit.cover,
