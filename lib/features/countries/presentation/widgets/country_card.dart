@@ -14,8 +14,8 @@ import 'flag_image.dart';
 String flagHeroTag(String code) => 'flag-$code';
 
 /// An Explore card (FR-EXP-01, FR-EXP-02): the flag filling a circle, the
-/// name and region over its lower part on a dark band, and a badge on its
-/// edge for saved countries. On web, hovering lifts it.
+/// name and region over its lower part on a dark gradient, and a badge on
+/// its edge for saved countries. On web, hovering lifts it.
 class CountryCard extends StatefulWidget {
   const CountryCard({
     super.key,
@@ -136,8 +136,12 @@ class _CountryCardState extends State<CountryCard> {
   }
 }
 
-/// The name and region in white on a translucent black band across the
-/// bottom of the circle, inset so the text stays clear of its curve.
+/// The name and region in white at the bottom of the circle, over a dark
+/// gradient that fades out above them, inset so the text stays clear of
+/// the curve.
+///
+/// The caption is the same height on every card, with room for two lines
+/// of name, so names and regions line up across a row.
 class _Caption extends StatelessWidget {
   const _Caption({
     required this.name,
@@ -152,20 +156,39 @@ class _Caption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final styles = Theme.of(context).textTheme;
-    return ColoredBox(
-      // Dark enough for white text on white flags (WCAG AA).
-      color: Colors.black.withValues(alpha: 0.55),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          diameter * 0.14,
-          6,
-          diameter * 0.14,
-          diameter * 0.11,
+    final scaler = MediaQuery.textScalerOf(context);
+    // Two lines of name and one of region, at the type scale's line heights.
+    final text = scaler.scale(20) * 2 + scaler.scale(16);
+    final bottom = diameter * 0.11;
+    final fade = diameter * 0.18;
+    final height = fade + text + bottom;
+    return SizedBox(
+      width: double.infinity,
+      height: height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            // From clear to dark enough for white text on white flags
+            // where the text starts (WCAG AA), and a little darker below.
+            colors: [
+              Colors.black.withValues(alpha: 0),
+              Colors.black.withValues(alpha: 0.55),
+              Colors.black.withValues(alpha: 0.7),
+            ],
+            stops: [0, fade / height, 1],
+          ),
         ),
-        child: SizedBox(
-          width: double.infinity,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            diameter * 0.14,
+            0,
+            diameter * 0.14,
+            bottom,
+          ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
                 name,
