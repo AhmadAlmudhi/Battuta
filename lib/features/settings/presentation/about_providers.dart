@@ -20,17 +20,12 @@ final countryDataDateProvider = FutureProvider<DateTime?>((ref) async {
   return ref.watch(countryRepositoryProvider).dataFetchedAt();
 });
 
-/// The fonts' SIL Open Font Licenses, listed on the licenses page next to
+/// The font's SIL Open Font License, listed on the licenses page next to
 /// the packages' licenses.
 void registerFontLicenses() {
   LicenseRegistry.addLicense(() async* {
-    for (final (font, path) in [
-      ('Inter', 'assets/fonts/inter/OFL.txt'),
-      ('IBM Plex Sans Arabic', 'assets/fonts/ibm_plex_sans_arabic/OFL.txt'),
-    ]) {
-      yield LicenseEntryWithLineBreaks([
-        font,
-      ], await rootBundle.loadString(path));
-    }
+    yield LicenseEntryWithLineBreaks([
+      'Alexandria',
+    ], await rootBundle.loadString('assets/fonts/alexandria/OFL.txt'));
   });
 }

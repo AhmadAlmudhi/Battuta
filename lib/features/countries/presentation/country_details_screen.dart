@@ -6,6 +6,7 @@ import '../../../core/format/formatters.dart';
 import '../../../core/network/connectivity.dart';
 import '../../../core/platform/link_launcher.dart';
 import '../../../core/theme/contrast.dart';
+import '../../../core/widgets/app_title.dart';
 import '../../../core/widgets/message_view.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../core/widgets/up_button.dart';
@@ -41,7 +42,7 @@ class CountryDetailsScreen extends ConsumerWidget {
           child: Scaffold(
             appBar: AppBar(
               leading: upButton(context, fallback: '/explore'),
-              title: Text(name),
+              title: AppTitle(screen: name),
             ),
             body: Align(
               alignment: AlignmentDirectional.topCenter,
@@ -113,7 +114,7 @@ class _Header extends StatelessWidget {
                     Positioned.fill(
                       child: Hero(
                         tag: flagHeroTag(country.code),
-                        child: FlagImage(country: country),
+                        child: FramedFlag(country: country, radius: 10),
                       ),
                     ),
                     PositionedDirectional(
@@ -362,7 +363,10 @@ class CountryNotFoundScreen extends StatelessWidget {
     return ScreenTitle(
       screen: l10n.countryNotFoundTitle,
       child: Scaffold(
-        appBar: AppBar(leading: upButton(context, fallback: '/explore')),
+        appBar: AppBar(
+          leading: upButton(context, fallback: '/explore'),
+          title: AppTitle(screen: l10n.countryNotFoundTitle),
+        ),
         body: MessageView(
           icon: Icons.public_off_rounded,
           title: l10n.countryNotFoundTitle,

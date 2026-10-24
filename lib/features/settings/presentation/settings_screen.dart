@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/format/formatters.dart';
 import '../../../core/layout/window_size.dart';
 import '../../../core/platform/link_launcher.dart';
+import '../../../core/widgets/app_title.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../core/widgets/up_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -26,7 +27,7 @@ class SettingsScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           leading: upButton(context, fallback: '/account'),
-          title: Text(l10n.settingsTitle),
+          title: AppTitle(screen: l10n.settingsTitle),
         ),
         body: ContentWidth(
           child: ListView(

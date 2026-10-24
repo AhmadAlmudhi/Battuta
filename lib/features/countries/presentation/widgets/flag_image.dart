@@ -51,6 +51,68 @@ class FlagImage extends StatelessWidget {
   );
 }
 
+/// A flag drawn like a printed card (PRD section 10.1): in its own shape,
+/// as large as the space allows, with rounded corners, a hairline edge so
+/// white flags stand out, and a soft shadow.
+class FramedFlag extends StatelessWidget {
+  const FramedFlag({
+    super.key,
+    required this.country,
+    this.radius = 6,
+    this.excludeFromSemantics = false,
+  });
+
+  final Country country;
+  final double radius;
+  final bool excludeFromSemantics;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final corners = BorderRadius.circular(radius);
+    return LayoutBuilder(
+      // Laid out at the full width and its own height, then scaled down to
+      // fit, so the frame hugs the flag whatever its shape.
+      builder: (context, constraints) => Center(
+        child: FittedBox(
+          child: SizedBox(
+            width: constraints.maxWidth,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: corners,
+                boxShadow: [
+                  BoxShadow(
+                    color: scheme.shadow.withValues(alpha: 0.16),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: BoxDecoration(
+                  borderRadius: corners,
+                  border: Border.all(
+                    color: scheme.onSurface.withValues(alpha: 0.12),
+                    width: 0.5,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: corners,
+                  child: FlagImage(
+                    country: country,
+                    excludeFromSemantics: excludeFromSemantics,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _FlagPlaceholder extends StatelessWidget {
   const _FlagPlaceholder(this.alpha2);
 
@@ -59,7 +121,7 @@ class _FlagPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return ColoredBox(
+    final box = ColoredBox(
       color: scheme.surfaceContainerHighest,
       child: Center(
         child: Text(
@@ -69,6 +131,12 @@ class _FlagPlaceholder extends StatelessWidget {
           ).textTheme.titleMedium?.copyWith(color: scheme.onSurfaceVariant),
         ),
       ),
+    );
+    // In a FramedFlag the height is open, so take a typical flag's shape.
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.hasBoundedHeight
+          ? box
+          : AspectRatio(aspectRatio: 3 / 2, child: box),
     );
   }
 }

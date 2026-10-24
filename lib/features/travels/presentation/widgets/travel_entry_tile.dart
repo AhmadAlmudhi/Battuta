@@ -104,18 +104,14 @@ class _TileBody extends StatelessWidget {
           padding: const EdgeInsetsDirectional.fromSTEB(12, 10, 4, 10),
           child: Row(
             children: [
-              Container(
+              SizedBox(
                 width: 60,
                 height: 40,
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(6),
-                ),
                 child: Hero(
                   tag: flagHeroTag(item.country.code),
-                  child: FlagImage(
+                  child: FramedFlag(
                     country: item.country,
+                    radius: 4,
                     excludeFromSemantics: true,
                   ),
                 ),

@@ -64,4 +64,4 @@ For the full product requirements and design, see [docs/Battuta_PRD.md](docs/Bat
 
 - Country data and flags: [REST Countries](https://restcountries.com)
 - Map data: [Natural Earth](https://www.naturalearthdata.com) (public domain)
-- Fonts: [Inter](https://rsms.me/inter/) and [IBM Plex Sans Arabic](https://github.com/IBM/plex), under the SIL Open Font License
+- Font: [Alexandria](https://fonts.google.com/specimen/Alexandria), under the SIL Open Font License

@@ -77,12 +77,16 @@
   "exploreOffline": "You're offline. Showing saved data.",
   "exploreRefreshFailed": "Couldn't refresh. Showing saved data.",
   "exploreUpToDate": "Data is up to date.",
+  "exploreRefreshing": "Updating country data. This can take up to a minute.",
+  "@exploreRefreshing": {
+    "description": "Shown while a manual refresh downloads country data (FR-EXP-11)."
+  },
   "exploreRefreshed": "Country data updated.",
   "exploreEmptyTitle": "No countries match.",
   "exploreEmptyBody": "Try a different search or fewer filters.",
   "exploreClearFilters": "Clear filters",
   "exploreVisited": "Visited",
-  "exploreOnWishlist": "On wishlist",
+  "exploreWishlist": "Wishlist",
   "flagLabel": "Flag of {country}",
   "@flagLabel": {
     "placeholders": {

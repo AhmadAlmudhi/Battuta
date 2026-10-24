@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/format/formatters.dart';
 import '../../../core/layout/window_size.dart';
+import '../../../core/widgets/app_title.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../core/widgets/up_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -26,7 +27,7 @@ class AccountScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           leading: upButton(context, fallback: '/explore'),
-          title: Text(l10n.accountTitle),
+          title: AppTitle(screen: l10n.accountTitle),
         ),
         body: ContentWidth(
           child: ListView(

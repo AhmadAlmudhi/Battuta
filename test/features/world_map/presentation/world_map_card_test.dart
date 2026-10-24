@@ -1,3 +1,4 @@
+import 'package:battuta/features/countries/presentation/country_details_screen.dart';
 import 'package:battuta/features/travels/domain/travel_entry.dart';
 import 'package:battuta/features/travels/presentation/travel_forms.dart';
 import 'package:battuta/features/travels/presentation/travel_providers.dart';
@@ -166,7 +167,12 @@ void main() {
     await tester.tap(inCard('Open details'));
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(AppBar, 'Japan'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is CountryDetailsScreen && widget.code == 'JPN',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a country that isn\'t saved offers the same forms as Country '
@@ -208,6 +214,45 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(MapCountryCard), findsNothing);
     expect(painter(tester).selected, isNull);
+  });
+
+  testWidgets('tapping the selected country again, or the page outside the '
+      'map, closes the card (FR-MAP-14)', (tester) async {
+    await openStats(tester);
+    // Taps a second or more apart, so they aren't a double tap, which zooms.
+    final spot = onMap(tester, japan);
+    final taps = await tester.createGesture();
+    Future<void> tapJapan(int second) async {
+      await taps.down(spot, timeStamp: Duration(seconds: second));
+      await taps.up(timeStamp: Duration(seconds: second));
+      await tester.pumpAndSettle();
+    }
+
+    await tapJapan(1);
+    expect(find.byType(MapCountryCard), findsOneWidget);
+    await tapJapan(2);
+    expect(find.byType(MapCountryCard), findsNothing);
+    expect(painter(tester).selected, isNull);
+
+    await tapJapan(3);
+    // A tap on the card itself keeps it open.
+    await tester.tap(inCard('Japan'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MapCountryCard), findsOneWidget);
+
+    await tester.tap(find.text('Countries visited'));
+    await tester.pumpAndSettle();
+    expect(find.byType(MapCountryCard), findsNothing);
+  });
+
+  testWidgets('scrolling the page leaves the card open', (tester) async {
+    await openStats(tester);
+    await tapOnMap(tester, japan);
+
+    await tester.drag(find.text('Countries visited'), const Offset(0, -200));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(MapCountryCard), findsOneWidget);
   });
 
   testWidgets('shapes of countries outside the dataset can\'t be selected '

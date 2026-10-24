@@ -52,21 +52,33 @@ class CountryRefresher {
 
   /// Pull to refresh or Refresh data (FR-EXP-11): calls the API at most once
   /// per 60 minutes, otherwise ends at once as up to date (rule 5).
-  Future<RefreshOutcome> refreshManually() async {
+  ///
+  /// [onStart] runs only when the download begins, or has already begun, so
+  /// the screen can say that it takes a moment.
+  Future<RefreshOutcome> refreshManually({void Function()? onStart}) async {
     final now = _now();
     if (!RefreshPolicy.canManualRefresh(_read(_manualRefreshKey), now)) {
       return RefreshOutcome.upToDate;
     }
-    return _refresh(_manualRefreshKey, now);
+    return _refresh(_manualRefreshKey, now, onStart: onStart);
   }
 
-  Future<RefreshOutcome> _refresh(String attemptKey, DateTime now) {
+  Future<RefreshOutcome> _refresh(
+    String attemptKey,
+    DateTime now, {
+    void Function()? onStart,
+  }) {
     // A refresh already running answers both callers, so overlapping
     // requests never call the API twice.
-    return _inFlight ??= () async {
+    if (_inFlight case final running?) {
+      onStart?.call();
+      return running;
+    }
+    return _inFlight = () async {
       try {
         if (!await _isOnline()) return RefreshOutcome.offline;
         await _prefs.setInt(attemptKey, now.millisecondsSinceEpoch);
+        onStart?.call();
         await _repository.refresh(now: now);
         return RefreshOutcome.refreshed;
       } on CountryApiException {

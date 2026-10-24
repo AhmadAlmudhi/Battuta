@@ -42,9 +42,17 @@ class FakeRefresher implements CountryRefresher {
   int manualCalls = 0;
   int autoCalls = 0;
 
+  /// While set, a manual refresh that downloads waits for it.
+  Completer<void>? download;
+
   @override
-  Future<RefreshOutcome> refreshManually() async {
+  Future<RefreshOutcome> refreshManually({void Function()? onStart}) async {
     manualCalls++;
+    // Like the real refresher, only these outcomes download first.
+    if (manualOutcome case RefreshOutcome.refreshed || RefreshOutcome.failed) {
+      onStart?.call();
+      await download?.future;
+    }
     return manualOutcome;
   }
 

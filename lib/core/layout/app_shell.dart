@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../widgets/app_title.dart';
 import 'window_size.dart';
 
 /// The three main tabs: a bottom bar on compact and medium screens, a side
@@ -94,8 +95,8 @@ class BranchStack extends StatelessWidget {
   );
 }
 
-/// Scaffold for a main tab: title, the Account button every tab has, and
-/// centered content.
+/// Scaffold for a main tab: the app's name, the Account button every tab
+/// has, and centered content.
 class TabScaffold extends StatelessWidget {
   const TabScaffold({
     super.key,
@@ -104,6 +105,7 @@ class TabScaffold extends StatelessWidget {
     this.actions = const [],
   });
 
+  /// The tab's name, for screen readers (FR-PLT-09).
   final String title;
   final Widget body;
 
@@ -113,7 +115,7 @@ class TabScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text(title),
+      title: AppTitle(screen: title),
       actions: [
         ...actions,
         IconButton(

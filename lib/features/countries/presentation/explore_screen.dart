@@ -70,10 +70,38 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     ref.read(exploreQueryProvider.notifier).clearAll();
   }
 
-  /// Pull to refresh and Refresh data (FR-EXP-11).
+  /// Pull to refresh and Refresh data (FR-EXP-11). A download takes a
+  /// moment, so the screen says so while it runs.
   Future<void> _refresh() async {
     final l10n = AppLocalizations.of(context);
-    final outcome = await ref.read(countryRefresherProvider).refreshManually();
+    final scheme = Theme.of(context).colorScheme;
+    final messenger = ScaffoldMessenger.of(context);
+    final outcome = await ref
+        .read(countryRefresherProvider)
+        .refreshManually(
+          onStart: () => messenger
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                // Stays until the result replaces it, even when slow pages
+                // run to their timeouts.
+                duration: const Duration(minutes: 3),
+                content: Row(
+                  children: [
+                    SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: scheme.inversePrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(child: Text(l10n.exploreRefreshing)),
+                  ],
+                ),
+              ),
+            ),
+        );
     if (!mounted) return;
     final message = switch (outcome) {
       RefreshOutcome.refreshed => l10n.exploreRefreshed,

@@ -6,9 +6,9 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.12 |
+| Version | 1.13 |
 | Status | Ready for development |
-| Date | 22 October 2026 |
+| Date | 24 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
 | Also built and tested | Android and iOS (not published in 1.0) |
 | Technology | Flutter, Firebase |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.13 | 24 Oct 2026 | The app uses Alexandria, one typeface for Latin and Arabic, instead of Inter and IBM Plex Sans Arabic. Every app bar shows the app's name, centered (FR-PLT-09). Explore cards are redesigned: the flag in its own shape like a printed card, and a labeled status badge (FR-EXP-01, FR-EXP-02). On the world map, tapping the selected country again or anywhere else on the page closes its card (FR-MAP-14), and a region's summary moved under the map (FR-MAP-24). A manual refresh says it can take up to a minute (FR-EXP-11). |
 | 1.12 | 22 Oct 2026 | CI and production deploys set up with GitHub Actions (section 12.3). Every production deploy, from a version tag or the weekly run, fetches a fresh country snapshot first, and the weekly run redeploys the latest release, never unreleased code. The snapshot script stops without writing when data is missing or doesn't parse. The app version is 1.0.0. |
 | 1.11 | 22 Oct 2026 | The map's Could items built: the color spread from the tap card, Replay my travels, and Share my map (FR-MAP-32 to 43). The replay's year label and Skip sit under the map, in place of its actions, so they cover no country; Replay is hidden when motion is reduced. The shared image is drawn straight to a canvas, not captured from the screen (section 11.5). The Israeli new shekel is left out with Israel (D-12). |
 | 1.10 | 21 Oct 2026 | World map zoom, region focus, and the reveal built. The map handles its own gestures instead of `InteractiveViewer`, so the page still scrolls at 1× and the map pans once zoomed (section 11.5). Region bars on Stats are their own screen-reader items. |
@@ -136,7 +137,7 @@ The product is named **بطوطة**, written **Battuta** in Latin letters. It is
 | Tagline | English: Every country, stamped. Arabic: كل دولة، بختمها |
 | App icon | A cream passport stamp, tilted 12 degrees, with an amber globe at its center, on a Lagoon Teal background. The icon has no text, so it works in both languages. The artwork stays within the central 60% of the canvas, so round and rounded-square masks never clip it. Source files in `assets/icons/`: `battuta_logo.svg`, rendered to `battuta_icon.png` (1,024 px), plus the stamp alone (`battuta_icon_foreground.png`) and the background alone (`battuta_icon_background.png`) for the Android adaptive icon. Every platform size, including the web favicon, is generated with `flutter_launcher_icons` (`flutter_launcher_icons.yaml`). |
 | Production URL | `battuta-travel.web.app`, a free Firebase Hosting address, which Firebase also serves at `battuta-travel.firebaseapp.com`. The names `battuta` and `battuta-app` were taken by other projects. The `-travel` suffix appears only in the web address, never in the app name. |
-| Typography | Inter for Latin text and IBM Plex Sans Arabic for Arabic text, including the بطوطة wordmark in Bold. Both use the SIL Open Font License and are bundled as assets, so the web app never fetches fonts at run time. |
+| Typography | Alexandria for all text, Latin and Arabic, including the بطوطة wordmark in Bold. One family designed for both scripts keeps Latin text on Arabic screens, such as capitals, matching the Arabic around it. It uses the SIL Open Font License and is bundled as assets in four weights, so the web app never fetches fonts at run time. |
 
 #### Colors
 
@@ -352,8 +353,8 @@ Requirements are grouped by module. Each module lists its requirements, then the
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-EXP-01 | Show all countries in a scrolling grid: 2 columns on compact screens, 3 to 4 on medium screens, and up to 6 on expanded screens (FR-PLT-02). Each card shows the flag, the name in the app language, and the region. | Must |
-| FR-EXP-02 | A card shows a badge when the country is in Visited (check icon) or Wishlist (bookmark icon). | Must |
+| FR-EXP-01 | Show all countries in a scrolling grid: 2 columns on compact screens, 3 to 4 on medium screens, and up to 6 on expanded screens (FR-PLT-02). Each card shows the flag in its own shape, framed like a printed card, the name in the app language, and the region. | Must |
+| FR-EXP-02 | A card shows a badge with a label when the country is in Visited (check icon, Stamp Amber) or Wishlist (bookmark icon, teal), next to the region. On web, hovering over a card lifts it. | Must |
 | FR-EXP-03 | A search field filters the grid as the user types, 300 ms after typing stops. | Must |
 | FR-EXP-04 | Search matches the English common name, English official name, and Arabic name as case-insensitive substrings, after normalization (section 10.4). | Must |
 | FR-EXP-05 | Results whose name starts with the query rank above results that only contain it. Ties sort by name. | Should |
@@ -362,7 +363,7 @@ Requirements are grouped by module. Each module lists its requirements, then the
 | FR-EXP-08 | Sort options: name A to Z (default), name Z to A, population high to low or low to high, area high to low or low to high. | Must |
 | FR-EXP-09 | Search text, filters, and sort stay applied while the user moves between screens, until the app or tab is closed. | Must |
 | FR-EXP-10 | When the device is offline, a non-blocking banner reads: You're offline. Showing saved data. | Must |
-| FR-EXP-11 | The user can refresh country data with pull to refresh on touch screens, or **Refresh data** in the Explore menu on web. Manual refresh calls the API at most once per hour (section 8.2). | Should |
+| FR-EXP-11 | The user can refresh country data with pull to refresh on touch screens, or **Refresh data** in the Explore menu on web. Manual refresh calls the API at most once per hour (section 8.2). While the download runs, a message with a progress indicator reads: Updating country data. This can take up to a minute. The outcome replaces it. | Should |
 | FR-EXP-12 | Loading, empty, and error states follow section 10.3. | Must |
 
 | ID | Given | When | Then |
@@ -493,6 +494,7 @@ Email and password is the only sign-in method in 1.0 (D-8).
 | FR-PLT-06 | Every swipe or long-press action also has a visible control, so mouse and keyboard users can reach it. | Must |
 | FR-PLT-07 | On web, the browser tab title names the current screen in the app language, for example Japan · Battuta or اليابان · بطوطة, and the site has a favicon. | Should |
 | FR-PLT-08 | Haptic feedback is used on Android and iOS only. | Should |
+| FR-PLT-09 | Every app bar shows the app's name, Battuta or بطوطة, centered, instead of the screen's name. Screen readers still hear the screen's name with it, for example Japan · Battuta. | Should |
 
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
@@ -549,7 +551,7 @@ Some countries are too small to see or tap on a world map, such as Singapore, Ba
 | --- | --- | --- |
 | FR-MAP-12 | Tapping or clicking a country highlights its border and opens a card with its flag, name, status, and visit date or target year. | Must |
 | FR-MAP-13 | The card offers the same actions and forms as Country details: Mark as visited and Add to wishlist for a country that isn't saved, Mark as visited and Edit for a wishlist country, and Edit for a visited one. Open details opens /country/:code. Remove stays on Country details and My travels. | Must |
-| FR-MAP-14 | Tapping the ocean or pressing Esc closes the card. | Must |
+| FR-MAP-14 | Tapping the selected country again, the ocean, or anywhere else on the page closes the card, as does pressing Esc. Scrolling the page and tapping the card itself leave it open. | Must |
 | FR-MAP-15 | On web, hovering over a country highlights its border and shows its name in a tooltip. | Must |
 
 | ID | Given | When | Then |
@@ -583,7 +585,7 @@ Selecting a region flies the map to it. Countries outside the region fade instea
 | FR-MAP-21 | The map card has region chips: All, Africa, Americas, Asia, Europe, and Oceania. Regions come from the countries table, so the map agrees with Explore and Stats. There is no Antarctic chip: Antarctica isn't on the map, and the region's islands are too far apart to frame. | Should |
 | FR-MAP-22 | Selecting a region animates the map to that region's frame (table below) over 600 ms with an ease-in-out curve. Selecting All animates back to the world view. | Should |
 | FR-MAP-23 | Countries outside the selected region fade to 30% opacity over the same 600 ms. They keep their colors and can still be selected. | Should |
-| FR-MAP-24 | A summary on the map shows the region's name and counts, for example: Europe · 4 visited · 3 on your wishlist. | Should |
+| FR-MAP-24 | A summary under the map shows the region's name and counts, for example: Europe · 4 visited · 3 on your wishlist. It sits outside the map so it covers none of it. | Should |
 | FR-MAP-25 | Tapping a region's progress bar on Stats (FR-STA-02) scrolls the map into view and selects that region. The Antarctic bar has no map region and isn't tappable. | Should |
 
 Starting frames, to adjust by eye during development:
@@ -1014,6 +1016,7 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes
 - Layouts follow the Material 3 window size classes: compact, medium, and expanded (FR-PLT-02).
 - The Material 3 type scale. Numbers on the Stats screen use tabular figures so they don't shift while counting.
 - Spacing on an 8 dp grid. Cards use 12 dp corner radius; sheets and dialogs use the Material 3 defaults.
+- Flags on Explore cards, Country details, and My travels keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. Explore cards are outlined, with the region and status at the bottom.
 - Material Symbols (rounded) for icons. On web, interactive elements show hover and focus states.
 
 #### World map
@@ -1021,7 +1024,7 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes
 - **Projection:** Equal Earth. It shows every country at its true relative size, so Africa isn't shrunk next to Europe as on common web maps, and its rounded sides give an atlas-like look.
 - **Framing:** the map is cropped between 57° south and 84° north, which removes Antarctica and a large empty area. At 1,000 units wide it is 435 units tall, a ratio of about 2.3 to 1, and the card keeps that ratio at every width.
 - **Lines and hatching:** borders are 0.55 dp for Not yet and Visited countries and 0.9 dp for Wishlist countries. Wishlist hatching runs at 45°, repeating every 5 dp, with stripes 1.6 dp wide, so wishlist countries differ from visited ones without relying on color. Dots have a 4 dp radius and a 1.2 dp border. All of these keep their size at every zoom level (FR-MAP-20).
-- **Card layout:** from top to bottom, the headline (FR-MAP-02), the region chips, the map, the selected country's card (FR-MAP-12), and the legend. The region summary sits over the map's top start corner, and the zoom and Reset view buttons over its bottom end corner.
+- **Card layout:** from top to bottom, the headline (FR-MAP-02), the region chips, the map, the region summary while a region is focused (FR-MAP-24), the selected country's card (FR-MAP-12), and the legend. The zoom and Reset view buttons sit over the map's bottom end corner.
 - **Faded countries** outside a region focus keep their colors at 30% opacity.
 
 | Element | Light theme | Dark theme |
@@ -1171,7 +1174,7 @@ lib/
     onboarding/         Welcome screen
   main.dart
 assets/data/            countries_snapshot.json, and world_map.json (section 8.7)
-assets/fonts/           Inter and IBM Plex Sans Arabic, with their licenses
+assets/fonts/           Alexandria in four weights, with its license
 assets/flags/           320 px PNG flag per country (about 3 MB)
 web/                    index.html, icons, sqlite3.wasm, drift_worker.js
 tool/                   snapshot, flag, and map scripts, web database worker source

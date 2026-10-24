@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:battuta/core/database/app_database.dart';
 import 'package:battuta/features/countries/data/country_refresher.dart';
 import 'package:battuta/features/countries/presentation/widgets/country_card.dart';
@@ -219,7 +221,7 @@ void main() {
 
     await tester.tap(card('Japan'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(AppBar, 'Japan'), findsOneWidget);
+    expect(appBarOf('Japan'), findsOneWidget);
 
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
@@ -273,6 +275,31 @@ void main() {
         find.text("Couldn't refresh. Showing saved data."),
         findsOneWidget,
       );
+    });
+
+    testWidgets('says a download can take a while as it runs, but not when '
+        'the data is up to date (FR-EXP-11)', (tester) async {
+      final app = await pumpApp(tester, prefs: returningUser);
+      const waiting = 'Updating country data. This can take up to a minute.';
+
+      await tester.fling(card('Antarctica'), const Offset(0, 400), 1000);
+      await tester.pumpAndSettle();
+      expect(find.text(waiting), findsNothing);
+
+      app.refresher
+        ..manualOutcome = RefreshOutcome.refreshed
+        ..download = Completer();
+      await tester.fling(card('Antarctica'), const Offset(0, 400), 1000);
+      // Frames for the indicator to settle and the earlier message to leave.
+      for (var frame = 0; frame < 10; frame++) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
+      expect(find.text(waiting), findsOneWidget);
+
+      app.refresher.download!.complete();
+      await tester.pumpAndSettle();
+      expect(find.text(waiting), findsNothing);
+      expect(find.text('Country data updated.'), findsOneWidget);
     });
   });
 

@@ -182,6 +182,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exploreUpToDate => 'Data is up to date.';
 
   @override
+  String get exploreRefreshing =>
+      'Updating country data. This can take up to a minute.';
+
+  @override
   String get exploreRefreshed => 'Country data updated.';
 
   @override
@@ -197,7 +201,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exploreVisited => 'Visited';
 
   @override
-  String get exploreOnWishlist => 'On wishlist';
+  String get exploreWishlist => 'Wishlist';
 
   @override
   String flagLabel(String country) {

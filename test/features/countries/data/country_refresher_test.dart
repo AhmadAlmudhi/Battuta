@@ -99,6 +99,20 @@ void main() {
       expect(repository.refreshCalls, 1);
     });
 
+    test('says when the download starts, and not when it answers up to '
+        'date', () async {
+      final refresher0 = refresher();
+      final callsAtStart = <int>[];
+
+      await refresher0.refreshManually(
+        onStart: () => callsAtStart.add(repository.refreshCalls),
+      );
+      await refresher0.refreshManually(onStart: () => callsAtStart.add(-1));
+
+      // Once, just before the API call.
+      expect(callsAtStart, [0]);
+    });
+
     test('reports failures and keeps the data', () async {
       repository.failWith = const CountryApiException(
         CountryApiFailure.network,
@@ -108,8 +122,13 @@ void main() {
 
     test('reports offline without calling the API', () async {
       online = false;
-      expect(await refresher().refreshManually(), RefreshOutcome.offline);
+      var started = false;
+      expect(
+        await refresher().refreshManually(onStart: () => started = true),
+        RefreshOutcome.offline,
+      );
       expect(repository.refreshCalls, 0);
+      expect(started, isFalse);
     });
   });
 
@@ -124,5 +143,19 @@ void main() {
 
     expect(outcomes, everyElement(RefreshOutcome.refreshed));
     expect(repository.refreshCalls, 1);
+  });
+
+  test('joining a download under way counts as its start', () async {
+    final refresher0 = refresher();
+    var started = 0;
+
+    final outcomes = await Future.wait([
+      refresher0.refreshManually(onStart: () => started++),
+      refresher0.refreshManually(onStart: () => started++),
+    ]);
+
+    expect(outcomes, everyElement(RefreshOutcome.refreshed));
+    expect(repository.refreshCalls, 1);
+    expect(started, 2);
   });
 }
