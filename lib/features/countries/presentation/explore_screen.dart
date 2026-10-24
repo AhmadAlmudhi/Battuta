@@ -467,8 +467,6 @@ class _SkeletonGrid extends StatelessWidget {
         WindowSizeClass.of(context),
         constraints.maxWidth,
       );
-      final tileWidth =
-          (constraints.maxWidth - 32 - 12 * (columns - 1)) / columns;
       return GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 36, 16, 16),
@@ -476,7 +474,7 @@ class _SkeletonGrid extends StatelessWidget {
           crossAxisCount: columns,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
-          mainAxisExtent: tileWidth * 2 / 3 + CountryCard.infoHeight(context),
+          childAspectRatio: 1,
         ),
         itemCount: 8,
         itemBuilder: (context, _) => const CountryCardSkeleton(),

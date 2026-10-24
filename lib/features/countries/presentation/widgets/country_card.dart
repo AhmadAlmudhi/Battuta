@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -11,9 +13,9 @@ import 'flag_image.dart';
 /// (PRD section 10.2).
 String flagHeroTag(String code) => 'flag-$code';
 
-/// An Explore card: the flag, the name in the app language, the region, and
-/// a badge for saved countries (FR-EXP-01, FR-EXP-02). On web, hovering
-/// lifts the card.
+/// An Explore card (FR-EXP-01, FR-EXP-02): the flag filling a circle, the
+/// name and region over its lower part on a dark band, and a badge on its
+/// edge for saved countries. On web, hovering lifts it.
 class CountryCard extends StatefulWidget {
   const CountryCard({
     super.key,
@@ -25,13 +27,6 @@ class CountryCard extends StatefulWidget {
   final Country country;
   final TravelStatus? status;
   final VoidCallback onTap;
-
-  /// The card's height below the flag for 2 lines of name and the region
-  /// row, scaled with the text size so nothing clips at 130% (NFR-08).
-  static double infoHeight(BuildContext context) {
-    final scaler = MediaQuery.textScalerOf(context);
-    return scaler.scale(40) + scaler.scale(16) + _badgePadding * 2 + 24;
-  }
 
   @override
   State<CountryCard> createState() => _CountryCardState();
@@ -49,82 +44,142 @@ class _CountryCardState extends State<CountryCard> {
     final country = widget.country;
 
     return MergeSemantics(
-      child: Card(
-        margin: EdgeInsets.zero,
-        clipBehavior: Clip.antiAlias,
-        color: scheme.surfaceContainerLow,
-        elevation: _hovered ? 3 : 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: _hovered
-                ? scheme.primary.withValues(alpha: 0.5)
-                : scheme.outlineVariant.withValues(alpha: 0.7),
-          ),
-        ),
-        child: InkWell(
-          onTap: widget.onTap,
-          onHover: (hovered) => setState(() => _hovered = hovered),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AspectRatio(
-                aspectRatio: 3 / 2,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 4),
-                  child: AnimatedScale(
-                    scale: _hovered && !MediaQuery.disableAnimationsOf(context)
-                        ? 1.04
-                        : 1,
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOutCubic,
-                    child: Hero(
-                      tag: flagHeroTag(country.code),
-                      child: FramedFlag(
-                        country: country,
-                        excludeFromSemantics: true,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(12, 8, 12, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        country.name(arabic: arabic),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final diameter = math.min(
+            constraints.maxWidth,
+            constraints.maxHeight,
+          );
+          // Where the circle's edge crosses its top end diagonal, for the
+          // badge.
+          final corner = diameter / 2 * (1 - math.sqrt1_2);
+          return Center(
+            child: AnimatedScale(
+              scale: _hovered && !MediaQuery.disableAnimationsOf(context)
+                  ? 1.03
+                  : 1,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              child: SizedBox.square(
+                dimension: diameter,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned.fill(
+                      child: Material(
+                        color: scheme.surfaceContainerHighest,
+                        elevation: _hovered ? 6 : 1,
+                        clipBehavior: Clip.antiAlias,
+                        shape: CircleBorder(
+                          side: BorderSide(
+                            color: _hovered
+                                ? scheme.primary
+                                : scheme.outlineVariant,
+                            width: _hovered ? 2 : 1,
+                          ),
                         ),
-                      ),
-                      // The region row sits at the bottom, level across a
-                      // row of cards, whether the name takes 1 line or 2.
-                      const Spacer(),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              regionName(l10n, country.region),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: scheme.onSurfaceVariant,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Hero(
+                              tag: flagHeroTag(country.code),
+                              // Both ways, the flag flies in its framed
+                              // shape, not stretched from a circle.
+                              flightShuttleBuilder: (_, _, _, _, _) =>
+                                  FramedFlag(country: country, radius: 10),
+                              child: FlagImage(
+                                country: country,
+                                fit: BoxFit.cover,
+                                excludeFromSemantics: true,
                               ),
                             ),
-                          ),
-                          if (widget.status case final status?) ...[
-                            const SizedBox(width: 6),
-                            _StatusBadge(status: status),
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: _Caption(
+                                name: country.name(arabic: arabic),
+                                region: regionName(l10n, country.region),
+                                diameter: diameter,
+                              ),
+                            ),
+                            // Above the flag, so the ripple shows over it.
+                            Material(
+                              type: MaterialType.transparency,
+                              child: InkWell(
+                                customBorder: const CircleBorder(),
+                                onTap: widget.onTap,
+                                onHover: (hovered) =>
+                                    setState(() => _hovered = hovered),
+                              ),
+                            ),
                           ],
-                        ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                    if (widget.status case final status?)
+                      PositionedDirectional(
+                        top: corner - _StatusBadge.size / 2,
+                        end: corner - _StatusBadge.size / 2,
+                        child: _StatusBadge(status: status),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// The name and region in white on a translucent black band across the
+/// bottom of the circle, inset so the text stays clear of its curve.
+class _Caption extends StatelessWidget {
+  const _Caption({
+    required this.name,
+    required this.region,
+    required this.diameter,
+  });
+
+  final String name;
+  final String region;
+  final double diameter;
+
+  @override
+  Widget build(BuildContext context) {
+    final styles = Theme.of(context).textTheme;
+    return ColoredBox(
+      // Dark enough for white text on white flags (WCAG AA).
+      color: Colors.black.withValues(alpha: 0.55),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          diameter * 0.14,
+          6,
+          diameter * 0.14,
+          diameter * 0.11,
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                name,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: styles.titleSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                region,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: styles.bodySmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.85),
                 ),
               ),
             ],
@@ -135,20 +190,19 @@ class _CountryCardState extends State<CountryCard> {
   }
 }
 
-/// Space above and below a badge's label.
-const _badgePadding = 3.0;
-
-/// Visited in Stamp Amber or Wishlist in teal, with its icon (FR-EXP-02).
+/// A check in Stamp Amber for Visited, or a bookmark in teal for Wishlist,
+/// ringed in the page color like a status dot (FR-EXP-02).
 class _StatusBadge extends StatelessWidget {
   const _StatusBadge({required this.status});
 
   final TravelStatus status;
 
+  static const size = 30.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final (icon, background, foreground, label) = switch (status) {
       // Stamp Amber with Deep Ink, as the brand rules require (PRD 1.4).
       TravelStatus.visited => (
@@ -164,32 +218,17 @@ class _StatusBadge extends StatelessWidget {
         l10n.exploreWishlist,
       ),
     };
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: background,
-        shape: const StadiumBorder(),
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(
-          6,
-          _badgePadding,
-          8,
-          _badgePadding,
+    return Semantics(
+      label: label,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: background,
+          shape: BoxShape.circle,
+          border: Border.all(color: scheme.surface, width: 2),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14, color: foreground),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: foreground,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
+        child: Icon(icon, size: 16, color: foreground),
       ),
     );
   }
@@ -203,54 +242,22 @@ class CountryCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    Widget bar(double widthFactor) => FractionallySizedBox(
-      widthFactor: widthFactor,
-      child: Container(
-        height: 12,
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(6),
+    final circle = LayoutBuilder(
+      builder: (context, constraints) => Center(
+        child: SizedBox.square(
+          dimension: math.min(constraints.maxWidth, constraints.maxHeight),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+          ),
         ),
       ),
     );
 
-    final card = Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      color: scheme.surfaceContainerLow,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.7)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: 3 / 2,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 4),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(12, 12, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [bar(0.8), const SizedBox(height: 8), bar(0.5)],
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (MediaQuery.disableAnimationsOf(context)) return card;
-    return card
+    if (MediaQuery.disableAnimationsOf(context)) return circle;
+    return circle
         .animate(onPlay: (controller) => controller.repeat())
         .shimmer(
           duration: 1200.ms,

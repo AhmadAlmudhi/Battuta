@@ -37,13 +37,9 @@ class CountryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = WindowSizeClass.of(context);
-    final infoHeight = CountryCard.infoHeight(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final columns = exploreGridColumns(size, constraints.maxWidth);
-        final tileWidth =
-            (constraints.maxWidth - _padding * 2 - _spacing * (columns - 1)) /
-            columns;
         return GridView.builder(
           // Pull to refresh needs the grid to scroll even when it is short.
           physics: const AlwaysScrollableScrollPhysics(),
@@ -52,7 +48,8 @@ class CountryGrid extends StatelessWidget {
             crossAxisCount: columns,
             mainAxisSpacing: _spacing,
             crossAxisSpacing: _spacing,
-            mainAxisExtent: tileWidth * 2 / 3 + infoHeight,
+            // Round cards fill square tiles.
+            childAspectRatio: 1,
           ),
           itemCount: countries.length,
           itemBuilder: (context, index) {

@@ -116,7 +116,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 - Material 3. Theme from seed `#0E7C86` (Lagoon Teal) with fixed secondary `#F2B24B` (Stamp Amber), `onSecondary` `#13232B`. Never use amber for text on white. See PRD section 1.4 for the exact `ColorScheme.fromSeed` code.
 - Font: Alexandria for Latin and Arabic, bundled as four static weights in `assets/fonts/alexandria/` (cut from the Google Fonts variable font with fontTools' instancer; never fetched at runtime). Stats numbers use tabular figures, which Alexandria supports; check `tnum` before switching fonts.
 - Every app bar shows the app's name, centered by `appBarTheme`: use `AppTitle(screen: ...)`, which gives screen readers the screen's name too (FR-PLT-09). Tests find a screen with `appBarOf(name)` from `pump_app.dart`.
-- Flags on Explore cards, Country details, and My travels use `FramedFlag` (own shape, rounded corners, hairline edge, shadow), also inside the flag heroes.
+- Explore cards are circles: the flag with `BoxFit.cover`, the name and region on a black band at 55% opacity, and a status badge on the top end edge. Country details and My travels use `FramedFlag` (own shape, rounded corners, hairline edge, shadow); the card's Hero flies a `FramedFlag` both ways through `flightShuttleBuilder`.
 - `AnimatedSize` asserts when its child resizes with a zero duration, so with reduced motion skip it instead of passing `Duration.zero` (see `_Resizing` in `world_map_card.dart`).
 - 8 dp spacing grid, 12 dp card radius, Material Symbols Rounded, 48 dp minimum touch targets.
 - Window size classes (FR-PLT-02): compact < 600 (bottom bar, 2 cols, bottom sheets), medium 600–839 (bottom bar, 3–4 cols, dialogs), expanded ≥ 840 (nav rail, up to 6 cols, dialogs). Content max width 1,200 dp.
@@ -190,7 +190,7 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
   - `gh release download sqlite3-<version> -R simolus3/sqlite3.dart -p sqlite3.wasm -D web --clobber`, with the `sqlite3` version from `pubspec.lock`.
 - Don't add COOP/COEP headers; without them drift uses IndexedDB storage, which is expected.
 - `firebase.json` rewrites all paths to `/index.html`.
-- Flags are bundled (`assets/flags/{alpha2}.png`, 320 px) because the flag CDN sends no CORS headers. Use `FlagImage`, which decodes at display size and falls back to the 2-letter code. Hero tag: `flagHeroTag(code)`.
+- Flags are bundled (`assets/flags/{alpha2}.png`, 320 px) because the flag CDN sends no CORS headers. Use `FlagImage`, which decodes once at the bundled size (one shared image per flag, so hero flights draw at once; decoding at display size would re-decode every frame of a flight) and falls back to the 2-letter code. Hero tag: `flagHeroTag(code)`.
 - The REST Countries key only answers browsers from its allowed origins. `localhost` is allowed, so Refresh data works on `flutter run -d chrome` (and really spends 3 requests); other hosts, such as preview channels, get 403 (handled: "Couldn't refresh").
 - Emulator testing on web: use a debug build (`flutter run`). FlutterFire re-applies the Auth emulator after a reload only in debug builds; a release build restores the session against production, gets a 400, and signs out. The emulator setting is also per tab, so reload the same tab rather than opening a new one.
 - Chrome DevTools offline emulation (`Network.emulateNetworkConditions`) ends when the DevTools session disconnects, so do offline checks within one connected session.
