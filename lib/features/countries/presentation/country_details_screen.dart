@@ -224,7 +224,10 @@ class _Header extends ConsumerWidget {
                         PositionedDirectional(
                           end: -20,
                           bottom: -20,
-                          child: VisitStamp(countryCode: country.code),
+                          child: VisitStamp(
+                            countryCode: country.code,
+                            landOnArrival: true,
+                          ),
                         ),
                       ],
                     ),

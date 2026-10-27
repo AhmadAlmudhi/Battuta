@@ -255,6 +255,48 @@ void main() {
     });
   });
 
+  testWidgets("a visited country's stamp lands once the flag has flown in, "
+      'and fades as the screen leaves (PRD 10.2)', (tester) async {
+    final haptics = <String?>[];
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'HapticFeedback.vibrate') {
+        haptics.add(call.arguments as String?);
+      }
+      return null;
+    });
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+    final app = await pumpApp(tester, prefs: returningUser, size: _tall);
+    await app.container.read(travelRepositoryProvider).saveVisit('FRA');
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.ancestor(
+        of: find.text('France'),
+        matching: find.byType(CountryCard),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('VISITED'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.text('VISITED'), findsOneWidget);
+    // Only saving a visit taps.
+    expect(haptics, isEmpty);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pump();
+    final fade = find.ancestor(
+      of: find.text('VISITED'),
+      matching: find.byType(AnimatedOpacity),
+    );
+    expect(tester.widget<AnimatedOpacity>(fade).opacity, 0);
+    await tester.pumpAndSettle();
+  });
+
   group('wishlist (FR-TRV-03, FR-TRV-04)', () {
     testWidgets('Add to wishlist with a priority and target year', (
       tester,
