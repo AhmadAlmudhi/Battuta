@@ -266,6 +266,8 @@
   "wishlistFormNotesHint": "What draws you there?",
   "validationVisitDateFuture": "Visit date can't be in the future.",
   "validationNotesTooLong": "Notes can be up to 500 characters.",
+  "travelsVisited": "Visited",
+  "travelsWishlist": "Wishlist",
   "travelsVisitedTab": "Visited ({count})",
   "@travelsVisitedTab": {
     "placeholders": {
@@ -275,6 +277,35 @@
     }
   },
   "travelsWishlistTab": "Wishlist ({count})",
+  "travelsRegionCount": "{count, plural, =1{1 region} other{{count} regions}}",
+  "@travelsRegionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "travelsVisitedSummary": "{countries} in {regions}",
+  "@travelsVisitedSummary": {
+    "description": "At the top of My travels' Visited tab, for example: 6 countries in 3 regions.",
+    "placeholders": {
+      "countries": {
+        "type": "String"
+      },
+      "regions": {
+        "type": "String"
+      }
+    }
+  },
+  "travelsHighPriorityCount": "{count, plural, =1{1 high priority} other{{count} high priority}}",
+  "@travelsHighPriorityCount": {
+    "description": "In the Wishlist tab's summary, for example: 4 countries · 2 high priority.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@travelsWishlistTab": {
     "placeholders": {
       "count": {
@@ -285,7 +316,7 @@
   "travelsSearchHint": "Search your travels",
   "travelsSortByDate": "Visit date, newest first",
   "travelsSortByPriority": "Priority, then target year",
-  "travelsNoDate": "Date not set",
+  "travelsNoDate": "No date",
   "travelsEmptyVisitedTitle": "No visits yet",
   "travelsEmptyVisitedBody": "Countries you mark as visited appear here.",
   "travelsEmptyWishlistTitle": "Your wishlist is empty",

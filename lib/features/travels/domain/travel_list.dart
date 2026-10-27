@@ -71,3 +71,45 @@ abstract final class TravelListOrder {
   static String _nameKey(TravelListItem item, bool arabic) =>
       normalizeForSearch(item.country.name(arabic: arabic));
 }
+
+/// Rows under one heading in My travels: a year of visits, or a wishlist
+/// priority.
+typedef TravelGroup<K> = ({K key, List<TravelListItem> items});
+
+/// Headings for the default orders (FR-TRV-06). The lists come sorted, so a
+/// group is a run of rows with the same key.
+abstract final class TravelListGroups {
+  /// Visits newest first, by year; undated visits last, under null.
+  static List<TravelGroup<int?>> byYear(List<TravelListItem> sorted) =>
+      _runs(sorted, (item) => item.entry.visitedOn?.year);
+
+  /// The wishlist by priority, high first.
+  static List<TravelGroup<WishlistPriority>> byPriority(
+    List<TravelListItem> sorted,
+  ) => _runs(sorted, (item) => item.entry.priority ?? WishlistPriority.medium);
+
+  /// How many of [items] are in each region.
+  static Map<String, int> regionCounts(Iterable<TravelListItem> items) {
+    final counts = <String, int>{};
+    for (final item in items) {
+      counts.update(item.country.region, (n) => n + 1, ifAbsent: () => 1);
+    }
+    return counts;
+  }
+
+  static List<TravelGroup<K>> _runs<K>(
+    List<TravelListItem> items,
+    K Function(TravelListItem item) keyOf,
+  ) {
+    final groups = <TravelGroup<K>>[];
+    for (final item in items) {
+      final key = keyOf(item);
+      if (groups.isNotEmpty && groups.last.key == key) {
+        groups.last.items.add(item);
+      } else {
+        groups.add((key: key, items: [item]));
+      }
+    }
+    return groups;
+  }
+}

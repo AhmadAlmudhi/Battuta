@@ -559,6 +559,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get validationNotesTooLong => 'يمكن أن تصل الملاحظات إلى 500 حرف.';
 
   @override
+  String get travelsVisited => 'تمت زيارتها';
+
+  @override
+  String get travelsWishlist => 'قائمة الأمنيات';
+
+  @override
   String travelsVisitedTab(int count) {
     return 'تمت زيارتها ($count)';
   }
@@ -566,6 +572,39 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String travelsWishlistTab(int count) {
     return 'قائمة الأمنيات ($count)';
+  }
+
+  @override
+  String travelsRegionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منطقة',
+      many: '$count منطقة',
+      few: '$count مناطق',
+      two: 'منطقتين',
+      one: 'منطقة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String travelsVisitedSummary(String countries, String regions) {
+    return '$countries في $regions';
+  }
+
+  @override
+  String travelsHighPriorityCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count بأولوية عالية',
+      many: '$count بأولوية عالية',
+      few: '$count بأولوية عالية',
+      two: 'اثنتان بأولوية عالية',
+      one: 'واحدة بأولوية عالية',
+    );
+    return '$_temp0';
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/format/formatters.dart';
+import '../../../../core/widgets/note_text.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../countries/domain/country.dart';
 import '../../domain/travel_entry.dart';
@@ -182,7 +183,10 @@ class _SavedCard extends ConsumerWidget {
                       top: 2,
                       bottom: 2,
                     ),
-                    child: Text(entry.notes, style: theme.textTheme.bodyMedium),
+                    child: NoteText(
+                      entry.notes,
+                      style: theme.textTheme.bodyMedium,
+                    ),
                   ),
                 ),
               ),

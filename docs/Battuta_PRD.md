@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.14 |
+| Version | 1.15 |
 | Status | Ready for development |
 | Date | 27 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.15 | 27 Oct 2026 | My travels redesigned: Visited and Wishlist are a two-part toggle with counts, above the search and region chips, which show how many entries each region has. Each tab opens with a one-line summary. In the default order, visits fall under their years and wishlist entries under their priorities. Rows show a round flag, the rating or a priority tag, the region with the date or target year, and the first line of the notes; a missing date is left out (FR-TRV-05, FR-TRV-06, FR-TRV-08). Notes read in their own direction, so English notes on an Arabic screen keep their punctuation in place. |
 | 1.14 | 27 Oct 2026 | Country details redesigned: the header's flag tint runs up behind the app bar, with the region tag and Open in Maps under the names; the save actions are full-width buttons or a status card; facts are tiles with shortened figures and a list; neighbors are round flags; and expanded screens show two columns (FR-DET-01 to 04, FR-DET-07). A visited country's stamp lands after the flag's flight instead of arriving with it (section 10.2). The visit and wishlist forms are redesigned: the country's flag in the header, a centered date choice, larger stars with words, priority options and year chips, a filled notes field, and a full-width Save (FR-TRV-01, FR-TRV-04). |
 | 1.13 | 24 Oct 2026 | The app uses Alexandria, one typeface for Latin and Arabic, instead of Inter and IBM Plex Sans Arabic. Every app bar shows the app's name, centered (FR-PLT-09). Explore cards are circles filled with the flag, with the name and region over a soft dark gradient and a status badge on the edge (FR-EXP-01, FR-EXP-02). Flags elsewhere are framed like printed cards, and every flag decodes once at full size, so flights between screens draw it at once (NFR-03); on the way, the circle morphs into the framed shape. On the world map, tapping the selected country again or anywhere else on the page closes its card (FR-MAP-14), and a region's summary moved under the map (FR-MAP-24). A manual refresh says it can take up to a minute (FR-EXP-11). |
 | 1.12 | 22 Oct 2026 | CI and production deploys set up with GitHub Actions (section 12.3). Every production deploy, from a version tag or the weekly run, fetches a fresh country snapshot first, and the weekly run redeploys the latest release, never unreleased code. The snapshot script stops without writing when data is missing or doesn't parse. The app version is 1.0.0. |
@@ -403,10 +404,10 @@ Requirements are grouped by module. Each module lists its requirements, then the
 | FR-TRV-02 | Saving a visit plays the passport-stamp animation (section 10.2) and updates the details action area. | Must |
 | FR-TRV-03 | Marking a wishlist country as visited converts its entry to Visited and keeps its notes. | Must |
 | FR-TRV-04 | **Add to wishlist** opens a form with: priority (High, Medium, or Low, as three options; default Medium), target year (optional; a row of chips from Any time and this year to 20 years ahead), and notes (optional, up to 500 characters). | Must |
-| FR-TRV-05 | My travels has two tabs, Visited and Wishlist, each showing its count. | Must |
-| FR-TRV-06 | Visited sorts by visit date, newest first, with undated entries last. Wishlist sorts by priority, then target year. Both can switch to name order. | Must |
+| FR-TRV-05 | My travels has two tabs, Visited and Wishlist, chosen with a two-part toggle that shows each tab's count. Each tab opens with a one-line summary: for Visited, the number of countries and of regions they are in, for example 6 countries in 3 regions; for Wishlist, the number of countries and, when there are any, how many are high priority. | Must |
+| FR-TRV-06 | Visited sorts by visit date, newest first, with undated entries last, grouped under each year and a final No date group. Wishlist sorts by priority, then target year, grouped under High, Medium, and Low priority. Each group heading shows its number of countries. Both can switch to name order, which has no groups. | Must |
 | FR-TRV-07 | Each entry has a menu with Edit and Delete. On touch screens, swiping an entry reveals the same actions. Delete removes the entry at once and shows an Undo snackbar for 4 seconds. | Must |
-| FR-TRV-08 | Each tab supports search by country name and filtering by region. | Should |
+| FR-TRV-08 | Each tab supports search by country name and filtering by region. Each region chip shows how many of the tab's entries are in that region. | Should |
 | FR-TRV-09 | An empty tab shows a short message and a button that opens Explore. | Must |
 | FR-TRV-10 | Every change is saved on the device immediately and survives restarts and page reloads. | Must |
 
@@ -1020,7 +1021,8 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes
 - Country details on expanded screens has two columns: the header and save actions on the start side, which stay in place, and the facts and neighbors beside them. On phones and medium screens it is one column with the header across the full width.
 - The visit and wishlist forms open with the country's round flag, the title, and the line Everything here is optional, with a ✕ to close. Fields scroll; a full-width Save stays below them and above the on-screen keyboard. Notes use a filled field whose character count appears from 400 characters. Sections that can be emptied, the visit date and the rating, have their Clear action at the end of their title.
 - Explore cards are circles filled with the flag, cropped to fit. The name and region sit over the lower part in white, on a black gradient that is clear above the text, 55% opaque where the text starts, which keeps white text readable over white flags, and 70% at the bottom. The caption is the same height on every card, with room for a two-line name, so names and regions line up across a row.
-- Flags on Country details and My travels keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. A flag flying from an Explore card to Country details morphs from the circle into that frame, and back.
+- Flags on Country details keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. A flag flying from an Explore card or a My travels row to Country details morphs from the circle into that frame, and back.
+- My travels rows sit in rounded panels, one per group, separated by hairlines. Each row shows the round flag, the name, the rating stars (Visited) or a priority tag (Wishlist), the region with the visit date or target year, and the first line of the notes. Notes are shown in their own writing direction, lined up with the screen's start edge.
 - Material Symbols (rounded) for icons. On web, interactive elements show hover and focus states.
 
 #### World map

@@ -17,6 +17,12 @@ void main() {
     matching: find.byType(TravelEntryTile),
   );
 
+  /// A tab of the Visited and Wishlist toggle, by its label and count.
+  Finder tab(String label, int count) => find.descendant(
+    of: find.widgetWithText(Tab, label),
+    matching: find.text('$count'),
+  );
+
   /// Names of the visible rows, top to bottom.
   List<String> rowOrder(WidgetTester tester, List<String> names) => [...names]
     ..sort(
@@ -64,9 +70,9 @@ void main() {
     testWidgets('empty tabs invite the user to Explore', (tester) async {
       final app = await openTravels(tester);
 
-      expect(find.text('Visited (0)'), findsOneWidget);
+      expect(tab('Visited', 0), findsOneWidget);
       expect(find.text('No visits yet'), findsOneWidget);
-      await tester.tap(find.text('Wishlist (0)'));
+      await tester.tap(tab('Wishlist', 0));
       await tester.pumpAndSettle();
       expect(find.text('Your wishlist is empty'), findsOneWidget);
 
@@ -78,8 +84,8 @@ void main() {
     testWidgets('each tab shows its count', (tester) async {
       await openTravels(tester, seed: seedVisits);
 
-      expect(find.text('Visited (3)'), findsOneWidget);
-      expect(find.text('Wishlist (1)'), findsOneWidget);
+      expect(tab('Visited', 3), findsOneWidget);
+      expect(tab('Wishlist', 1), findsOneWidget);
     });
 
     testWidgets('the Wishlist tab has its own URL (PRD 5.2)', (tester) async {
@@ -90,15 +96,47 @@ void main() {
       );
       expect(tile('Saudi Arabia'), findsOneWidget);
 
-      await tester.tap(find.text('Visited (3)'));
+      await tester.tap(tab('Visited', 3));
       await tester.pumpAndSettle();
       expect(location(app), '/travels');
       expect(tile('Japan'), findsOneWidget);
 
-      await tester.tap(find.text('Wishlist (1)'));
+      await tester.tap(tab('Wishlist', 1));
       await tester.pumpAndSettle();
       expect(location(app), '/travels?tab=wishlist');
     });
+  });
+
+  testWidgets('visits fall under their years with a summary, and rows leave '
+      'out a missing date (FR-TRV-06)', (tester) async {
+    await openTravels(tester, seed: seedVisits);
+
+    expect(find.text('3 countries in 2 regions'), findsOneWidget);
+    // Newest year first, undated last.
+    final headings = ['2026', '2025', 'No date'];
+    for (final heading in headings) {
+      expect(find.text(heading), findsOneWidget);
+    }
+    expect(
+      [for (final h in headings) tester.getTopLeft(find.text(h)).dy],
+      orderedEquals(
+        [for (final h in headings) tester.getTopLeft(find.text(h)).dy]..sort(),
+      ),
+    );
+    expect(find.text('Europe · June 1, 2025'), findsOneWidget);
+    expect(find.text('Europe'), findsOneWidget); // Germany has no date.
+    expect(find.text('Date not set'), findsNothing);
+  });
+
+  testWidgets('a row shows the first line of its notes', (tester) async {
+    await openTravels(
+      tester,
+      seed: (app) => app.container
+          .read(travelRepositoryProvider)
+          .saveVisit('FRA', notes: 'Croissants every morning\nand more'),
+    );
+
+    expect(find.text('Croissants every morning'), findsOneWidget);
   });
 
   group('order (FR-TRV-06)', () {
@@ -149,7 +187,8 @@ void main() {
         'Spain',
         'Senegal',
       ]);
-      expect(find.text('High priority · Target year 2027'), findsOneWidget);
+      expect(find.text('High priority'), findsOneWidget);
+      expect(find.text('Asia · Target year 2027'), findsOneWidget);
     });
   });
 
@@ -164,7 +203,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(tile('France'), findsNothing);
       expect(find.text('France deleted.'), findsOneWidget);
-      expect(find.text('Visited (2)'), findsOneWidget);
+      expect(tab('Visited', 2), findsOneWidget);
 
       await tester.tap(find.text('Undo'));
       await tester.pumpAndSettle();
@@ -182,7 +221,7 @@ void main() {
 
       expect(tile('France'), findsNothing);
       expect(find.text('France deleted.'), findsOneWidget);
-      expect(find.text('Visited (2)'), findsOneWidget);
+      expect(tab('Visited', 2), findsOneWidget);
     });
 
     testWidgets('swiping toward the end opens the edit form and keeps the '
@@ -249,7 +288,8 @@ void main() {
     ) async {
       await openTravels(tester, seed: seedVisits);
 
-      await tester.tap(find.widgetWithText(FilterChip, 'Asia'));
+      // Visited has 1 country in Asia.
+      await tester.tap(find.widgetWithText(FilterChip, 'Asia 1'));
       await tester.pumpAndSettle();
       expect(tile('Japan'), findsOneWidget);
       expect(tile('France'), findsNothing);
