@@ -643,6 +643,21 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String statsOutOfTotal(String total) {
+    return '/ $total';
+  }
+
+  @override
+  String statsWorldShare(String percent) {
+    return '$percent% of the world';
+  }
+
+  @override
+  String statsWishlistCount(String count) {
+    return '$count on your wishlist';
+  }
+
+  @override
   String statsHeadlineLabel(String visited, String total, String percent) {
     return '$visited of $total countries visited, $percent percent';
   }
@@ -656,7 +671,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String statsRegionProgress(String count, String percent) {
+    return '$count · $percent%';
+  }
+
+  @override
   String get statsHighlights => 'Highlights';
+
+  @override
+  String get statsRegionsVisited => 'Regions visited';
 
   @override
   String get statsWishlistSize => 'On your wishlist';

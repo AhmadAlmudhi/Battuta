@@ -98,13 +98,12 @@ void main() {
     await openStats(tester);
 
     final card = find.byType(WorldMapCard);
-    expect(
-      find.descendant(
-        of: card,
-        matching: find.text('of 8 · 25.0% · 1 on your wishlist'),
-      ),
-      findsOneWidget,
-    );
+    for (final text in ['/ 8', '25.0% of the world', '1 on your wishlist']) {
+      expect(
+        find.descendant(of: card, matching: find.text(text)),
+        findsOneWidget,
+      );
+    }
     expect(
       find.descendant(of: card, matching: find.text('Countries visited')),
       findsOneWidget,

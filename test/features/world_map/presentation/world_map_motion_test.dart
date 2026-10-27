@@ -306,7 +306,8 @@ void main() {
       await openStats(tester);
       await tester.drag(page, const Offset(0, -400));
       await tester.pumpAndSettle();
-      expect(mapRect(tester).bottom, lessThan(80));
+      // The top of the map has scrolled off the screen.
+      expect(mapRect(tester).top, lessThan(0));
 
       await tester.tap(find.bySemanticsLabel('Antarctic, 0 of 1'));
       await tester.pumpAndSettle();

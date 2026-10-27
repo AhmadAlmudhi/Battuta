@@ -357,6 +357,33 @@
       }
     }
   },
+  "statsOutOfTotal": "/ {total}",
+  "@statsOutOfTotal": {
+    "description": "Beside the large visited count, for example: 16 / 249 (FR-STA-01).",
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "statsWorldShare": "{percent}% of the world",
+  "@statsWorldShare": {
+    "description": "A tag under the headline (FR-STA-01).",
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "statsWishlistCount": "{count} on your wishlist",
+  "@statsWishlistCount": {
+    "description": "A tag under the headline (FR-MAP-02).",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "statsHeadlineLabel": "{visited} of {total} countries visited, {percent} percent",
   "@statsHeadlineLabel": {
     "description": "Screen-reader label for the headline.",
@@ -384,7 +411,20 @@
       }
     }
   },
+  "statsRegionProgress": "{count} · {percent}%",
+  "@statsRegionProgress": {
+    "description": "A region's count and share, for example: 4 of 49 · 8.2% (FR-STA-02).",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "statsHighlights": "Highlights",
+  "statsRegionsVisited": "Regions visited",
   "statsWishlistSize": "On your wishlist",
   "statsLatestTrip": "Most recent trip",
   "statsFirstTrip": "First trip",
