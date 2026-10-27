@@ -364,7 +364,13 @@ void main() {
     expect(actions.keys.single.label, 'View as list');
     actions.values.single();
     await tester.pumpAndSettle();
-    expect(find.text('Visited (2)'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.widgetWithText(Tab, 'Visited'),
+        matching: find.text('2'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('in Arabic the map doesn\'t mirror, but the card does '

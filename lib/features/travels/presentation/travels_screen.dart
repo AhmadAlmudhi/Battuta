@@ -151,23 +151,22 @@ class _TravelsScreenState extends ConsumerState<TravelsScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  _TabToggle(
+                    controller: _tabs,
+                    visited: value.visitedTotal,
+                    wishlist: value.wishlistTotal,
+                  ),
                   _SearchField(
                     controller: _search,
                     onChanged: _onSearchChanged,
                     onClear: _clearSearch,
                   ),
-                  if (value.regions.length > 1 || query.regions.isNotEmpty)
-                    _RegionChips(
-                      regions: value.regions,
-                      selected: query.regions,
-                    ),
-                  TabBar(
-                    controller: _tabs,
-                    tabs: [
-                      Tab(text: l10n.travelsVisitedTab(value.visitedTotal)),
-                      Tab(text: l10n.travelsWishlistTab(value.wishlistTotal)),
-                    ],
-                  ),
+                  if (_tab == TravelsTab.visited
+                          ? value.visitedRegions
+                          : value.wishlistRegions
+                      case final counts
+                      when counts.length > 1 || query.regions.isNotEmpty)
+                    _RegionChips(counts: counts, selected: query.regions),
                   Expanded(
                     child: TabBarView(
                       controller: _tabs,
@@ -175,13 +174,8 @@ class _TravelsScreenState extends ConsumerState<TravelsScreen>
                         for (final tab in TravelsTab.values)
                           _EntryList(
                             tab: tab,
-                            items: [
-                              for (final item
-                                  in tab == TravelsTab.visited
-                                      ? value.visited
-                                      : value.wishlist)
-                                if (!_swiped.contains(item.country.code)) item,
-                            ],
+                            summary: _summary(l10n, tab, value),
+                            groups: _groups(l10n, tab, query, value),
                             total: tab == TravelsTab.visited
                                 ? value.visitedTotal
                                 : value.wishlistTotal,
@@ -209,6 +203,180 @@ class _TravelsScreenState extends ConsumerState<TravelsScreen>
       ),
     );
   }
+
+  /// One line about the whole tab, for example 6 countries in 3 regions.
+  String _summary(AppLocalizations l10n, TravelsTab tab, TravelsView view) =>
+      switch (tab) {
+        TravelsTab.visited => l10n.travelsVisitedSummary(
+          l10n.exploreCountryCount(view.visitedTotal),
+          l10n.travelsRegionCount(view.visitedRegions.length),
+        ),
+        TravelsTab.wishlist => [
+          l10n.exploreCountryCount(view.wishlistTotal),
+          if (view.highPriority > 0)
+            l10n.travelsHighPriorityCount(view.highPriority),
+        ].join(' · '),
+      };
+
+  /// The tab's rows under headings: years of visits, or wishlist
+  /// priorities. Sorted by name, they form one untitled group (FR-TRV-06).
+  List<(String?, List<TravelListItem>)> _groups(
+    AppLocalizations l10n,
+    TravelsTab tab,
+    TravelsQuery query,
+    TravelsView view,
+  ) {
+    bool shown(TravelListItem item) => !_swiped.contains(item.country.code);
+    final items = [
+      ...(tab == TravelsTab.visited ? view.visited : view.wishlist).where(
+        shown,
+      ),
+    ];
+    if (items.isEmpty) return const [];
+    return switch (tab) {
+      TravelsTab.visited when query.visitedSort == VisitedSort.date => [
+        for (final group in TravelListGroups.byYear(items))
+          (group.key?.toString() ?? l10n.travelsNoDate, group.items),
+      ],
+      TravelsTab.wishlist when query.wishlistSort == WishlistSort.priority => [
+        for (final group in TravelListGroups.byPriority(items))
+          (
+            switch (group.key) {
+              WishlistPriority.high => l10n.priorityHigh,
+              WishlistPriority.medium => l10n.priorityMedium,
+              WishlistPriority.low => l10n.priorityLow,
+            },
+            group.items,
+          ),
+      ],
+      _ => [(null, items)],
+    };
+  }
+}
+
+/// Visited and Wishlist as a pill-shaped toggle, each with its count
+/// (FR-TRV-05). It's a TabBar underneath, so swiping the lists still
+/// switches tabs.
+class _TabToggle extends StatelessWidget {
+  const _TabToggle({
+    required this.controller,
+    required this.visited,
+    required this.wishlist,
+  });
+
+  final TabController controller;
+  final int visited;
+  final int wishlist;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final pill = BorderRadius.circular(999);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHigh,
+          borderRadius: pill,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: TabBar(
+            controller: controller,
+            indicator: BoxDecoration(
+              color: scheme.surface,
+              borderRadius: pill,
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.shadow.withValues(alpha: 0.12),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            dividerColor: Colors.transparent,
+            splashBorderRadius: pill,
+            labelColor: scheme.onSurface,
+            unselectedLabelColor: scheme.onSurfaceVariant,
+            labelStyle: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            unselectedLabelStyle: theme.textTheme.labelLarge,
+            tabs: [
+              _ToggleTab(
+                icon: Icons.check_rounded,
+                label: l10n.travelsVisited,
+                count: visited,
+                semantics: l10n.travelsVisitedTab(visited),
+              ),
+              _ToggleTab(
+                icon: Icons.bookmark_rounded,
+                label: l10n.travelsWishlist,
+                count: wishlist,
+                semantics: l10n.travelsWishlistTab(wishlist),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ToggleTab extends StatelessWidget {
+  const _ToggleTab({
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.semantics,
+  });
+
+  final IconData icon;
+  final String label;
+  final int count;
+
+  /// Read as one label, for example Visited (6).
+  final String semantics;
+
+  @override
+  Widget build(BuildContext context) => Tab(
+    height: 40,
+    child: Semantics(
+      label: semantics,
+      excludeSemantics: true,
+      // The tab bar animates the label color; the badge follows it.
+      child: Builder(
+        builder: (context) {
+          final color = DefaultTextStyle.of(context).style.color;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18),
+              const SizedBox(width: 6),
+              Flexible(child: Text(label, overflow: TextOverflow.fade)),
+              const SizedBox(width: 6),
+              DecoratedBox(
+                decoration: ShapeDecoration(
+                  shape: const StadiumBorder(),
+                  color: color?.withValues(alpha: 0.12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 7,
+                    vertical: 1,
+                  ),
+                  child: Text('$count'),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
 }
 
 class _SearchField extends StatelessWidget {
@@ -262,19 +430,20 @@ class _SearchField extends StatelessWidget {
   }
 }
 
-/// Region filters, OR within the field (FR-TRV-08).
+/// Region filters for the current tab, each with how many of the tab's
+/// countries are in it; OR within the field (FR-TRV-08).
 class _RegionChips extends ConsumerWidget {
-  const _RegionChips({required this.regions, required this.selected});
+  const _RegionChips({required this.counts, required this.selected});
 
-  final List<String> regions;
+  final Map<String, int> counts;
   final Set<String> selected;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     // A selected region stays offered even if its last entry was deleted,
-    // so it can still be cleared.
-    final shown = {...regions, ...selected}.toList()..sort();
+    // or isn't in this tab, so it can still be cleared.
+    final shown = {...counts.keys, ...selected}.toList()..sort();
     return SizedBox(
       height: 48,
       child: ListView(
@@ -285,7 +454,9 @@ class _RegionChips extends ConsumerWidget {
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 8),
               child: FilterChip(
-                label: Text(regionName(l10n, region)),
+                label: Text(
+                  '${regionName(l10n, region)} ${counts[region] ?? 0}',
+                ),
                 selected: selected.contains(region),
                 onSelected: (_) => ref
                     .read(travelsQueryProvider.notifier)
@@ -301,7 +472,8 @@ class _RegionChips extends ConsumerWidget {
 class _EntryList extends StatelessWidget {
   const _EntryList({
     required this.tab,
-    required this.items,
+    required this.summary,
+    required this.groups,
     required this.total,
     required this.onOpen,
     required this.onEdit,
@@ -311,7 +483,10 @@ class _EntryList extends StatelessWidget {
   });
 
   final TravelsTab tab;
-  final List<TravelListItem> items;
+  final String summary;
+
+  /// Rows under their headings; a null heading shows none.
+  final List<(String?, List<TravelListItem>)> groups;
   final int total;
   final ValueChanged<TravelListItem> onOpen;
   final ValueChanged<TravelListItem> onEdit;
@@ -322,6 +497,8 @@ class _EntryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     // An empty tab invites the user to Explore (FR-TRV-09).
     if (total == 0) {
       final visited = tab == TravelsTab.visited;
@@ -337,7 +514,7 @@ class _EntryList extends StatelessWidget {
         onAction: () => context.go('/explore'),
       );
     }
-    if (items.isEmpty) {
+    if (groups.isEmpty) {
       return MessageView(
         icon: Icons.search_off_rounded,
         title: l10n.travelsNoMatchesTitle,
@@ -346,23 +523,96 @@ class _EntryList extends StatelessWidget {
         onAction: onClearFilters,
       );
     }
-    return ListView.separated(
+    return ListView(
       // Keeps each tab's scroll position when switching tabs.
       key: PageStorageKey(tab),
-      padding: const EdgeInsets.all(16),
-      itemCount: items.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return TravelEntryTile(
-          key: ValueKey(item.country.code),
-          item: item,
-          onOpen: () => onOpen(item),
-          onEdit: () => onEdit(item),
-          onDelete: () => onDelete(item),
-          onSwipeDelete: () => onSwipeDelete(item),
-        );
-      },
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.only(start: 4, bottom: 16),
+          child: Text(
+            summary,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        for (final (i, (heading, items)) in groups.indexed) ...[
+          if (i > 0) const SizedBox(height: 20),
+          if (heading != null)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 4, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      heading,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    l10n.exploreCountryCount(items.length),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          _Group(
+            children: [
+              for (final item in items)
+                TravelEntryTile(
+                  key: ValueKey(item.country.code),
+                  item: item,
+                  onOpen: () => onOpen(item),
+                  onEdit: () => onEdit(item),
+                  onDelete: () => onDelete(item),
+                  onSwipeDelete: () => onSwipeDelete(item),
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// A heading's rows on one rounded panel, divided by lines that start
+/// after the flags.
+class _Group extends StatelessWidget {
+  const _Group({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final corners = BorderRadius.circular(16);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: corners,
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.6)),
+      ),
+      child: ClipRRect(
+        borderRadius: corners,
+        child: Column(
+          children: [
+            for (final (i, child) in children.indexed) ...[
+              if (i > 0)
+                Divider(
+                  height: 1,
+                  indent: 76,
+                  color: scheme.outlineVariant.withValues(alpha: 0.6),
+                ),
+              child,
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

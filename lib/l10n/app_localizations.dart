@@ -1028,6 +1028,18 @@ abstract class AppLocalizations {
   /// **'Notes can be up to 500 characters.'**
   String get validationNotesTooLong;
 
+  /// No description provided for @travelsVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited'**
+  String get travelsVisited;
+
+  /// No description provided for @travelsWishlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Wishlist'**
+  String get travelsWishlist;
+
   /// No description provided for @travelsVisitedTab.
   ///
   /// In en, this message translates to:
@@ -1039,6 +1051,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wishlist ({count})'**
   String travelsWishlistTab(int count);
+
+  /// No description provided for @travelsRegionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 region} other{{count} regions}}'**
+  String travelsRegionCount(int count);
+
+  /// At the top of My travels' Visited tab, for example: 6 countries in 3 regions.
+  ///
+  /// In en, this message translates to:
+  /// **'{countries} in {regions}'**
+  String travelsVisitedSummary(String countries, String regions);
+
+  /// In the Wishlist tab's summary, for example: 4 countries · 2 high priority.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 high priority} other{{count} high priority}}'**
+  String travelsHighPriorityCount(int count);
 
   /// No description provided for @travelsSearchHint.
   ///
@@ -1061,7 +1091,7 @@ abstract class AppLocalizations {
   /// No description provided for @travelsNoDate.
   ///
   /// In en, this message translates to:
-  /// **'Date not set'**
+  /// **'No date'**
   String get travelsNoDate;
 
   /// No description provided for @travelsEmptyVisitedTitle.

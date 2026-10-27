@@ -544,6 +544,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get validationNotesTooLong => 'Notes can be up to 500 characters.';
 
   @override
+  String get travelsVisited => 'Visited';
+
+  @override
+  String get travelsWishlist => 'Wishlist';
+
+  @override
   String travelsVisitedTab(int count) {
     return 'Visited ($count)';
   }
@@ -551,6 +557,33 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String travelsWishlistTab(int count) {
     return 'Wishlist ($count)';
+  }
+
+  @override
+  String travelsRegionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count regions',
+      one: '1 region',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String travelsVisitedSummary(String countries, String regions) {
+    return '$countries in $regions';
+  }
+
+  @override
+  String travelsHighPriorityCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count high priority',
+      one: '1 high priority',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -563,7 +596,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get travelsSortByPriority => 'Priority, then target year';
 
   @override
-  String get travelsNoDate => 'Date not set';
+  String get travelsNoDate => 'No date';
 
   @override
   String get travelsEmptyVisitedTitle => 'No visits yet';

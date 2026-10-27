@@ -71,7 +71,9 @@ class TravelsView {
     required this.wishlist,
     required this.visitedTotal,
     required this.wishlistTotal,
-    required this.regions,
+    required this.visitedRegions,
+    required this.wishlistRegions,
+    required this.highPriority,
   });
 
   final List<TravelListItem> visited;
@@ -81,8 +83,13 @@ class TravelsView {
   final int visitedTotal;
   final int wishlistTotal;
 
-  /// Regions of the saved countries, offered as filters (FR-TRV-08).
-  final List<String> regions;
+  /// Each tab's regions with how many of its countries are in them, before
+  /// search and filters, offered as filters (FR-TRV-08).
+  final Map<String, int> visitedRegions;
+  final Map<String, int> wishlistRegions;
+
+  /// Wishlist countries with high priority, for the tab's summary.
+  final int highPriority;
 }
 
 /// My travels in the app language: [arabic] picks the names used for name
@@ -145,7 +152,11 @@ final travelsViewProvider = Provider.family<AsyncValue<TravelsView>, bool>((
       ),
       visitedTotal: visited.length,
       wishlistTotal: wishlist.length,
-      regions: {for (final item in items) item.country.region}.toList()..sort(),
+      visitedRegions: TravelListGroups.regionCounts(visited),
+      wishlistRegions: TravelListGroups.regionCounts(wishlist),
+      highPriority: wishlist
+          .where((i) => i.entry.priority == WishlistPriority.high)
+          .length,
     ),
   );
 });

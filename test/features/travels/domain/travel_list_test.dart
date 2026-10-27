@@ -95,6 +95,64 @@ void main() {
     });
   });
 
+  group('headings (FR-TRV-06)', () {
+    test('visits fall under their years, newest first, undated last', () {
+      final sorted = TravelListOrder.visited(
+        [
+          visit('FRA', on: DateTime(2025, 6, 1)),
+          visit('JPN', on: DateTime(2026, 3, 14)),
+          visit('DEU'),
+          visit('ESP', on: DateTime(2025, 1, 9)),
+        ],
+        VisitedSort.date,
+        arabic: false,
+      );
+
+      final groups = TravelListGroups.byYear(sorted);
+
+      expect([for (final g in groups) g.key], [2026, 2025, null]);
+      expect(
+        [for (final g in groups) codes(g.items)],
+        [
+          ['JPN'],
+          ['FRA', 'ESP'],
+          ['DEU'],
+        ],
+      );
+    });
+
+    test('the wishlist falls under its priorities, high first', () {
+      final sorted = TravelListOrder.wishlist(
+        [
+          wish('ESP', WishlistPriority.low),
+          wish('SAU', WishlistPriority.high, 2027),
+          wish('JPN', WishlistPriority.high),
+        ],
+        WishlistSort.priority,
+        arabic: false,
+      );
+
+      final groups = TravelListGroups.byPriority(sorted);
+
+      expect(
+        [for (final g in groups) g.key],
+        [WishlistPriority.high, WishlistPriority.low],
+      );
+      expect(codes(groups.first.items), ['SAU', 'JPN']);
+    });
+
+    test('counts entries per region', () {
+      expect(
+        TravelListGroups.regionCounts([
+          visit('FRA'),
+          visit('DEU'),
+          visit('JPN'),
+        ]),
+        {'Europe': 2, 'Asia': 1},
+      );
+    });
+  });
+
   test('does not change the input list', () {
     final items = [visit('JPN'), visit('BEL')];
     TravelListOrder.visited(items, VisitedSort.name, arabic: false);
