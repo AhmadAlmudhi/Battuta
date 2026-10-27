@@ -158,6 +158,9 @@ void main() {
       await tester.tap(find.text('Mark as visited'));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('4 of 5 stars'));
+      await tester.pump();
+      // The chosen rating gets its word.
+      expect(find.text('Great'), findsOneWidget);
       await tester.enterText(find.byType(TextField), 'Paris in spring');
       await tester.tap(saveButton());
       await tester.pumpAndSettle();
@@ -193,7 +196,7 @@ void main() {
       await tester.tap(find.text('Mark as visited'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Add date'));
+      await tester.tap(find.text('Pick a date'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('21')); // testNow is 20 October 2026.
       await tester.tap(find.text('OK'));
@@ -202,7 +205,7 @@ void main() {
       expect(find.text("Visit date can't be in the future."), findsOneWidget);
       expect(enabled(saveButton()), isFalse);
 
-      await tester.tap(find.byTooltip('Clear date'));
+      await tester.tap(find.text('Clear date'));
       await tester.pumpAndSettle();
       expect(enabled(saveButton()), isTrue);
     });
@@ -221,11 +224,53 @@ void main() {
       expect(enabled(saveButton()), isFalse);
     });
 
-    testWidgets('Cancel saves nothing', (tester) async {
+    testWidgets('Today and Yesterday set the date in one tap; choosing the '
+        'same day again clears it', (tester) async {
       final app = await openDetails(tester, 'FRA');
       await tester.tap(find.text('Mark as visited'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Cancel'));
+
+      bool today() => tester
+          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Today'))
+          .selected;
+      await tester.tap(find.text('Today'));
+      await tester.pump();
+      expect(today(), isTrue);
+      await tester.tap(find.text('Today'));
+      await tester.pump();
+      expect(today(), isFalse);
+
+      await tester.tap(find.text('Yesterday'));
+      await tester.tap(saveButton());
+      await tester.pumpAndSettle();
+
+      // testNow is 20 October 2026.
+      expect(
+        app.container.read(travelEntryProvider('FRA')).valueOrNull?.visitedOn,
+        DateTime(2026, 10, 19),
+      );
+      expect(find.text('Visited on October 19, 2026'), findsOneWidget);
+    });
+
+    testWidgets('the notes count shows only near the limit', (tester) async {
+      await openDetails(tester, 'FRA');
+      await tester.tap(find.text('Mark as visited'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'a' * 399);
+      await tester.pump();
+      expect(find.text('399/500'), findsNothing);
+
+      await tester.enterText(find.byType(TextField), 'a' * 450);
+      await tester.pump();
+      expect(find.text('450/500'), findsOneWidget);
+    });
+
+    testWidgets('Close saves nothing', (tester) async {
+      final app = await openDetails(tester, 'FRA');
+      await tester.tap(find.text('Mark as visited'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
 
       expect(
@@ -242,26 +287,31 @@ void main() {
     ) async {
       await openDetails(tester, 'JPN');
 
+      final semantics = tester.ensureSemantics();
       await tester.tap(find.text('Add to wishlist'));
       await tester.pumpAndSettle();
+      // Medium and Any time to begin with.
       expect(
-        tester
-            .widget<SegmentedButton<WishlistPriority>>(
-              find.byType(SegmentedButton<WishlistPriority>),
-            )
-            .selected,
-        {WishlistPriority.medium},
+        tester.getSemantics(find.text('Medium')),
+        isSemantics(isSelected: true),
+      );
+      expect(
+        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Any time')),
+        isA<ChoiceChip>().having((chip) => chip.selected, 'selected', isTrue),
       );
       await tester.tap(find.text('High'));
-      await tester.tap(find.byType(DropdownMenu<int?>));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(MenuItemButton, '2027'));
-      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ChoiceChip, '2027'));
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.text('High')),
+        isSemantics(isSelected: true),
+      );
       await tester.tap(saveButton());
       await tester.pumpAndSettle();
 
       expect(find.text('On your wishlist'), findsOneWidget);
       expect(find.text('High priority · Target year 2027'), findsOneWidget);
+      semantics.dispose();
     });
 
     testWidgets('marking a wishlist country as visited keeps its notes '

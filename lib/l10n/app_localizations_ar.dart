@@ -498,7 +498,32 @@ class AppLocalizationsAr extends AppLocalizations {
   String get visitFormDate => 'تاريخ الزيارة';
 
   @override
-  String get visitFormAddDate => 'إضافة تاريخ';
+  String get visitFormAddDate => 'اختر تاريخًا';
+
+  @override
+  String get visitFormToday => 'اليوم';
+
+  @override
+  String get visitFormYesterday => 'أمس';
+
+  @override
+  String get visitFormRateHint => 'اضغط على نجمة للتقييم';
+
+  @override
+  String visitFormRatingWord(String rating) {
+    String _temp0 = intl.Intl.selectLogic(rating, {
+      '1': 'لم تعجبني',
+      '2': 'مقبولة',
+      '3': 'جيدة',
+      '4': 'رائعة',
+      '5': 'أحببتها',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get visitFormNotesHint => 'ماذا تريد أن تتذكر؟';
 
   @override
   String get visitFormClearDate => 'مسح التاريخ';
@@ -513,7 +538,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get formNotes => 'ملاحظات';
 
   @override
-  String get formNotesHint => 'اختيارية';
+  String get formOptional => 'كل ما هنا اختياري.';
 
   @override
   String wishlistFormTitle(String country) {
@@ -527,7 +552,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get wishlistFormTargetYear => 'السنة المستهدفة';
 
   @override
-  String get wishlistFormNoTargetYear => 'بدون سنة محددة';
+  String get wishlistFormAnyTime => 'في أي وقت';
+
+  @override
+  String get wishlistFormNotesHint => 'ما الذي يجذبك إليها؟';
 
   @override
   String get validationVisitDateFuture =>

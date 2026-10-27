@@ -193,7 +193,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Your visit to France'), findsOneWidget);
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
       expect(tile('France'), findsOneWidget);
     });
