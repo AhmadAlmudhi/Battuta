@@ -58,8 +58,6 @@ flutter:
     - assets/data/countries_snapshot.json
     - assets/data/world_map.json
     - assets/flags/
-    # The logo on Welcome, cut from assets/icons/battuta_icon.png at 384 px.
-    - assets/images/battuta_logo.jpg
     # Shown on the licenses page (OFL requires the license to travel with the font).
     - assets/fonts/alexandria/OFL.txt
   fonts:

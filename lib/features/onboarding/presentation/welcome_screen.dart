@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/layout/window_size.dart';
+import '../../../core/widgets/battuta_logo.dart';
 import '../../../core/widgets/panel.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../l10n/app_localizations.dart';
@@ -105,13 +106,7 @@ class _Intro extends ConsumerWidget {
           ? CrossAxisAlignment.center
           : CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.appName,
-          textAlign: align,
-          style: theme.textTheme.displaySmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        const BattutaName(size: 40),
         const SizedBox(height: 8),
         Text(
           l10n.appTagline,
@@ -206,9 +201,9 @@ const _flags = [
   ('mx', -0.9, -0.3, 30.0),
 ];
 
-/// The logo among the flags. The logo lands like the passport stamp, then
-/// the flags appear one by one (PRD 10.2); with reduced motion everything
-/// is there at once.
+/// The logo's mark among the flags; the name sits under it. The mark lands
+/// like the passport stamp, then the flags appear one by one (PRD 10.2);
+/// with reduced motion everything is there at once.
 class _Hero extends StatelessWidget {
   const _Hero({required this.width, required this.height});
 
@@ -220,7 +215,7 @@ class _Hero extends StatelessWidget {
     final still = MediaQuery.disableAnimationsOf(context);
     // Flags and logo grow with the space on wide screens.
     final scale = width / 320;
-    final logo = _Logo(size: 104 * scale);
+    final logo = BattutaMark(size: 112 * scale);
 
     return ExcludeSemantics(
       child: SizedBox(
@@ -264,34 +259,6 @@ class _Hero extends StatelessWidget {
       ),
     );
   }
-}
-
-/// The app icon: a cream passport stamp with an amber globe on Lagoon Teal
-/// (PRD 1.4), with rounded corners like a home-screen icon.
-class _Logo extends StatelessWidget {
-  const _Logo({required this.size});
-
-  final double size;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(size * 0.24),
-      boxShadow: const [
-        BoxShadow(
-          blurRadius: 24,
-          offset: Offset(0, 8),
-          color: Color(0x40000000),
-        ),
-      ],
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(size * 0.24),
-      child: Image.asset('assets/images/battuta_logo.jpg', fit: BoxFit.cover),
-    ),
-  );
 }
 
 /// A decorative round flag with a hairline edge, so white flags stand out.

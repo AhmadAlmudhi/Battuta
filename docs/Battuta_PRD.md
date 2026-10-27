@@ -6,9 +6,9 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.17 |
+| Version | 1.18 |
 | Status | Ready for development |
-| Date | 27 October 2026 |
+| Date | 28 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
 | Also built and tested | Android and iOS (not published in 1.0) |
 | Technology | Flutter, Firebase |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.18 | 28 Oct 2026 | A logo: the stamp mark beside the name, Battuta or بطوطة, drawn in the theme's colors (section 1.4). It replaces the name as text in every app bar (FR-PLT-09), on Welcome, where the mark sits among the flags with the name under it (FR-ONB-01), and in the Share my map image (FR-MAP-41). |
 | 1.17 | 27 Oct 2026 | Welcome redesigned: the app's logo lands among round flags, three short lines say what the app does, the buttons are larger, and a note says no account is needed (FR-ONB-01). On expanded screens the flags and the words sit side by side. A switch at the top changes between English and Arabic before the user starts (FR-ONB-05). |
 | 1.16 | 27 Oct 2026 | Stats redesigned: the headline shows the visited count over the dataset total, such as 16 / 249, with the share of the world and the wishlist size as tags (FR-STA-01, FR-MAP-02). Region rows list the most visited region first, add each region's share, and show a map icon where a tap focuses the map (FR-STA-02). Highlights are tiles, two to a row on phones and four on wider screens, with a new Regions visited figure; the most recent trip shows its flag and opens its country, and the wishlist size opens the Wishlist (FR-STA-03). Country details, My travels, and Stats share one flat panel style (section 10.1). |
 | 1.15 | 27 Oct 2026 | My travels redesigned: Visited and Wishlist are a two-part toggle with counts, above the search and region chips, which show how many entries each region has. Each tab opens with a one-line summary. In the default order, visits fall under their years and wishlist entries under their priorities. Rows show a round flag, the rating or a priority tag, the region with the date or target year, and the first line of the notes; a missing date is left out (FR-TRV-05, FR-TRV-06, FR-TRV-08). Notes read in their own direction, so English notes on an Arabic screen keep their punctuation in place. |
@@ -140,6 +141,7 @@ The product is named **بطوطة**, written **Battuta** in Latin letters. It is
 | Code identifiers | Flutter package name: `battuta`. Android application ID and iOS bundle ID: `com.ahmadalmudhi.battuta`. Firebase project ID: `battuta-b8451`. Hosting site: `battuta-travel`. These identifiers never appear in the interface; the app is always called Battuta (بطوطة). |
 | Tagline | English: Every country, stamped. Arabic: كل دولة، بختمها |
 | App icon | A cream passport stamp, tilted 12 degrees, with an amber globe at its center, on a Lagoon Teal background. The icon has no text, so it works in both languages. The artwork stays within the central 60% of the canvas, so round and rounded-square masks never clip it. Source files in `assets/icons/`: `battuta_logo.svg`, rendered to `battuta_icon.png` (1,024 px), plus the stamp alone (`battuta_icon_foreground.png`) and the background alone (`battuta_icon_background.png`) for the Android adaptive icon. Every platform size, including the web favicon, is generated with `flutter_launcher_icons` (`flutter_launcher_icons.yaml`). |
+| Logo | The mark beside the name. The mark is the app icon's passport stamp without its tile: a double ring with two small dots, tilted 12 degrees, around an amber globe with one meridian and three parallels. The ring takes the theme's primary color (Lagoon Teal in the light theme, a lighter teal in the dark one), and the globe is Stamp Amber. The name follows the interface language, Battuta or بطوطة, in Alexandria Bold in the primary color. The mark leads the name on the start side, so it sits to the right of بطوطة. Under 40 dp, as in the app bar, the mark leaves out the inner ring and the dots and uses bolder lines. The logo is drawn in code, not stored as images, so it is sharp at any size and follows the theme. |
 | Production URL | `battuta-travel.web.app`, a free Firebase Hosting address, which Firebase also serves at `battuta-travel.firebaseapp.com`. The names `battuta` and `battuta-app` were taken by other projects. The `-travel` suffix appears only in the web address, never in the app name. |
 | Typography | Alexandria for all text, Latin and Arabic, including the بطوطة wordmark in Bold. One family designed for both scripts keeps Latin text on Arabic screens, such as capitals, matching the Arabic around it. It uses the SIL Open Font License and is bundled as assets in four weights, so the web app never fetches fonts at run time. |
 
@@ -500,7 +502,7 @@ Email and password is the only sign-in method in 1.0 (D-8).
 | FR-PLT-06 | Every swipe or long-press action also has a visible control, so mouse and keyboard users can reach it. | Must |
 | FR-PLT-07 | On web, the browser tab title names the current screen in the app language, for example Japan · Battuta or اليابان · بطوطة, and the site has a favicon. | Should |
 | FR-PLT-08 | Haptic feedback is used on Android and iOS only. | Should |
-| FR-PLT-09 | Every app bar shows the app's name, Battuta or بطوطة, centered, instead of the screen's name. Screen readers still hear the screen's name with it, for example Japan · Battuta. | Should |
+| FR-PLT-09 | Every app bar shows the logo (section 1.4), with the app's name, Battuta or بطوطة, centered, instead of the screen's name. Screen readers still hear the screen's name with it, for example Japan · Battuta. | Should |
 
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
@@ -662,7 +664,7 @@ When the user marks a country from the tap card, the color spreads from the exac
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-MAP-41 | Share my map creates a 1,080 × 1,350 pixel image with the map, the user's counts, the app name, and the web address battuta-travel.web.app. | Could |
+| FR-MAP-41 | Share my map creates a 1,080 × 1,350 pixel image with the logo, the user's counts, the map, and the web address battuta-travel.web.app. | Could |
 | FR-MAP-42 | On Android and iOS, the image opens the system share sheet. On web, it downloads as a PNG file. | Could |
 | FR-MAP-43 | The image uses the current theme and language. | Could |
 
@@ -1028,7 +1030,7 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes
 - Explore cards are circles filled with the flag, cropped to fit. The name and region sit over the lower part in white, on a black gradient that is clear above the text, 55% opaque where the text starts, which keeps white text readable over white flags, and 70% at the bottom. The caption is the same height on every card, with room for a two-line name, so names and regions line up across a row.
 - Flags on Country details keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. A flag flying from an Explore card or a My travels row to Country details morphs from the circle into that frame, and back.
 - My travels rows sit in rounded panels, one per group, separated by hairlines. Each row shows the round flag, the name, the rating stars (Visited) or a priority tag (Wishlist), the region with the visit date or target year, and the first line of the notes. Notes are shown in their own writing direction, lined up with the screen's start edge.
-- Welcome shows the app icon with rounded corners, surrounded by round flags with a hairline edge. On phones and medium screens the flags and logo sit above the words, centered; on expanded screens they sit beside them, on the start side. The buttons are 52 dp tall.
+- Welcome shows the logo's mark, large, surrounded by round flags with a hairline edge, and the name in the logo's lettering under it. On phones and medium screens the flags and mark sit above the words, centered; on expanded screens they sit beside them, on the start side. The buttons are 52 dp tall.
 - Material Symbols (rounded) for icons. On web, interactive elements show hover and focus states.
 
 #### World map

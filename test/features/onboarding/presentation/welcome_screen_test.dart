@@ -1,3 +1,4 @@
+import 'package:battuta/core/widgets/battuta_logo.dart';
 import 'package:battuta/features/onboarding/presentation/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -55,13 +56,7 @@ void main() {
   testWidgets('wide screens put the flags beside the words', (tester) async {
     await pumpApp(tester, size: const Size(1280, 900));
 
-    final logo = find.byWidgetPredicate(
-      (widget) =>
-          widget is Image &&
-          widget.image is AssetImage &&
-          (widget.image as AssetImage).assetName ==
-              'assets/images/battuta_logo.jpg',
-    );
+    final logo = find.byType(BattutaMark);
     expect(logo, findsOneWidget);
     expect(
       tester.getCenter(logo).dx,

@@ -5,6 +5,7 @@ import '../../../core/format/formatters.dart';
 import '../../../core/layout/window_size.dart';
 import '../../../core/platform/link_launcher.dart';
 import '../../../core/widgets/app_title.dart';
+import '../../../core/widgets/battuta_logo.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../core/widgets/up_button.dart';
 import '../../../l10n/app_localizations.dart';
@@ -171,6 +172,10 @@ class _About extends ConsumerWidget {
               context: context,
               applicationName: l10n.appName,
               applicationVersion: version,
+              applicationIcon: const Padding(
+                padding: EdgeInsets.all(8),
+                child: BattutaMark(size: 56),
+              ),
             ),
           ),
         ],
