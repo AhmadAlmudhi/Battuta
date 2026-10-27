@@ -32,8 +32,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get welcomeTitle => 'مرحبًا بك في بطوطة';
 
   @override
-  String get welcomeBody =>
-      'استكشف كل دول العالم، وسجّل الدول التي زرتها، وخطّط لوجهتك القادمة.';
+  String get welcomePointExplore => 'استكشف كل دول العالم بأعلامها ومعلوماتها';
+
+  @override
+  String get welcomePointVisits =>
+      'سجّل زياراتك مع التاريخ والتقييم والملاحظات';
+
+  @override
+  String get welcomePointMap => 'شاهد خريطة العالم تتلوّن بزياراتك';
+
+  @override
+  String get welcomeNoAccount =>
+      'لا تحتاج إلى حساب. سجّل الدخول متى شئت لتحفظ رحلاتك وتزامنها بين أجهزتك.';
 
   @override
   String get welcomeContinueAsGuest => 'المتابعة كضيف';

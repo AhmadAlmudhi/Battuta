@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.16 |
+| Version | 1.17 |
 | Status | Ready for development |
 | Date | 27 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.17 | 27 Oct 2026 | Welcome redesigned: the app's logo lands among round flags, three short lines say what the app does, the buttons are larger, and a note says no account is needed (FR-ONB-01). On expanded screens the flags and the words sit side by side. A switch at the top changes between English and Arabic before the user starts (FR-ONB-05). |
 | 1.16 | 27 Oct 2026 | Stats redesigned: the headline shows the visited count over the dataset total, such as 16 / 249, with the share of the world and the wishlist size as tags (FR-STA-01, FR-MAP-02). Region rows list the most visited region first, add each region's share, and show a map icon where a tap focuses the map (FR-STA-02). Highlights are tiles, two to a row on phones and four on wider screens, with a new Regions visited figure; the most recent trip shows its flag and opens its country, and the wishlist size opens the Wishlist (FR-STA-03). Country details, My travels, and Stats share one flat panel style (section 10.1). |
 | 1.15 | 27 Oct 2026 | My travels redesigned: Visited and Wishlist are a two-part toggle with counts, above the search and region chips, which show how many entries each region has. Each tab opens with a one-line summary. In the default order, visits fall under their years and wishlist entries under their priorities. Rows show a round flag, the rating or a priority tag, the region with the date or target year, and the first line of the notes; a missing date is left out (FR-TRV-05, FR-TRV-06, FR-TRV-08). Notes read in their own direction, so English notes on an Arabic screen keep their punctuation in place. |
 | 1.14 | 27 Oct 2026 | Country details redesigned: the header's flag tint runs up behind the app bar, with the region tag and Open in Maps under the names; the save actions are full-width buttons or a status card; facts are tiles with shortened figures and a list; neighbors are round flags; and expanded screens show two columns (FR-DET-01 to 04, FR-DET-07). A visited country's stamp lands after the flag's flight instead of arriving with it (section 10.2). The visit and wishlist forms are redesigned: the country's flag in the header, a centered date choice, larger stars with words, priority options and year chips, a filled notes field, and a full-width Save (FR-TRV-01, FR-TRV-04). |
@@ -342,15 +343,17 @@ Requirements are grouped by module. Each module lists its requirements, then the
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-ONB-01 | On first launch, the app shows a Welcome screen with two actions: **Continue as guest** and **Sign in**. | Must |
+| FR-ONB-01 | On first launch, the app shows a Welcome screen with two actions: **Continue as guest** and **Sign in**. It also shows the app's logo, the tagline, three short lines on what the app does (explore every country, record visits, watch the world map fill in), and a note under the actions: No account needed. Sign in any time to back up and sync your travels. | Must |
 | FR-ONB-02 | Choosing Continue as guest opens Explore. The Welcome screen is never shown again on this device or browser. | Must |
 | FR-ONB-03 | Choosing Sign in opens the Sign in screen. After a successful sign-in, the user lands on Explore. | Must |
 | FR-ONB-04 | Country data is imported from the snapshot bundled with the app, so Explore is ready without any download (section 8.2). | Must |
+| FR-ONB-05 | Welcome has a switch to the other language, named in its own script (English or العربية). It applies and saves the language as Settings does (FR-SET-02), and the user stays on Welcome. | Should |
 
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
 | AC-ONB-01 | a fresh install or a first visit to the website | the app opens | the Welcome screen appears. |
 | AC-ONB-02 | the user chose Continue as guest | the app is reopened or the page is reloaded | Explore opens directly. |
+| AC-ONB-03 | Welcome is shown in English | the user selects العربية | Welcome appears in Arabic, right to left, and the app stays in Arabic after Continue as guest. |
 
 ### 6.2 Explore (EXP)
 
@@ -1025,6 +1028,7 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes
 - Explore cards are circles filled with the flag, cropped to fit. The name and region sit over the lower part in white, on a black gradient that is clear above the text, 55% opaque where the text starts, which keeps white text readable over white flags, and 70% at the bottom. The caption is the same height on every card, with room for a two-line name, so names and regions line up across a row.
 - Flags on Country details keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. A flag flying from an Explore card or a My travels row to Country details morphs from the circle into that frame, and back.
 - My travels rows sit in rounded panels, one per group, separated by hairlines. Each row shows the round flag, the name, the rating stars (Visited) or a priority tag (Wishlist), the region with the visit date or target year, and the first line of the notes. Notes are shown in their own writing direction, lined up with the screen's start edge.
+- Welcome shows the app icon with rounded corners, surrounded by round flags with a hairline edge. On phones and medium screens the flags and logo sit above the words, centered; on expanded screens they sit beside them, on the start side. The buttons are 52 dp tall.
 - Material Symbols (rounded) for icons. On web, interactive elements show hover and focus states.
 
 #### World map
@@ -1052,6 +1056,7 @@ One signature moment, the passport stamp, plus a small set of consistent transit
 | --- | --- | --- | --- | --- |
 | Passport stamp | Saving a visit; opening Country details for a visited country | A Stamp Amber stamp scales from 1.6× to 1× over the flag with a slight rotation; after a save, on Android and iOS, a light haptic tap follows. When Country details opens for a country that was already visited, the stamp waits until the flag has flown into the header, then lands; going back, it fades out before the flag flies away. A page opened directly, such as from a link, shows the stamp still | About 600 ms, ease-out-back; fade-out 150 ms | AnimationController, HapticFeedback |
 | Flag transition | Card to details, and back | The flag flies from the card into the header. On the way, the card's circle opens into the flag's own shape with rounded corners while its frame fades in; going back, it closes into the circle again | About 300 ms (default) | Hero, tag flag-{code}, with `FlagFlight` as the in-flight widget |
+| Welcome entrance | Welcome opens | The logo lands like the passport stamp, from 1.6× with a slight turn; then the round flags around it fade in and grow, one after another | Logo 600 ms, ease-out-back; flags 300 to 400 ms each, 70 ms apart | flutter_animate |
 | Grid entrance | First Explore load | Visible cards fade in and rise 16 dp in a 40 ms stagger | 250 ms each, ease-out | flutter_animate |
 | Result count | Filter change | The count rolls to its new value | 200 ms | AnimatedSwitcher |
 | Search results | Query change | Results cross-fade instead of jumping | 200 ms | AnimatedSwitcher |
