@@ -140,8 +140,6 @@
   "visitFormTitle": "زيارتك إلى {country}",
   "visitFormDate": "تاريخ الزيارة",
   "visitFormAddDate": "اختر تاريخًا",
-  "visitFormToday": "اليوم",
-  "visitFormYesterday": "أمس",
   "visitFormRateHint": "اضغط على نجمة للتقييم",
   "visitFormRatingWord": "{rating, select, 1{لم تعجبني} 2{مقبولة} 3{جيدة} 4{رائعة} 5{أحببتها} other{}}",
   "visitFormNotesHint": "ماذا تريد أن تتذكر؟",

@@ -202,6 +202,8 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
 
+      // The picked date shows on the chip.
+      expect(find.text('October 21, 2026'), findsOneWidget);
       expect(find.text("Visit date can't be in the future."), findsOneWidget);
       expect(enabled(saveButton()), isFalse);
 
@@ -222,34 +224,6 @@ void main() {
 
       expect(find.text('Notes can be up to 500 characters.'), findsOneWidget);
       expect(enabled(saveButton()), isFalse);
-    });
-
-    testWidgets('Today and Yesterday set the date in one tap; choosing the '
-        'same day again clears it', (tester) async {
-      final app = await openDetails(tester, 'FRA');
-      await tester.tap(find.text('Mark as visited'));
-      await tester.pumpAndSettle();
-
-      bool today() => tester
-          .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Today'))
-          .selected;
-      await tester.tap(find.text('Today'));
-      await tester.pump();
-      expect(today(), isTrue);
-      await tester.tap(find.text('Today'));
-      await tester.pump();
-      expect(today(), isFalse);
-
-      await tester.tap(find.text('Yesterday'));
-      await tester.tap(saveButton());
-      await tester.pumpAndSettle();
-
-      // testNow is 20 October 2026.
-      expect(
-        app.container.read(travelEntryProvider('FRA')).valueOrNull?.visitedOn,
-        DateTime(2026, 10, 19),
-      );
-      expect(find.text('Visited on October 19, 2026'), findsOneWidget);
     });
 
     testWidgets('the notes count shows only near the limit', (tester) async {

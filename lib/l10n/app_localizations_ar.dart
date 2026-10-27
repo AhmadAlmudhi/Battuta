@@ -501,12 +501,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get visitFormAddDate => 'اختر تاريخًا';
 
   @override
-  String get visitFormToday => 'اليوم';
-
-  @override
-  String get visitFormYesterday => 'أمس';
-
-  @override
   String get visitFormRateHint => 'اضغط على نجمة للتقييم';
 
   @override

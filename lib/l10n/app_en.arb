@@ -236,8 +236,6 @@
   },
   "visitFormDate": "Visit date",
   "visitFormAddDate": "Pick a date",
-  "visitFormToday": "Today",
-  "visitFormYesterday": "Yesterday",
   "visitFormRateHint": "Tap a star to rate",
   "visitFormRatingWord": "{rating, select, 1{Not for me} 2{Okay} 3{Good} 4{Great} 5{Loved it} other{}}",
   "@visitFormRatingWord": {

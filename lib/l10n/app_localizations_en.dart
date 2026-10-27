@@ -487,12 +487,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get visitFormAddDate => 'Pick a date';
 
   @override
-  String get visitFormToday => 'Today';
-
-  @override
-  String get visitFormYesterday => 'Yesterday';
-
-  @override
   String get visitFormRateHint => 'Tap a star to rate';
 
   @override

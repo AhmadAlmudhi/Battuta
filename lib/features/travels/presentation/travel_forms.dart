@@ -100,13 +100,7 @@ class _VisitFormState extends ConsumerState<VisitForm> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    final now = _now;
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    bool isDay(DateTime day) =>
-        _date != null && DateUtils.isSameDay(_date, day);
-    // Today and Yesterday are one tap; any other day comes from the calendar.
-    final picked = _date != null && !isDay(today) && !isDay(yesterday);
+    final date = _date;
 
     return _FormFrame(
       country: widget.country,
@@ -119,33 +113,17 @@ class _VisitFormState extends ConsumerState<VisitForm> {
           clear: l10n.visitFormClearDate,
           onClear: _date == null ? null : () => setState(() => _date = null),
         ),
-        Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final (day, label) in [
-              (today, l10n.visitFormToday),
-              (yesterday, l10n.visitFormYesterday),
-            ])
-              ChoiceChip(
-                label: Text(label),
-                selected: isDay(day),
-                showCheckmark: false,
-                // Choosing the selected day again clears it.
-                onSelected: (selected) =>
-                    setState(() => _date = selected ? day : null),
-              ),
-            ChoiceChip(
-              avatar: const Icon(Icons.calendar_today_rounded),
-              label: Text(
-                picked ? context.formatDate(_date!) : l10n.visitFormAddDate,
-              ),
-              selected: picked,
-              showCheckmark: false,
-              onSelected: (_) => _pickDate(),
+        // Centered like the stars; once picked, it shows the date.
+        Center(
+          child: ChoiceChip(
+            avatar: const Icon(Icons.calendar_today_rounded),
+            label: Text(
+              date == null ? l10n.visitFormAddDate : context.formatDate(date),
             ),
-          ],
+            selected: date != null,
+            showCheckmark: false,
+            onSelected: (_) => _pickDate(),
+          ),
         ),
         if (!_dateValid)
           Padding(

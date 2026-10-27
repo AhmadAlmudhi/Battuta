@@ -938,18 +938,6 @@ abstract class AppLocalizations {
   /// **'Pick a date'**
   String get visitFormAddDate;
 
-  /// No description provided for @visitFormToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Today'**
-  String get visitFormToday;
-
-  /// No description provided for @visitFormYesterday.
-  ///
-  /// In en, this message translates to:
-  /// **'Yesterday'**
-  String get visitFormYesterday;
-
   /// No description provided for @visitFormRateHint.
   ///
   /// In en, this message translates to:
