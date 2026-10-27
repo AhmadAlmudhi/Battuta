@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../../core/format/formatters.dart';
+import '../../../core/widgets/battuta_logo.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../travels/domain/travel_entry.dart';
 import 'world_map_colors.dart';
@@ -118,14 +119,36 @@ Future<Uint8List> renderMapShareImage({
     return bottom;
   }
 
-  var y = write(
-    texts.appName,
-    styles.titleLarge?.copyWith(
-      color: scheme.primary,
-      fontWeight: FontWeight.w700,
+  // The logo on the start side: the mark, then the name.
+  const logoTop = 24.0;
+  const nameSize = 22.0;
+  const markSize = nameSize * BattutaLogo.markScale;
+  const gap = nameSize * 0.36;
+  final name = TextPainter(
+    text: TextSpan(
+      text: texts.appName,
+      style: BattutaName.style(theme, nameSize),
     ),
-    24,
+    textDirection: direction,
+  )..layout();
+  final logoHeight = name.height > markSize ? name.height : markSize;
+  final markLeft = ltr ? margin : margin + width - markSize;
+  canvas
+    ..save()
+    ..translate(markLeft, logoTop + (logoHeight - markSize) / 2);
+  BattutaMarkPainter(
+    ring: scheme.primary,
+  ).paint(canvas, const Size.square(markSize));
+  canvas.restore();
+  name.paint(
+    canvas,
+    Offset(
+      ltr ? margin + markSize + gap : markLeft - gap - name.width,
+      logoTop + (logoHeight - name.height) / 2,
+    ),
   );
+  name.dispose();
+  var y = logoTop + logoHeight;
   y = write(
     texts.label,
     styles.labelLarge?.copyWith(color: scheme.onSurfaceVariant),

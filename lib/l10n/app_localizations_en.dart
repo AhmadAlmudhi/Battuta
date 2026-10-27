@@ -32,8 +32,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeTitle => 'Welcome to Battuta';
 
   @override
-  String get welcomeBody =>
-      'Explore every country, record where you\'ve been, and plan where to go next.';
+  String get welcomePointExplore =>
+      'Explore every country, with its flag and facts';
+
+  @override
+  String get welcomePointVisits =>
+      'Mark your visits with dates, ratings, and notes';
+
+  @override
+  String get welcomePointMap => 'Watch your world map fill in';
+
+  @override
+  String get welcomeNoAccount =>
+      'No account needed. Sign in any time to back up and sync your travels.';
 
   @override
   String get welcomeContinueAsGuest => 'Continue as guest';

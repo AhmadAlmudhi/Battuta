@@ -140,11 +140,29 @@ abstract class AppLocalizations {
   /// **'Welcome to Battuta'**
   String get welcomeTitle;
 
-  /// No description provided for @welcomeBody.
+  /// No description provided for @welcomePointExplore.
   ///
   /// In en, this message translates to:
-  /// **'Explore every country, record where you\'ve been, and plan where to go next.'**
-  String get welcomeBody;
+  /// **'Explore every country, with its flag and facts'**
+  String get welcomePointExplore;
+
+  /// No description provided for @welcomePointVisits.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark your visits with dates, ratings, and notes'**
+  String get welcomePointVisits;
+
+  /// No description provided for @welcomePointMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch your world map fill in'**
+  String get welcomePointMap;
+
+  /// No description provided for @welcomeNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'No account needed. Sign in any time to back up and sync your travels.'**
+  String get welcomeNoAccount;
 
   /// No description provided for @welcomeContinueAsGuest.
   ///

@@ -1,3 +1,4 @@
+import 'package:battuta/core/widgets/battuta_logo.dart';
 import 'package:battuta/features/settings/domain/app_settings.dart';
 import 'package:battuta/features/settings/presentation/settings_controller.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,7 @@ void main() {
   });
 
   group('navigation', () {
-    testWidgets('every app bar shows the app\'s name in the middle, and names '
+    testWidgets('every app bar shows the logo in the middle, and names '
         'its screen for screen readers (FR-PLT-09)', (tester) async {
       final semantics = tester.ensureSemantics();
       final app = await pumpApp(tester, prefs: returningUser);
@@ -59,7 +60,7 @@ void main() {
         await app.goTo(tester, location);
         final title = find.descendant(
           of: find.byType(AppBar),
-          matching: find.text('Battuta'),
+          matching: find.byType(BattutaLogo),
         );
         expect(title, findsOneWidget, reason: location);
         expect(
