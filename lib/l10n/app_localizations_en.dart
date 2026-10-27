@@ -388,6 +388,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailsTimezones => 'Time zones';
 
   @override
+  String detailsTimezoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count time zones',
+      one: '1 time zone',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get detailsNeighbors => 'Neighboring countries';
 
   @override
@@ -473,7 +484,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get visitFormDate => 'Visit date';
 
   @override
-  String get visitFormAddDate => 'Add date';
+  String get visitFormAddDate => 'Pick a date';
+
+  @override
+  String get visitFormRateHint => 'Tap a star to rate';
+
+  @override
+  String visitFormRatingWord(String rating) {
+    String _temp0 = intl.Intl.selectLogic(rating, {
+      '1': 'Not for me',
+      '2': 'Okay',
+      '3': 'Good',
+      '4': 'Great',
+      '5': 'Loved it',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get visitFormNotesHint => 'What do you want to remember?';
 
   @override
   String get visitFormClearDate => 'Clear date';
@@ -488,7 +518,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get formNotes => 'Notes';
 
   @override
-  String get formNotesHint => 'Optional';
+  String get formOptional => 'Everything here is optional.';
 
   @override
   String wishlistFormTitle(String country) {
@@ -502,7 +532,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wishlistFormTargetYear => 'Target year';
 
   @override
-  String get wishlistFormNoTargetYear => 'No target year';
+  String get wishlistFormAnyTime => 'Any time';
+
+  @override
+  String get wishlistFormNotesHint => 'What draws you there?';
 
   @override
   String get validationVisitDateFuture => 'Visit date can\'t be in the future.';

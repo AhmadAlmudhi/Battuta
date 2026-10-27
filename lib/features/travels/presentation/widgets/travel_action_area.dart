@@ -11,8 +11,8 @@ import '../travel_providers.dart';
 import 'travel_summary.dart';
 
 /// The country's save actions on its details screen (FR-DET-04): Mark as
-/// visited and Add to wishlist when it isn't saved, otherwise its status
-/// with Edit and Remove.
+/// visited and Add to wishlist side by side when it isn't saved, otherwise
+/// a card with its status, Edit, and Remove.
 class TravelActionArea extends ConsumerWidget {
   const TravelActionArea({super.key, required this.country});
 
@@ -28,27 +28,43 @@ class TravelActionArea extends ConsumerWidget {
         country: country,
         entry: entry,
       ),
-      AsyncData() => Wrap(
-        spacing: 12,
-        runSpacing: 8,
-        children: [
-          FilledButton.icon(
-            onPressed: () => showVisitForm(context, country: country),
-            icon: const Icon(Icons.check_rounded),
-            label: Text(l10n.detailsMarkVisited),
-          ),
-          OutlinedButton.icon(
-            onPressed: () => showWishlistForm(context, country: country),
-            icon: const Icon(Icons.bookmark_add_outlined),
-            label: Text(l10n.detailsAddToWishlist),
-          ),
-        ],
+      // Equal halves, as tall as the taller label.
+      AsyncData() => IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: FilledButton.icon(
+                style: _tall,
+                onPressed: () => showVisitForm(context, country: country),
+                icon: const Icon(Icons.check_rounded),
+                label: Text(l10n.detailsMarkVisited),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                style: _tall,
+                onPressed: () => showWishlistForm(context, country: country),
+                icon: const Icon(Icons.bookmark_add_outlined),
+                label: Text(l10n.detailsAddToWishlist),
+              ),
+            ),
+          ],
+        ),
       ),
-      _ => const SizedBox(height: 40),
+      _ => const SizedBox(height: 48),
     };
   }
 }
 
+/// The main actions are full-width and at least 48 dp tall.
+const _tall = ButtonStyle(minimumSize: WidgetStatePropertyAll(Size(0, 48)));
+
+/// A saved country's status in its color, Stamp Amber for Visited or teal
+/// for Wishlist, with the visit date or wishlist details, rating, and notes.
+/// Edit and Remove sit in its corner; a wishlist country can be marked as
+/// visited.
 class _SavedCard extends ConsumerWidget {
   const _SavedCard({required this.country, required this.entry});
 
@@ -61,6 +77,13 @@ class _SavedCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final visited = entry.status == TravelStatus.visited;
+    final accent = visited ? scheme.secondary : scheme.primary;
+    final background = Color.alphaBlend(
+      visited
+          ? scheme.secondary.withValues(alpha: 0.16)
+          : scheme.primaryContainer.withValues(alpha: 0.45),
+      scheme.surfaceContainerLow,
+    );
 
     final details = [
       if (visited && entry.visitedOn != null)
@@ -68,10 +91,14 @@ class _SavedCard extends ConsumerWidget {
       if (!visited) wishlistSummary(l10n, entry),
     ];
 
-    return Card(
-      margin: EdgeInsets.zero,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accent.withValues(alpha: 0.4)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 4, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -98,7 +125,9 @@ class _SavedCard extends ConsumerWidget {
                     children: [
                       Text(
                         visited ? l10n.detailsVisited : l10n.detailsOnWishlist,
-                        style: theme.textTheme.titleMedium,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       if (details.isNotEmpty)
                         Text(
@@ -110,29 +139,8 @@ class _SavedCard extends ConsumerWidget {
                     ],
                   ),
                 ),
-              ],
-            ),
-            if (visited && entry.rating != null) ...[
-              const SizedBox(height: 8),
-              RatingStars(rating: entry.rating!),
-            ],
-            if (entry.notes.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(entry.notes, style: theme.textTheme.bodyMedium),
-            ],
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                if (!visited)
-                  FilledButton.icon(
-                    onPressed: () =>
-                        showVisitForm(context, country: country, entry: entry),
-                    icon: const Icon(Icons.check_rounded),
-                    label: Text(l10n.detailsMarkVisited),
-                  ),
-                OutlinedButton.icon(
+                IconButton(
+                  tooltip: l10n.detailsEdit,
                   onPressed: () => visited
                       ? showVisitForm(context, country: country, entry: entry)
                       : showWishlistForm(
@@ -141,9 +149,9 @@ class _SavedCard extends ConsumerWidget {
                           entry: entry,
                         ),
                   icon: const Icon(Icons.edit_outlined),
-                  label: Text(l10n.detailsEdit),
                 ),
-                TextButton.icon(
+                IconButton(
+                  tooltip: l10n.detailsRemove,
                   onPressed: () => removeWithUndo(
                     context,
                     ref,
@@ -151,10 +159,47 @@ class _SavedCard extends ConsumerWidget {
                     message: (l10n, name) => l10n.detailsRemoved(name),
                   ),
                   icon: const Icon(Icons.delete_outline_rounded),
-                  label: Text(l10n.detailsRemove),
                 ),
               ],
             ),
+            if (visited && entry.rating != null)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 52, top: 4),
+                child: RatingStars(rating: entry.rating!),
+              ),
+            if (entry.notes.isNotEmpty)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(top: 12, end: 12),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: BorderDirectional(
+                      start: BorderSide(color: accent, width: 3),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      start: 12,
+                      top: 2,
+                      bottom: 2,
+                    ),
+                    child: Text(entry.notes, style: theme.textTheme.bodyMedium),
+                  ),
+                ),
+              ),
+            if (!visited)
+              Padding(
+                padding: const EdgeInsetsDirectional.only(top: 16, end: 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    style: _tall,
+                    onPressed: () =>
+                        showVisitForm(context, country: country, entry: entry),
+                    icon: const Icon(Icons.check_rounded),
+                    label: Text(l10n.detailsMarkVisited),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

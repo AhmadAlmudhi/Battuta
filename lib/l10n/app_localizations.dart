@@ -788,6 +788,12 @@ abstract class AppLocalizations {
   /// **'Time zones'**
   String get detailsTimezones;
 
+  /// Under a country's time zone range on Country details (FR-DET-02).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 time zone} other{{count} time zones}}'**
+  String detailsTimezoneCount(int count);
+
   /// No description provided for @detailsNeighbors.
   ///
   /// In en, this message translates to:
@@ -929,8 +935,26 @@ abstract class AppLocalizations {
   /// No description provided for @visitFormAddDate.
   ///
   /// In en, this message translates to:
-  /// **'Add date'**
+  /// **'Pick a date'**
   String get visitFormAddDate;
+
+  /// No description provided for @visitFormRateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a star to rate'**
+  String get visitFormRateHint;
+
+  /// Under the stars in the visit form, for the chosen rating.
+  ///
+  /// In en, this message translates to:
+  /// **'{rating, select, 1{Not for me} 2{Okay} 3{Good} 4{Great} 5{Loved it} other{}}'**
+  String visitFormRatingWord(String rating);
+
+  /// No description provided for @visitFormNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you want to remember?'**
+  String get visitFormNotesHint;
 
   /// No description provided for @visitFormClearDate.
   ///
@@ -956,11 +980,11 @@ abstract class AppLocalizations {
   /// **'Notes'**
   String get formNotes;
 
-  /// No description provided for @formNotesHint.
+  /// No description provided for @formOptional.
   ///
   /// In en, this message translates to:
-  /// **'Optional'**
-  String get formNotesHint;
+  /// **'Everything here is optional.'**
+  String get formOptional;
 
   /// No description provided for @wishlistFormTitle.
   ///
@@ -980,11 +1004,17 @@ abstract class AppLocalizations {
   /// **'Target year'**
   String get wishlistFormTargetYear;
 
-  /// No description provided for @wishlistFormNoTargetYear.
+  /// No description provided for @wishlistFormAnyTime.
   ///
   /// In en, this message translates to:
-  /// **'No target year'**
-  String get wishlistFormNoTargetYear;
+  /// **'Any time'**
+  String get wishlistFormAnyTime;
+
+  /// No description provided for @wishlistFormNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What draws you there?'**
+  String get wishlistFormNotesHint;
 
   /// No description provided for @validationVisitDateFuture.
   ///

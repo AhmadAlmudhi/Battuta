@@ -21,6 +21,7 @@ Map<String, Object?> apiRecord({
   List<String> languages = const [],
   List<(String, String)> currencies = const [],
   List<String> borders = const [],
+  List<String> timezones = const ['UTC'],
 }) => {
   'names': {
     'common': name,
@@ -51,7 +52,7 @@ Map<String, Object?> apiRecord({
   ],
   'links': {'google_maps': mapsUrl ?? ''},
   'population': population,
-  'timezones': const ['UTC'],
+  'timezones': timezones,
 };
 
 /// A small dataset that covers the acceptance criteria: French is spoken in
@@ -74,6 +75,8 @@ final testRecords = [
     languages: ['French'],
     currencies: [('EUR', 'Euro')],
     borders: ['BEL', 'DEU', 'ESP'],
+    // Overseas France, out of order like the API's list.
+    timezones: ['UTC+01:00', 'UTC-10:00', 'UTC+12:00', 'UTC-03:00'],
   ),
   apiRecord(
     code: 'ESP',

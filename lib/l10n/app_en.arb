@@ -168,6 +168,15 @@
   "detailsLanguages": "Languages",
   "detailsCurrencies": "Currencies",
   "detailsTimezones": "Time zones",
+  "detailsTimezoneCount": "{count, plural, =1{1 time zone} other{{count} time zones}}",
+  "@detailsTimezoneCount": {
+    "description": "Under a country's time zone range on Country details (FR-DET-02).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "detailsNeighbors": "Neighboring countries",
   "detailsNoLandBorders": "No land borders",
   "detailsOpenInMaps": "Open in Maps",
@@ -226,12 +235,23 @@
     }
   },
   "visitFormDate": "Visit date",
-  "visitFormAddDate": "Add date",
+  "visitFormAddDate": "Pick a date",
+  "visitFormRateHint": "Tap a star to rate",
+  "visitFormRatingWord": "{rating, select, 1{Not for me} 2{Okay} 3{Good} 4{Great} 5{Loved it} other{}}",
+  "@visitFormRatingWord": {
+    "description": "Under the stars in the visit form, for the chosen rating.",
+    "placeholders": {
+      "rating": {
+        "type": "String"
+      }
+    }
+  },
+  "visitFormNotesHint": "What do you want to remember?",
   "visitFormClearDate": "Clear date",
   "visitFormRating": "Rating",
   "visitFormClearRating": "Clear rating",
   "formNotes": "Notes",
-  "formNotesHint": "Optional",
+  "formOptional": "Everything here is optional.",
   "wishlistFormTitle": "{country} on your wishlist",
   "@wishlistFormTitle": {
     "placeholders": {
@@ -242,7 +262,8 @@
   },
   "wishlistFormPriority": "Priority",
   "wishlistFormTargetYear": "Target year",
-  "wishlistFormNoTargetYear": "No target year",
+  "wishlistFormAnyTime": "Any time",
+  "wishlistFormNotesHint": "What draws you there?",
   "validationVisitDateFuture": "Visit date can't be in the future.",
   "validationNotesTooLong": "Notes can be up to 500 characters.",
   "travelsVisitedTab": "Visited ({count})",

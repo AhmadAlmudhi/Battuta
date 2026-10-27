@@ -6,9 +6,9 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.13 |
+| Version | 1.14 |
 | Status | Ready for development |
-| Date | 24 October 2026 |
+| Date | 27 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
 | Also built and tested | Android and iOS (not published in 1.0) |
 | Technology | Flutter, Firebase |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.14 | 27 Oct 2026 | Country details redesigned: the header's flag tint runs up behind the app bar, with the region tag and Open in Maps under the names; the save actions are full-width buttons or a status card; facts are tiles with shortened figures and a list; neighbors are round flags; and expanded screens show two columns (FR-DET-01 to 04, FR-DET-07). A visited country's stamp lands after the flag's flight instead of arriving with it (section 10.2). The visit and wishlist forms are redesigned: the country's flag in the header, a centered date choice, larger stars with words, priority options and year chips, a filled notes field, and a full-width Save (FR-TRV-01, FR-TRV-04). |
 | 1.13 | 24 Oct 2026 | The app uses Alexandria, one typeface for Latin and Arabic, instead of Inter and IBM Plex Sans Arabic. Every app bar shows the app's name, centered (FR-PLT-09). Explore cards are circles filled with the flag, with the name and region over a soft dark gradient and a status badge on the edge (FR-EXP-01, FR-EXP-02). Flags elsewhere are framed like printed cards, and every flag decodes once at full size, so flights between screens draw it at once (NFR-03); on the way, the circle morphs into the framed shape. On the world map, tapping the selected country again or anywhere else on the page closes its card (FR-MAP-14), and a region's summary moved under the map (FR-MAP-24). A manual refresh says it can take up to a minute (FR-EXP-11). |
 | 1.12 | 22 Oct 2026 | CI and production deploys set up with GitHub Actions (section 12.3). Every production deploy, from a version tag or the weekly run, fetches a fresh country snapshot first, and the weekly run redeploys the latest release, never unreleased code. The snapshot script stops without writing when data is missing or doesn't parse. The app version is 1.0.0. |
 | 1.11 | 22 Oct 2026 | The map's Could items built: the color spread from the tap card, Replay my travels, and Share my map (FR-MAP-32 to 43). The replay's year label and Skip sit under the map, in place of its actions, so they cover no country; Replay is hidden when motion is reduced. The shared image is drawn straight to a canvas, not captured from the screen (section 11.5). The Israeli new shekel is left out with Israel (D-12). |
@@ -301,7 +302,7 @@ flowchart TD
     Welcome --> SignIn
     Explore --> Details
     Travels --> Details
-    Details -- "neighbor chip" --> Details
+    Details -- "neighbor flag" --> Details
     Details --> Forms
     Travels -- edit --> Forms
     Stats -- "map card" --> Details
@@ -320,7 +321,7 @@ On web, every route is a real URL that can be bookmarked, shared, and refreshed 
 | --- | --- | --- | --- |
 | Welcome | `/welcome` | First launch only | Continue as guest, or Sign in |
 | Explore | `/explore` | Main tab (default) | Grid, search, filters, sort |
-| Country details | `/country/:code` | Explore card, My travels entry, Stats map card, neighbor chip, direct URL | :code is the 3-letter ISO code, for example /country/SAU |
+| Country details | `/country/:code` | Explore card, My travels entry, Stats map card, neighbor flag, direct URL | :code is the 3-letter ISO code, for example /country/SAU |
 | Visit form | Modal | Country details, Edit entry, Stats map card | Bottom sheet on compact screens, dialog on wider screens |
 | Wishlist form | Modal | Country details, Edit entry, Stats map card | Bottom sheet on compact screens, dialog on wider screens |
 | My travels | `/travels` | Main tab | Tabs: Visited (default) and Wishlist (?tab=wishlist) |
@@ -379,18 +380,18 @@ Requirements are grouped by module. Each module lists its requirements, then the
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-DET-01 | The header shows a large flag (animated in from the card, section 10.2), the common name, and the official name. | Must |
-| FR-DET-02 | Facts: capital, region and subregion, population, area in km², languages, currencies with symbols, and time zones, formatted for the app language. A missing value shows *Not available*. | Must |
-| FR-DET-03 | Neighboring countries appear as chips with flag and name. Selecting a chip opens that country. A country with no land borders shows *No land borders*. | Must |
-| FR-DET-04 | If the country is not saved, show **Mark as visited** and **Add to wishlist**. If it is saved, show its status with **Edit** and **Remove**. | Must |
+| FR-DET-01 | The header shows a large flag (animated in from the card, section 10.2), the common name, and the official name when it differs from the common name. Under them sit a tag with the region and subregion and **Open in Maps** (FR-DET-05). | Must |
+| FR-DET-02 | Facts, formatted for the app language: capital, population, and area as tiles, with population and area shortened (35.3M, 2.15M km²) and the exact figure under them; languages, currencies with symbols, and time zones in full, with more than two time zones shown as their range from west to east and a count. Region and subregion are in the header's tag. A missing value shows *Not available*; a missing subregion is left out of the tag. | Must |
+| FR-DET-03 | Neighboring countries appear as round flags with their names, in a row that scrolls sideways on phones and wraps onto more rows on wider screens. Selecting one opens that country, and its flag morphs into the header as from an Explore card. A country with no land borders shows *No land borders*. | Must |
+| FR-DET-04 | If the country is not saved, show **Mark as visited** and **Add to wishlist** side by side, full width. If it is saved, show a card in its status color with the visit date or wishlist details, rating, and notes, with **Edit** and **Remove** in its corner; a wishlist country's card also offers **Mark as visited**. | Must |
 | FR-DET-05 | **Open in Maps** opens the country's map link in a new browser tab on web, or in an external app on mobile. It is disabled while offline. | Should |
 | FR-DET-06 | The route /country/:code opens directly. An unknown code shows a Country not found screen with a button back to Explore. | Must |
-| FR-DET-07 | The header background is tinted with the flag's dominant color, keeping text contrast at WCAG AA. | Could |
+| FR-DET-07 | The header background is tinted with the flag's dominant color and fades into the page, running up behind the app bar, which turns solid once the page scrolls under it. The tint keeps text contrast, including the app bar's title, at WCAG AA. | Could |
 
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
 | AC-DET-01 | the Explore grid | the user selects a card | the flag animates into the details header. |
-| AC-DET-02 | France's details are open | the user selects the Spain chip | Spain's details open, and Back returns to France. |
+| AC-DET-02 | France's details are open | the user selects Spain's flag among the neighbors | Spain's details open, and Back returns to France. |
 | AC-DET-03 | an island country such as Japan | its details open | the neighbors section reads No land borders. |
 | AC-DET-04 | the route /country/XYZ | it is opened | the Country not found screen appears. |
 
@@ -398,10 +399,10 @@ Requirements are grouped by module. Each module lists its requirements, then the
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-TRV-01 | **Mark as visited** opens a form with: visit date (optional, not in the future), rating 1 to 5 (optional), and notes (optional, up to 500 characters). | Must |
+| FR-TRV-01 | **Mark as visited** opens a form with: visit date (optional, not in the future, picked from a calendar), rating 1 to 5 (optional, with a word for each: Not for me, Okay, Good, Great, Loved it), and notes (optional, up to 500 characters). | Must |
 | FR-TRV-02 | Saving a visit plays the passport-stamp animation (section 10.2) and updates the details action area. | Must |
 | FR-TRV-03 | Marking a wishlist country as visited converts its entry to Visited and keeps its notes. | Must |
-| FR-TRV-04 | **Add to wishlist** opens a form with: priority (High, Medium, or Low; default Medium), target year (optional, this year to 20 years ahead), and notes (optional, up to 500 characters). | Must |
+| FR-TRV-04 | **Add to wishlist** opens a form with: priority (High, Medium, or Low, as three options; default Medium), target year (optional; a row of chips from Any time and this year to 20 years ahead), and notes (optional, up to 500 characters). | Must |
 | FR-TRV-05 | My travels has two tabs, Visited and Wishlist, each showing its count. | Must |
 | FR-TRV-06 | Visited sorts by visit date, newest first, with undated entries last. Wishlist sorts by priority, then target year. Both can switch to name order. | Must |
 | FR-TRV-07 | Each entry has a menu with Edit and Delete. On touch screens, swiping an entry reveals the same actions. Delete removes the entry at once and shows an Undo snackbar for 4 seconds. | Must |
@@ -769,7 +770,7 @@ Authorization: Bearer <RC_API_KEY>
 | `names.translations.ara.official` | `nameOfficialAr` | Arabic UI |
 | `capitals` (primary, else first) | `capital` | Details |
 | `region`, `subregion` | `region`, `subregion` | Filters, Stats |
-| `borders` | `borders` (3-letter codes) | Neighbor chips |
+| `borders` | `borders` (3-letter codes) | Neighbors on Country details |
 | `area.kilometers` | `areaKm2` | Details, sort |
 | `population` | `population` | Details, sort |
 | `languages[].name` | `languages` | Details, language filter |
@@ -1016,6 +1017,8 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes
 - Layouts follow the Material 3 window size classes: compact, medium, and expanded (FR-PLT-02).
 - The Material 3 type scale. Numbers on the Stats screen use tabular figures so they don't shift while counting.
 - Spacing on an 8 dp grid. Cards use 12 dp corner radius; sheets and dialogs use the Material 3 defaults.
+- Country details on expanded screens has two columns: the header and save actions on the start side, which stay in place, and the facts and neighbors beside them. On phones and medium screens it is one column with the header across the full width.
+- The visit and wishlist forms open with the country's round flag, the title, and the line Everything here is optional, with a ✕ to close. Fields scroll; a full-width Save stays below them and above the on-screen keyboard. Notes use a filled field whose character count appears from 400 characters. Sections that can be emptied, the visit date and the rating, have their Clear action at the end of their title.
 - Explore cards are circles filled with the flag, cropped to fit. The name and region sit over the lower part in white, on a black gradient that is clear above the text, 55% opaque where the text starts, which keeps white text readable over white flags, and 70% at the bottom. The caption is the same height on every card, with room for a two-line name, so names and regions line up across a row.
 - Flags on Country details and My travels keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. A flag flying from an Explore card to Country details morphs from the circle into that frame, and back.
 - Material Symbols (rounded) for icons. On web, interactive elements show hover and focus states.
@@ -1043,7 +1046,7 @@ One signature moment, the passport stamp, plus a small set of consistent transit
 
 | Moment | Trigger | Behavior | Timing | Implementation |
 | --- | --- | --- | --- | --- |
-| Passport stamp | Saving a visit | A Stamp Amber stamp scales from 1.6× to 1× over the flag with a slight rotation; on Android and iOS, a light haptic tap follows | About 600 ms, ease-out-back | AnimationController, HapticFeedback |
+| Passport stamp | Saving a visit; opening Country details for a visited country | A Stamp Amber stamp scales from 1.6× to 1× over the flag with a slight rotation; after a save, on Android and iOS, a light haptic tap follows. When Country details opens for a country that was already visited, the stamp waits until the flag has flown into the header, then lands; going back, it fades out before the flag flies away. A page opened directly, such as from a link, shows the stamp still | About 600 ms, ease-out-back; fade-out 150 ms | AnimationController, HapticFeedback |
 | Flag transition | Card to details, and back | The flag flies from the card into the header. On the way, the card's circle opens into the flag's own shape with rounded corners while its frame fades in; going back, it closes into the circle again | About 300 ms (default) | Hero, tag flag-{code}, with `FlagFlight` as the in-flight widget |
 | Grid entrance | First Explore load | Visible cards fade in and rise 16 dp in a 40 ms stagger | 250 ms each, ease-out | flutter_animate |
 | Result count | Filter change | The count rolls to its new value | 200 ms | AnimatedSwitcher |

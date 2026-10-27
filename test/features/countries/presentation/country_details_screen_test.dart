@@ -35,31 +35,79 @@ void main() {
       await openDetails(tester, 'FRA');
 
       expect(find.text('Paris'), findsOneWidget);
-      expect(find.text('Western Europe'), findsOneWidget);
+      // Region and subregion share the header's tag.
+      expect(find.text('Europe · Western Europe'), findsOneWidget);
+      // At a glance, with the exact figure under it.
+      expect(find.text('68M'), findsOneWidget);
       expect(find.text('68,000,000'), findsOneWidget);
+      expect(find.text('552K km²'), findsOneWidget);
       expect(find.text('551,695 km²'), findsOneWidget);
       expect(find.text('French'), findsWidgets);
       expect(find.text('Euro'), findsOneWidget);
     });
 
+    testWidgets('many time zones show as their range, west to east', (
+      tester,
+    ) async {
+      await openDetails(tester, 'FRA');
+
+      expect(find.text('UTC-10:00 – UTC+12:00'), findsOneWidget);
+      expect(find.text('4 time zones'), findsOneWidget);
+    });
+
+    testWidgets('the official name shows only when it differs', (tester) async {
+      await openDetails(tester, 'FRA');
+      expect(find.text('French Republic'), findsOneWidget);
+
+      await openDetails(tester, 'JPN');
+      // Japan's official name is Japan.
+      expect(find.text('Japan'), findsOneWidget);
+    });
+
     testWidgets('a missing value reads Not available', (tester) async {
       await openDetails(tester, 'ATA');
 
-      // No capital and no subregion, languages, or currencies.
-      expect(find.text('Not available'), findsNWidgets(4));
+      // No capital, languages, or currencies. The missing subregion is left
+      // out of the region tag.
+      expect(find.text('Not available'), findsNWidgets(3));
+      expect(find.text('Antarctic'), findsOneWidget);
     });
 
     testWidgets('reads in Arabic, right to left', (tester) async {
       await openDetails(tester, 'FRA', prefs: {'locale': 'ar'});
 
       expect(find.text('العاصمة'), findsOneWidget);
-      expect(find.text('أوروبا الغربية'), findsOneWidget);
+      expect(find.text('أوروبا · أوروبا الغربية'), findsOneWidget);
       expect(find.text('551,695 كم²'), findsOneWidget);
       expect(
         Directionality.of(tester.element(find.text('العاصمة'))),
         TextDirection.rtl,
       );
     });
+  });
+
+  testWidgets('the facts sit beside the header on expanded screens, and '
+      'below it on phones (FR-PLT-02)', (tester) async {
+    await openDetails(tester, 'FRA');
+    expect(
+      tester.getTopLeft(find.text('Facts')).dy,
+      greaterThan(tester.getBottomLeft(find.text('French Republic')).dy),
+    );
+
+    final app = await pumpApp(
+      tester,
+      prefs: returningUser,
+      size: const Size(1280, 900),
+    );
+    await app.goTo(tester, '/country/FRA');
+    expect(
+      tester.getTopLeft(find.text('Facts')).dx,
+      greaterThan(tester.getTopRight(find.text('French Republic')).dx),
+    );
+    expect(
+      tester.getTopLeft(find.text('Facts')).dy,
+      lessThan(tester.getTopLeft(find.text('France')).dy),
+    );
   });
 
   group('neighbors (FR-DET-03)', () {
@@ -70,7 +118,7 @@ void main() {
       expect(find.text('No land borders'), findsOneWidget);
     });
 
-    testWidgets('a neighbor chip opens that country, and Back returns '
+    testWidgets('a neighbor\'s flag opens that country, and Back returns '
         '(AC-DET-02)', (tester) async {
       await pumpApp(tester, prefs: returningUser, size: _tall);
       await tester.tap(
@@ -81,7 +129,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithText(ActionChip, 'Spain'));
+      await tester.tap(find.text('Spain'));
       await tester.pumpAndSettle();
       expect(appBarOf('Spain'), findsOneWidget);
 
@@ -110,14 +158,17 @@ void main() {
       await tester.tap(find.text('Mark as visited'));
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('4 of 5 stars'));
+      await tester.pump();
+      // The chosen rating gets its word.
+      expect(find.text('Great'), findsOneWidget);
       await tester.enterText(find.byType(TextField), 'Paris in spring');
       await tester.tap(saveButton());
       await tester.pumpAndSettle();
 
       expect(find.text('VISITED'), findsOneWidget);
       expect(find.text('Visited'), findsOneWidget);
-      expect(find.text('Edit'), findsOneWidget);
-      expect(find.text('Remove'), findsOneWidget);
+      expect(find.byTooltip('Edit'), findsOneWidget);
+      expect(find.byTooltip('Remove'), findsOneWidget);
       expect(find.text('Paris in spring'), findsOneWidget);
       expect(haptics, ['HapticFeedbackType.lightImpact']);
 
@@ -145,16 +196,18 @@ void main() {
       await tester.tap(find.text('Mark as visited'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Add date'));
+      await tester.tap(find.text('Pick a date'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('21')); // testNow is 20 October 2026.
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
 
+      // The picked date shows on the chip.
+      expect(find.text('October 21, 2026'), findsOneWidget);
       expect(find.text("Visit date can't be in the future."), findsOneWidget);
       expect(enabled(saveButton()), isFalse);
 
-      await tester.tap(find.byTooltip('Clear date'));
+      await tester.tap(find.text('Clear date'));
       await tester.pumpAndSettle();
       expect(enabled(saveButton()), isTrue);
     });
@@ -173,11 +226,25 @@ void main() {
       expect(enabled(saveButton()), isFalse);
     });
 
-    testWidgets('Cancel saves nothing', (tester) async {
+    testWidgets('the notes count shows only near the limit', (tester) async {
+      await openDetails(tester, 'FRA');
+      await tester.tap(find.text('Mark as visited'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'a' * 399);
+      await tester.pump();
+      expect(find.text('399/500'), findsNothing);
+
+      await tester.enterText(find.byType(TextField), 'a' * 450);
+      await tester.pump();
+      expect(find.text('450/500'), findsOneWidget);
+    });
+
+    testWidgets('Close saves nothing', (tester) async {
       final app = await openDetails(tester, 'FRA');
       await tester.tap(find.text('Mark as visited'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.byTooltip('Close'));
       await tester.pumpAndSettle();
 
       expect(
@@ -188,32 +255,79 @@ void main() {
     });
   });
 
+  testWidgets("a visited country's stamp lands once the flag has flown in, "
+      'and fades as the screen leaves (PRD 10.2)', (tester) async {
+    final haptics = <String?>[];
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'HapticFeedback.vibrate') {
+        haptics.add(call.arguments as String?);
+      }
+      return null;
+    });
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+    final app = await pumpApp(tester, prefs: returningUser, size: _tall);
+    await app.container.read(travelRepositoryProvider).saveVisit('FRA');
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.ancestor(
+        of: find.text('France'),
+        matching: find.byType(CountryCard),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('VISITED'), findsNothing);
+
+    await tester.pumpAndSettle();
+    expect(find.text('VISITED'), findsOneWidget);
+    // Only saving a visit taps.
+    expect(haptics, isEmpty);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pump();
+    final fade = find.ancestor(
+      of: find.text('VISITED'),
+      matching: find.byType(AnimatedOpacity),
+    );
+    expect(tester.widget<AnimatedOpacity>(fade).opacity, 0);
+    await tester.pumpAndSettle();
+  });
+
   group('wishlist (FR-TRV-03, FR-TRV-04)', () {
     testWidgets('Add to wishlist with a priority and target year', (
       tester,
     ) async {
       await openDetails(tester, 'JPN');
 
+      final semantics = tester.ensureSemantics();
       await tester.tap(find.text('Add to wishlist'));
       await tester.pumpAndSettle();
+      // Medium and Any time to begin with.
       expect(
-        tester
-            .widget<SegmentedButton<WishlistPriority>>(
-              find.byType(SegmentedButton<WishlistPriority>),
-            )
-            .selected,
-        {WishlistPriority.medium},
+        tester.getSemantics(find.text('Medium')),
+        isSemantics(isSelected: true),
+      );
+      expect(
+        tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Any time')),
+        isA<ChoiceChip>().having((chip) => chip.selected, 'selected', isTrue),
       );
       await tester.tap(find.text('High'));
-      await tester.tap(find.byType(DropdownMenu<int?>));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(MenuItemButton, '2027'));
-      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(ChoiceChip, '2027'));
+      await tester.pump();
+      expect(
+        tester.getSemantics(find.text('High')),
+        isSemantics(isSelected: true),
+      );
       await tester.tap(saveButton());
       await tester.pumpAndSettle();
 
       expect(find.text('On your wishlist'), findsOneWidget);
       expect(find.text('High priority · Target year 2027'), findsOneWidget);
+      semantics.dispose();
     });
 
     testWidgets('marking a wishlist country as visited keeps its notes '
@@ -243,7 +357,7 @@ void main() {
       await repo.saveVisit('FRA', rating: 5, notes: 'Lovely');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Remove'));
+      await tester.tap(find.byTooltip('Remove'));
       await tester.pumpAndSettle();
       expect(find.text('Mark as visited'), findsOneWidget);
       expect(find.text('France removed.'), findsOneWidget);
@@ -262,7 +376,7 @@ void main() {
       await app.container.read(travelRepositoryProvider).saveVisit('FRA');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Remove'));
+      await tester.tap(find.byTooltip('Remove'));
       await tester.pumpAndSettle();
       expect(find.text('France removed.'), findsOneWidget);
 
@@ -287,8 +401,11 @@ void main() {
       app.connectivity.online = false;
       await tester.pumpAndSettle();
 
-      final button = tester.widget<OutlinedButton>(
-        find.widgetWithText(OutlinedButton, 'Open in Maps'),
+      final button = tester.widget<ButtonStyleButton>(
+        find.ancestor(
+          of: find.text('Open in Maps'),
+          matching: find.bySubtype<ButtonStyleButton>(),
+        ),
       );
       expect(button.onPressed, isNull);
       expect(find.text('Maps needs a connection.'), findsOneWidget);
