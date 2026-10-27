@@ -35,31 +35,79 @@ void main() {
       await openDetails(tester, 'FRA');
 
       expect(find.text('Paris'), findsOneWidget);
-      expect(find.text('Western Europe'), findsOneWidget);
+      // Region and subregion share the header's tag.
+      expect(find.text('Europe · Western Europe'), findsOneWidget);
+      // At a glance, with the exact figure under it.
+      expect(find.text('68M'), findsOneWidget);
       expect(find.text('68,000,000'), findsOneWidget);
+      expect(find.text('552K km²'), findsOneWidget);
       expect(find.text('551,695 km²'), findsOneWidget);
       expect(find.text('French'), findsWidgets);
       expect(find.text('Euro'), findsOneWidget);
     });
 
+    testWidgets('many time zones show as their range, west to east', (
+      tester,
+    ) async {
+      await openDetails(tester, 'FRA');
+
+      expect(find.text('UTC-10:00 – UTC+12:00'), findsOneWidget);
+      expect(find.text('4 time zones'), findsOneWidget);
+    });
+
+    testWidgets('the official name shows only when it differs', (tester) async {
+      await openDetails(tester, 'FRA');
+      expect(find.text('French Republic'), findsOneWidget);
+
+      await openDetails(tester, 'JPN');
+      // Japan's official name is Japan.
+      expect(find.text('Japan'), findsOneWidget);
+    });
+
     testWidgets('a missing value reads Not available', (tester) async {
       await openDetails(tester, 'ATA');
 
-      // No capital and no subregion, languages, or currencies.
-      expect(find.text('Not available'), findsNWidgets(4));
+      // No capital, languages, or currencies. The missing subregion is left
+      // out of the region tag.
+      expect(find.text('Not available'), findsNWidgets(3));
+      expect(find.text('Antarctic'), findsOneWidget);
     });
 
     testWidgets('reads in Arabic, right to left', (tester) async {
       await openDetails(tester, 'FRA', prefs: {'locale': 'ar'});
 
       expect(find.text('العاصمة'), findsOneWidget);
-      expect(find.text('أوروبا الغربية'), findsOneWidget);
+      expect(find.text('أوروبا · أوروبا الغربية'), findsOneWidget);
       expect(find.text('551,695 كم²'), findsOneWidget);
       expect(
         Directionality.of(tester.element(find.text('العاصمة'))),
         TextDirection.rtl,
       );
     });
+  });
+
+  testWidgets('the facts sit beside the header on expanded screens, and '
+      'below it on phones (FR-PLT-02)', (tester) async {
+    await openDetails(tester, 'FRA');
+    expect(
+      tester.getTopLeft(find.text('Facts')).dy,
+      greaterThan(tester.getBottomLeft(find.text('French Republic')).dy),
+    );
+
+    final app = await pumpApp(
+      tester,
+      prefs: returningUser,
+      size: const Size(1280, 900),
+    );
+    await app.goTo(tester, '/country/FRA');
+    expect(
+      tester.getTopLeft(find.text('Facts')).dx,
+      greaterThan(tester.getTopRight(find.text('French Republic')).dx),
+    );
+    expect(
+      tester.getTopLeft(find.text('Facts')).dy,
+      lessThan(tester.getTopLeft(find.text('France')).dy),
+    );
   });
 
   group('neighbors (FR-DET-03)', () {
@@ -70,7 +118,7 @@ void main() {
       expect(find.text('No land borders'), findsOneWidget);
     });
 
-    testWidgets('a neighbor chip opens that country, and Back returns '
+    testWidgets('a neighbor\'s flag opens that country, and Back returns '
         '(AC-DET-02)', (tester) async {
       await pumpApp(tester, prefs: returningUser, size: _tall);
       await tester.tap(
@@ -81,7 +129,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithText(ActionChip, 'Spain'));
+      await tester.tap(find.text('Spain'));
       await tester.pumpAndSettle();
       expect(appBarOf('Spain'), findsOneWidget);
 
@@ -116,8 +164,8 @@ void main() {
 
       expect(find.text('VISITED'), findsOneWidget);
       expect(find.text('Visited'), findsOneWidget);
-      expect(find.text('Edit'), findsOneWidget);
-      expect(find.text('Remove'), findsOneWidget);
+      expect(find.byTooltip('Edit'), findsOneWidget);
+      expect(find.byTooltip('Remove'), findsOneWidget);
       expect(find.text('Paris in spring'), findsOneWidget);
       expect(haptics, ['HapticFeedbackType.lightImpact']);
 
@@ -243,7 +291,7 @@ void main() {
       await repo.saveVisit('FRA', rating: 5, notes: 'Lovely');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Remove'));
+      await tester.tap(find.byTooltip('Remove'));
       await tester.pumpAndSettle();
       expect(find.text('Mark as visited'), findsOneWidget);
       expect(find.text('France removed.'), findsOneWidget);
@@ -262,7 +310,7 @@ void main() {
       await app.container.read(travelRepositoryProvider).saveVisit('FRA');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Remove'));
+      await tester.tap(find.byTooltip('Remove'));
       await tester.pumpAndSettle();
       expect(find.text('France removed.'), findsOneWidget);
 
@@ -287,8 +335,11 @@ void main() {
       app.connectivity.online = false;
       await tester.pumpAndSettle();
 
-      final button = tester.widget<OutlinedButton>(
-        find.widgetWithText(OutlinedButton, 'Open in Maps'),
+      final button = tester.widget<ButtonStyleButton>(
+        find.ancestor(
+          of: find.text('Open in Maps'),
+          matching: find.bySubtype<ButtonStyleButton>(),
+        ),
       );
       expect(button.onPressed, isNull);
       expect(find.text('Maps needs a connection.'), findsOneWidget);

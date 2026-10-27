@@ -388,6 +388,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailsTimezones => 'Time zones';
 
   @override
+  String detailsTimezoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count time zones',
+      one: '1 time zone',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get detailsNeighbors => 'Neighboring countries';
 
   @override

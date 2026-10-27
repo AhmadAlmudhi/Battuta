@@ -115,6 +115,7 @@
   "detailsLanguages": "اللغات",
   "detailsCurrencies": "العملات",
   "detailsTimezones": "المناطق الزمنية",
+  "detailsTimezoneCount": "{count, plural, =1{منطقة زمنية واحدة} =2{منطقتان زمنيتان} few{{count} مناطق زمنية} many{{count} منطقة زمنية} other{{count} منطقة زمنية}}",
   "detailsNeighbors": "الدول المجاورة",
   "detailsNoLandBorders": "لا توجد حدود برية",
   "detailsOpenInMaps": "فتح في الخرائط",

@@ -168,6 +168,15 @@
   "detailsLanguages": "Languages",
   "detailsCurrencies": "Currencies",
   "detailsTimezones": "Time zones",
+  "detailsTimezoneCount": "{count, plural, =1{1 time zone} other{{count} time zones}}",
+  "@detailsTimezoneCount": {
+    "description": "Under a country's time zone range on Country details (FR-DET-02).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "detailsNeighbors": "Neighboring countries",
   "detailsNoLandBorders": "No land borders",
   "detailsOpenInMaps": "Open in Maps",

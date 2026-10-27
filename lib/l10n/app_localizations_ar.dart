@@ -397,6 +397,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get detailsTimezones => 'المناطق الزمنية';
 
   @override
+  String detailsTimezoneCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count منطقة زمنية',
+      many: '$count منطقة زمنية',
+      few: '$count مناطق زمنية',
+      two: 'منطقتان زمنيتان',
+      one: 'منطقة زمنية واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get detailsNeighbors => 'الدول المجاورة';
 
   @override

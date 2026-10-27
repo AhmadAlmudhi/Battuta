@@ -788,6 +788,12 @@ abstract class AppLocalizations {
   /// **'Time zones'**
   String get detailsTimezones;
 
+  /// Under a country's time zone range on Country details (FR-DET-02).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 time zone} other{{count} time zones}}'**
+  String detailsTimezoneCount(int count);
+
   /// No description provided for @detailsNeighbors.
   ///
   /// In en, this message translates to:
