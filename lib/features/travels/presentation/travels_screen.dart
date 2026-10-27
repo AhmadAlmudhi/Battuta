@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/layout/app_shell.dart';
 import '../../../core/widgets/message_view.dart';
+import '../../../core/widgets/panel.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../countries/presentation/region_names.dart';
@@ -590,28 +591,19 @@ class _Group extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final corners = BorderRadius.circular(16);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: corners,
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-      ),
-      child: ClipRRect(
-        borderRadius: corners,
-        child: Column(
-          children: [
-            for (final (i, child) in children.indexed) ...[
-              if (i > 0)
-                Divider(
-                  height: 1,
-                  indent: 76,
-                  color: scheme.outlineVariant.withValues(alpha: 0.6),
-                ),
-              child,
-            ],
+    return Panel(
+      child: Column(
+        children: [
+          for (final (i, child) in children.indexed) ...[
+            if (i > 0)
+              Divider(
+                height: 1,
+                indent: 76,
+                color: scheme.outlineVariant.withValues(alpha: 0.6),
+              ),
+            child,
           ],
-        ),
+        ],
       ),
     );
   }

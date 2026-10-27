@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.15 |
+| Version | 1.16 |
 | Status | Ready for development |
 | Date | 27 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.16 | 27 Oct 2026 | Stats redesigned: the headline shows the visited count over the dataset total, such as 16 / 249, with the share of the world and the wishlist size as tags (FR-STA-01, FR-MAP-02). Region rows list the most visited region first, add each region's share, and show a map icon where a tap focuses the map (FR-STA-02). Highlights are tiles, two to a row on phones and four on wider screens, with a new Regions visited figure; the most recent trip shows its flag and opens its country, and the wishlist size opens the Wishlist (FR-STA-03). Country details, My travels, and Stats share one flat panel style (section 10.1). |
 | 1.15 | 27 Oct 2026 | My travels redesigned: Visited and Wishlist are a two-part toggle with counts, above the search and region chips, which show how many entries each region has. Each tab opens with a one-line summary. In the default order, visits fall under their years and wishlist entries under their priorities. Rows show a round flag, the rating or a priority tag, the region with the date or target year, and the first line of the notes; a missing date is left out (FR-TRV-05, FR-TRV-06, FR-TRV-08). Notes read in their own direction, so English notes on an Arabic screen keep their punctuation in place. |
 | 1.14 | 27 Oct 2026 | Country details redesigned: the header's flag tint runs up behind the app bar, with the region tag and Open in Maps under the names; the save actions are full-width buttons or a status card; facts are tiles with shortened figures and a list; neighbors are round flags; and expanded screens show two columns (FR-DET-01 to 04, FR-DET-07). A visited country's stamp lands after the flag's flight instead of arriving with it (section 10.2). The visit and wishlist forms are redesigned: the country's flag in the header, a centered date choice, larger stars with words, priority options and year chips, a filled notes field, and a full-width Save (FR-TRV-01, FR-TRV-04). |
 | 1.13 | 24 Oct 2026 | The app uses Alexandria, one typeface for Latin and Arabic, instead of Inter and IBM Plex Sans Arabic. Every app bar shows the app's name, centered (FR-PLT-09). Explore cards are circles filled with the flag, with the name and region over a soft dark gradient and a status badge on the edge (FR-EXP-01, FR-EXP-02). Flags elsewhere are framed like printed cards, and every flag decodes once at full size, so flights between screens draw it at once (NFR-03); on the way, the circle morphs into the framed shape. On the world map, tapping the selected country again or anywhere else on the page closes its card (FR-MAP-14), and a region's summary moved under the map (FR-MAP-24). A manual refresh says it can take up to a minute (FR-EXP-11). |
@@ -422,9 +423,9 @@ Requirements are grouped by module. Each module lists its requirements, then the
 
 | ID | Requirement | Priority |
 | --- | --- | --- |
-| FR-STA-01 | The headline, at the top of the world map card (FR-MAP-02), shows the number of countries visited and their share of the dataset total, to one decimal place, for example: 12 of 249 · 4.8%. | Must |
-| FR-STA-02 | One progress bar per region shows visited countries out of that region's total. | Must |
-| FR-STA-03 | Summary figures: wishlist size, most recent trip (country and date), and the year of the first trip. | Should |
+| FR-STA-01 | The headline, at the top of the world map card (FR-MAP-02), shows the number of countries visited over the dataset total, for example 12 / 249, and under it their share of the total to one decimal place, as a tag: 4.8% of the world. | Must |
+| FR-STA-02 | One progress bar per region shows visited countries out of that region's total, with their share, for example: 4 of 49 · 8.2%. The region with the largest share comes first; the Antarctic, which has no map region, comes last. Rows that show their region on the map (FR-MAP-25) end with a map icon. | Must |
+| FR-STA-03 | Highlights, as tiles two to a row on phones and four in a row on wider screens: most recent trip (country, with its round flag, and date), the year of the first trip, regions visited (for example 3 of 6), and wishlist size. The most recent trip opens its country, and the wishlist size opens the Wishlist tab. | Should |
 | FR-STA-04 | Numbers count up and bars fill when the screen opens (section 10.2). | Should |
 | FR-STA-05 | With no visits, the world map card still shows, without the headline, and a zero state below it invites the user to mark their first country, with a button to Explore. Region bars and highlights are hidden. | Must |
 
@@ -515,7 +516,7 @@ The top of the Stats screen is a world map of the user's travels: visited countr
 | ID | Requirement | Priority |
 | --- | --- | --- |
 | FR-MAP-01 | The top of the Stats screen is a world map card. Every country is colored by its status: Visited in Stamp Amber, Wishlist in teal hatching, and Not yet in white, or a dark fill in dark mode (section 10.1). | Must |
-| FR-MAP-02 | The card's header is the Stats headline (FR-STA-01) followed by the wishlist size, for example: 16 of 249 · 6.4% · 12 on your wishlist. Stats has no separate headline card. | Must |
+| FR-MAP-02 | The card's header is the Stats headline (FR-STA-01), with the wishlist size as a second tag beside the share, for example: 16 / 249, then 6.4% of the world and 12 on your wishlist. Stats has no separate headline card. | Must |
 | FR-MAP-03 | A legend shows Visited, Wishlist, and Not yet with their swatches. When small countries have dots (FR-MAP-09), it adds the note: Small countries appear as dots. | Must |
 | FR-MAP-04 | Status comes from the travel entries, and soft-deleted entries count as Not yet. The map updates immediately when an entry changes, on this device or through sync. | Must |
 | FR-MAP-05 | The map draws only from the bundled map file (section 8.7). It makes no network requests and works offline on every platform. | Must |
@@ -526,7 +527,7 @@ The top of the Stats screen is a world map of the user's travels: visited countr
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
 | AC-MAP-01 | Japan is visited and Brazil is on the wishlist | Stats opens | Japan is amber, Brazil is hatched teal, and France is white. |
-| AC-MAP-02 | 16 visited countries and 12 on the wishlist | Stats opens | the map card's header reads 16 of 249 · 6.4% · 12 on your wishlist, and there is no other headline card. |
+| AC-MAP-02 | 16 visited countries and 12 on the wishlist | Stats opens | the map card's header reads 16 / 249 with the tags 6.4% of the world and 12 on your wishlist, and there is no other headline card. |
 | AC-MAP-03 | the Stats screen is open | the user removes Japan from Visited on another screen and returns | Japan is white. |
 | AC-MAP-04 | the device is offline | Stats opens | the map shows normally. |
 | AC-MAP-05 | the app is in dark mode | Stats opens | unvisited countries use the dark fill, not white. |
@@ -1018,6 +1019,7 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes
 - Layouts follow the Material 3 window size classes: compact, medium, and expanded (FR-PLT-02).
 - The Material 3 type scale. Numbers on the Stats screen use tabular figures so they don't shift while counting.
 - Spacing on an 8 dp grid. Cards use 12 dp corner radius; sheets and dialogs use the Material 3 defaults.
+- Grouped content on Country details, My travels, and Stats, including the world map card, sits on flat panels: a tinted surface with a hairline edge and 16 dp corners, without a shadow. Facts and highlights are tiles on these panels, each led by an icon in a tinted circle.
 - Country details on expanded screens has two columns: the header and save actions on the start side, which stay in place, and the facts and neighbors beside them. On phones and medium screens it is one column with the header across the full width.
 - The visit and wishlist forms open with the country's round flag, the title, and the line Everything here is optional, with a ✕ to close. Fields scroll; a full-width Save stays below them and above the on-screen keyboard. Notes use a filled field whose character count appears from 400 characters. Sections that can be emptied, the visit date and the rating, have their Clear action at the end of their title.
 - Explore cards are circles filled with the flag, cropped to fit. The name and region sit over the lower part in white, on a black gradient that is clear above the text, 55% opaque where the text starts, which keeps white text readable over white flags, and 70% at the bottom. The caption is the same height on every card, with room for a two-line name, so names and regions line up across a row.

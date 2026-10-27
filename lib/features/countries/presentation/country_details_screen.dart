@@ -10,6 +10,7 @@ import '../../../core/theme/contrast.dart';
 import '../../../core/widgets/app_title.dart';
 import '../../../core/widgets/message_view.dart';
 import '../../../core/widgets/screen_title.dart';
+import '../../../core/widgets/panel.dart';
 import '../../../core/widgets/up_button.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../travels/presentation/widgets/travel_action_area.dart';
@@ -459,13 +460,13 @@ class _FactTile extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return MergeSemantics(
-      child: _Panel(
+      child: Panel(
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _IconBadge(icon: icon),
+              IconBadge(icon: icon),
               const SizedBox(height: 10),
               Text(
                 label,
@@ -506,7 +507,7 @@ class _FactList extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return _Panel(
+    return Panel(
       child: Column(
         children: [
           for (final (i, (icon, label, value, detail, ltr))
@@ -523,7 +524,7 @@ class _FactList extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _IconBadge(icon: icon),
+                    IconBadge(icon: icon),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -558,46 +559,6 @@ class _FactList extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-/// The surface behind the facts.
-class _Panel extends StatelessWidget {
-  const _Panel({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.6)),
-      ),
-      child: child,
-    );
-  }
-}
-
-class _IconBadge extends StatelessWidget {
-  const _IconBadge({required this.icon});
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: scheme.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, size: 18, color: scheme.onPrimaryContainer),
     );
   }
 }

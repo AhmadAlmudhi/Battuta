@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/format/formatters.dart';
+import '../../../../core/widgets/panel.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../countries/presentation/country_providers.dart';
 import '../../../countries/presentation/region_names.dart';
@@ -716,8 +717,7 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
       focusNode: _cardFocus,
       onKeyEvent: _onCardKey,
       includeSemantics: false,
-      child: Card(
-        margin: EdgeInsets.zero,
+      child: Panel(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(

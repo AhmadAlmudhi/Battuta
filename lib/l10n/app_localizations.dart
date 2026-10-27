@@ -1166,6 +1166,24 @@ abstract class AppLocalizations {
   /// **'of {total} · {percent}% · {wishlist} on your wishlist'**
   String statsOfTotal(String total, String percent, String wishlist);
 
+  /// Beside the large visited count, for example: 16 / 249 (FR-STA-01).
+  ///
+  /// In en, this message translates to:
+  /// **'/ {total}'**
+  String statsOutOfTotal(String total);
+
+  /// A tag under the headline (FR-STA-01).
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% of the world'**
+  String statsWorldShare(String percent);
+
+  /// A tag under the headline (FR-MAP-02).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} on your wishlist'**
+  String statsWishlistCount(String count);
+
   /// Screen-reader label for the headline.
   ///
   /// In en, this message translates to:
@@ -1184,11 +1202,23 @@ abstract class AppLocalizations {
   /// **'{visited} of {total}'**
   String statsRegionCount(String visited, String total);
 
+  /// A region's count and share, for example: 4 of 49 · 8.2% (FR-STA-02).
+  ///
+  /// In en, this message translates to:
+  /// **'{count} · {percent}%'**
+  String statsRegionProgress(String count, String percent);
+
   /// No description provided for @statsHighlights.
   ///
   /// In en, this message translates to:
   /// **'Highlights'**
   String get statsHighlights;
+
+  /// No description provided for @statsRegionsVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Regions visited'**
+  String get statsRegionsVisited;
 
   /// No description provided for @statsWishlistSize.
   ///
