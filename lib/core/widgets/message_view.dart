@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// A centered icon, title, message, and optional action, for not-found and
-/// empty states (PRD section 10.3).
+/// empty states (PRD section 10.3). It centers in the space the floating tab
+/// bar leaves free.
 class MessageView extends StatelessWidget {
   const MessageView({
     super.key,
@@ -23,7 +24,12 @@ class MessageView extends StatelessWidget {
     final theme = Theme.of(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          24 + MediaQuery.paddingOf(context).bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

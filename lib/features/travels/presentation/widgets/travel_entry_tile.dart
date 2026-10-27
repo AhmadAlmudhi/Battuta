@@ -184,6 +184,8 @@ class _TileBody extends StatelessWidget {
                 ),
               ),
               MenuAnchor(
+                // Above the floating tab bar.
+                useRootOverlay: true,
                 builder: (context, controller, _) => IconButton(
                   icon: const Icon(Icons.more_vert_rounded),
                   tooltip: l10n.travelsEntryMenu(name),

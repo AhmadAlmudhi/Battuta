@@ -181,7 +181,16 @@ class _StatsList extends StatelessWidget {
     alignment: AlignmentDirectional.topCenter,
     child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 720),
-      child: ListView(padding: const EdgeInsets.all(16), children: children),
+      child: ListView(
+        // The bottom padding includes the floating tab bar.
+        padding: EdgeInsets.fromLTRB(
+          16,
+          16,
+          16,
+          16 + MediaQuery.paddingOf(context).bottom,
+        ),
+        children: children,
+      ),
     ),
   );
 }

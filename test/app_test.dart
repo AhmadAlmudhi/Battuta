@@ -1,3 +1,4 @@
+import 'package:battuta/core/layout/app_shell.dart';
 import 'package:battuta/core/widgets/battuta_logo.dart';
 import 'package:battuta/features/settings/domain/app_settings.dart';
 import 'package:battuta/features/settings/presentation/settings_controller.dart';
@@ -116,10 +117,10 @@ void main() {
       expect(appBarOf('Account'), findsOneWidget);
     });
 
-    testWidgets('compact screens use a bottom navigation bar', (tester) async {
+    testWidgets('compact screens use the floating tab bar', (tester) async {
       await pumpApp(tester, prefs: returningUser);
 
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byType(FloatingNavBar), findsOneWidget);
       expect(find.byType(NavigationRail), findsNothing);
     });
 
@@ -129,7 +130,7 @@ void main() {
       await pumpApp(tester, prefs: returningUser, size: const Size(1440, 900));
 
       expect(find.byType(NavigationRail), findsOneWidget);
-      expect(find.byType(NavigationBar), findsNothing);
+      expect(find.byType(FloatingNavBar), findsNothing);
     });
 
     testWidgets('tabs switch between Explore, My travels, and Stats', (

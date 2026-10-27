@@ -161,6 +161,9 @@ void main() {
       200,
       scrollable: scrollable,
     );
+    // Then clear of the floating tab bar.
+    await tester.drag(scrollable, const Offset(0, -300));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Japan'));
     await tester.pumpAndSettle();

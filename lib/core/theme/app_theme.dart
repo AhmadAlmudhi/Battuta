@@ -35,6 +35,8 @@ abstract final class AppTheme {
     fontFamily: 'Alexandria',
     // Every app bar shows the app's name in the middle (FR-PLT-09).
     appBarTheme: const AppBarTheme(centerTitle: true),
+    // Snack bars float, like the tab bar they sit above.
+    snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
     cardTheme: const CardThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),

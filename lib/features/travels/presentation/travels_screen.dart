@@ -527,7 +527,13 @@ class _EntryList extends StatelessWidget {
     return ListView(
       // Keeps each tab's scroll position when switching tabs.
       key: PageStorageKey(tab),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      // The bottom padding includes the floating tab bar.
+      padding: EdgeInsets.fromLTRB(
+        16,
+        8,
+        16,
+        24 + MediaQuery.paddingOf(context).bottom,
+      ),
       children: [
         Padding(
           padding: const EdgeInsetsDirectional.only(start: 4, bottom: 16),
@@ -635,6 +641,8 @@ class _SortMenu extends ConsumerWidget {
     );
 
     return MenuAnchor(
+      // Above the floating tab bar.
+      useRootOverlay: true,
       builder: (context, menu, _) => IconButton(
         icon: const Icon(Icons.sort_rounded),
         tooltip: l10n.exploreSort,
