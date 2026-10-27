@@ -290,6 +290,8 @@ class _SortMenu extends ConsumerWidget {
       CountrySort.areaAsc: l10n.exploreSortAreaAsc,
     };
     return MenuAnchor(
+      // Above the floating tab bar.
+      useRootOverlay: true,
       builder: (context, controller, _) => IconButton(
         icon: const Icon(Icons.sort_rounded),
         tooltip: l10n.exploreSort,
@@ -323,6 +325,8 @@ class _MoreMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return MenuAnchor(
+      // Above the floating tab bar.
+      useRootOverlay: true,
       builder: (context, controller, _) => IconButton(
         icon: const Icon(Icons.more_vert_rounded),
         tooltip: l10n.exploreMoreOptions,

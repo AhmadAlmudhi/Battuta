@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.18 |
+| Version | 1.19 |
 | Status | Ready for development |
 | Date | 28 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.19 | 28 Oct 2026 | The tab bar on phones and medium screens floats: a rounded bar above the bottom edge with a teal highlight that slides to the selected tab. Pages scroll behind it, and their last items, empty states, snack bars, bottom sheets, and menus stay clear of it. On expanded screens the navigation rail sits on a rounded tinted panel (FR-PLT-02, section 10.1). Snack bars float. |
 | 1.18 | 28 Oct 2026 | A logo: the stamp mark beside the name, Battuta or بطوطة, drawn in the theme's colors (section 1.4). It replaces the name as text in every app bar (FR-PLT-09), on Welcome, where the mark sits among the flags with the name under it (FR-ONB-01), and in the Share my map image (FR-MAP-41). |
 | 1.17 | 27 Oct 2026 | Welcome redesigned: the app's logo lands among round flags, three short lines say what the app does, the buttons are larger, and a note says no account is needed (FR-ONB-01). On expanded screens the flags and the words sit side by side. A switch at the top changes between English and Arabic before the user starts (FR-ONB-05). |
 | 1.16 | 27 Oct 2026 | Stats redesigned: the headline shows the visited count over the dataset total, such as 16 / 249, with the share of the world and the wishlist size as tags (FR-STA-01, FR-MAP-02). Region rows list the most visited region first, add each region's share, and show a map icon where a tap focuses the map (FR-STA-02). Highlights are tiles, two to a row on phones and four on wider screens, with a new Regions visited figure; the most recent trip shows its flag and opens its country, and the wishlist size opens the Wishlist (FR-STA-03). Country details, My travels, and Stats share one flat panel style (section 10.1). |
@@ -288,7 +289,7 @@ There are two user types. Both see the same app on every platform; only cloud fe
 
 ### 5.1 Navigation map
 
-The app has three main tabs. On compact screens they sit in a bottom bar; on wide screens they move to a side navigation rail (FR-PLT-02). Country details is the hub that every other part of the app links into.
+The app has three main tabs. On compact and medium screens they sit in a bar floating above the bottom edge; on wide screens they move to a side navigation rail (FR-PLT-02). Country details is the hub that every other part of the app links into.
 
 ```mermaid
 flowchart TD
@@ -495,7 +496,7 @@ Email and password is the only sign-in method in 1.0 (D-8).
 | ID | Requirement | Priority |
 | --- | --- | --- |
 | FR-PLT-01 | One codebase builds for web, Android, and iOS, and every Must requirement behaves the same on all three. | Must |
-| FR-PLT-02 | Layout follows the Material 3 window size classes. **Compact** (under 600 dp): bottom navigation bar, 2-column grid, bottom sheets. **Medium** (600 to 839 dp): bottom navigation bar, 3 to 4 columns, dialogs. **Expanded** (840 dp and wider): navigation rail, up to 6 columns, dialogs. Content is centered with a maximum width of 1,200 dp. | Must |
+| FR-PLT-02 | Layout follows the Material 3 window size classes. **Compact** (under 600 dp): floating tab bar, 2-column grid, bottom sheets. **Medium** (600 to 839 dp): floating tab bar, 3 to 4 columns, dialogs. **Expanded** (840 dp and wider): navigation rail, up to 6 columns, dialogs. Content is centered with a maximum width of 1,200 dp. | Must |
 | FR-PLT-03 | Web URLs use clean paths with no # symbol. Every route can be opened directly, refreshed, and bookmarked. | Must |
 | FR-PLT-04 | The browser Back and Forward buttons move through in-app navigation. | Must |
 | FR-PLT-05 | On web, every control is reachable with the keyboard and shows a visible focus indicator. Enter submits forms, Esc closes dialogs and sheets, and clickable elements show a hover state. | Must |
@@ -1031,6 +1032,7 @@ Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes
 - Flags on Country details keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. A flag flying from an Explore card or a My travels row to Country details morphs from the circle into that frame, and back.
 - My travels rows sit in rounded panels, one per group, separated by hairlines. Each row shows the round flag, the name, the rating stars (Visited) or a priority tag (Wishlist), the region with the visit date or target year, and the first line of the notes. Notes are shown in their own writing direction, lined up with the screen's start edge.
 - Welcome shows the logo's mark, large, surrounded by round flags with a hairline edge, and the name in the logo's lettering under it. On phones and medium screens the flags and mark sit above the words, centered; on expanded screens they sit beside them, on the start side. The buttons are 52 dp tall.
+- The tab bar on compact and medium screens is a rounded pill, 64 dp tall, floating 12 dp above the bottom edge and 16 dp from the sides, at most 480 dp wide, with a soft shadow and a hairline edge. Each tab shows its icon and label; a Lagoon Teal highlight (the primary container color) slides behind the selected one in 300 ms, mirroring in Arabic. Pages scroll behind the bar, with enough room at the end that their last items scroll clear of it. Bottom sheets, menus, and snack bars appear above it; snack bars float. On expanded screens the navigation rail sits on a tinted panel with a hairline edge and 28 dp corners, inset 12 dp from the window, with the same highlight.
 - Material Symbols (rounded) for icons. On web, interactive elements show hover and focus states.
 
 #### World map

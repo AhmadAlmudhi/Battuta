@@ -11,6 +11,9 @@ Future<T?> showAdaptiveModal<T>(
   if (WindowSizeClass.of(context) == WindowSizeClass.compact) {
     return showModalBottomSheet<T>(
       context: context,
+      // Above the floating tab bar, which would otherwise cover the sheet's
+      // bottom, where Save is.
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,

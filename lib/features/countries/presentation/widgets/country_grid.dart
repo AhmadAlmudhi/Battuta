@@ -43,7 +43,13 @@ class CountryGrid extends StatelessWidget {
         return GridView.builder(
           // Pull to refresh needs the grid to scroll even when it is short.
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(_padding, 4, _padding, _padding),
+          // The bottom padding includes the floating tab bar.
+          padding: EdgeInsets.fromLTRB(
+            _padding,
+            4,
+            _padding,
+            _padding + MediaQuery.paddingOf(context).bottom,
+          ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             mainAxisSpacing: _spacing,
