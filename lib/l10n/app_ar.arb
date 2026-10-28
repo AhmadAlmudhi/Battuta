@@ -43,6 +43,7 @@
   "exploreFilters": "التصفية",
   "exploreFiltersActive": "{count, plural, =1{التصفية، عامل واحد مفعّل} =2{التصفية، عاملان مفعّلان} few{التصفية، {count} عوامل مفعّلة} other{التصفية، {count} عاملًا مفعّلًا}}",
   "exploreSort": "الترتيب",
+  "exploreSortMostVisited": "الأكثر زيارة",
   "exploreSortNameAsc": "الاسم، من أ إلى ي",
   "exploreSortNameDesc": "الاسم، من ي إلى أ",
   "exploreSortPopulationDesc": "عدد السكان، من الأعلى إلى الأقل",
@@ -254,6 +255,8 @@
   "settingsCountryDataUpdated": "حُدّثت في {date}",
   "settingsDataSource": "مصدر البيانات",
   "settingsDataSourceValue": "بيانات الدول والأعلام من REST Countries",
+  "settingsTourismSource": "أرقام السياحة",
+  "settingsTourismSourceValue": "يتبع ترتيب «الأكثر زيارة» أعداد السياح الدوليين الوافدين من البنك الدولي، ببيانات منظمة الأمم المتحدة للسياحة (CC BY 4.0).",
   "settingsMapSource": "بيانات الخريطة",
   "settingsMapSourceValue": "خريطة العالم من Natural Earth، وتظهر الحدود المتنازع عليها كما تعترف بها المملكة العربية السعودية.",
   "settingsLicenses": "تراخيص المصادر المفتوحة"

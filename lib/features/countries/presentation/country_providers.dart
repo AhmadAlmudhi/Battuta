@@ -10,6 +10,7 @@ import '../../settings/presentation/settings_controller.dart';
 import '../data/country_api_client.dart';
 import '../data/country_refresher.dart';
 import '../data/country_repository_impl.dart';
+import '../data/tourism_arrivals.dart';
 import '../domain/country.dart';
 import '../domain/country_repository.dart';
 import '../domain/country_search.dart';
@@ -92,7 +93,11 @@ final countryByCodeProvider = Provider.family<AsyncValue<Country?>, String>((
 });
 
 final countrySearchIndexProvider = Provider<AsyncValue<CountrySearchIndex>>(
-  (ref) => ref.watch(countriesProvider).whenData(CountrySearchIndex.new),
+  (ref) => ref
+      .watch(countriesProvider)
+      .whenData(
+        (countries) => CountrySearchIndex(countries, arrivals: tourismArrivals),
+      ),
 );
 
 final exploreFilterOptionsProvider = Provider<AsyncValue<ExploreFilterOptions>>(

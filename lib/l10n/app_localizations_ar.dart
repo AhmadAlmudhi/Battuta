@@ -165,6 +165,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get exploreSort => 'الترتيب';
 
   @override
+  String get exploreSortMostVisited => 'الأكثر زيارة';
+
+  @override
   String get exploreSortNameAsc => 'الاسم، من أ إلى ي';
 
   @override
@@ -931,6 +934,13 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get settingsDataSourceValue =>
       'بيانات الدول والأعلام من REST Countries';
+
+  @override
+  String get settingsTourismSource => 'أرقام السياحة';
+
+  @override
+  String get settingsTourismSourceValue =>
+      'يتبع ترتيب «الأكثر زيارة» أعداد السياح الدوليين الوافدين من البنك الدولي، ببيانات منظمة الأمم المتحدة للسياحة (CC BY 4.0).';
 
   @override
   String get settingsMapSource => 'بيانات الخريطة';

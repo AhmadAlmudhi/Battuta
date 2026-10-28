@@ -44,6 +44,25 @@ void main() {
     expect(app.launchedLinks, [Uri.parse('https://restcountries.com')]);
   });
 
+  testWidgets('the tourism figures behind Most visited are credited and open '
+      'their World Bank page (FR-SET-04)', (tester) async {
+    final app = await openSettings(tester);
+    expect(
+      find.text(
+        'Most visited follows international tourist arrivals from the World '
+        'Bank, with UN Tourism data (CC BY 4.0).',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Tourism figures'));
+    await tester.pumpAndSettle();
+
+    expect(app.launchedLinks, [
+      Uri.parse('https://data.worldbank.org/indicator/ST.INT.ARVL'),
+    ]);
+  });
+
   testWidgets('the map data opens naturalearthdata.com', (tester) async {
     final app = await openSettings(tester);
 

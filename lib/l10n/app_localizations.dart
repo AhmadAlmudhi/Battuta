@@ -356,6 +356,12 @@ abstract class AppLocalizations {
   /// **'Sort'**
   String get exploreSort;
 
+  /// No description provided for @exploreSortMostVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Most visited'**
+  String get exploreSortMostVisited;
+
   /// No description provided for @exploreSortNameAsc.
   ///
   /// In en, this message translates to:
@@ -1621,6 +1627,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Country data and flags from REST Countries'**
   String get settingsDataSourceValue;
+
+  /// No description provided for @settingsTourismSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Tourism figures'**
+  String get settingsTourismSource;
+
+  /// No description provided for @settingsTourismSourceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Most visited follows international tourist arrivals from the World Bank, with UN Tourism data (CC BY 4.0).'**
+  String get settingsTourismSourceValue;
 
   /// No description provided for @settingsMapSource.
   ///

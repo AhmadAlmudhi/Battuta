@@ -160,6 +160,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exploreSort => 'Sort';
 
   @override
+  String get exploreSortMostVisited => 'Most visited';
+
+  @override
   String get exploreSortNameAsc => 'Name, A to Z';
 
   @override
@@ -911,6 +914,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsDataSourceValue =>
       'Country data and flags from REST Countries';
+
+  @override
+  String get settingsTourismSource => 'Tourism figures';
+
+  @override
+  String get settingsTourismSourceValue =>
+      'Most visited follows international tourist arrivals from the World Bank, with UN Tourism data (CC BY 4.0).';
 
   @override
   String get settingsMapSource => 'Map data';

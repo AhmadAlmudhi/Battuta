@@ -6,9 +6,16 @@ import 'search_normalizer.dart';
 /// update well within 100 ms (NFR-04).
 ///
 /// Names are normalized once when the index is built, not on every query.
+/// [arrivals], international tourist arrivals by country code, order Most
+/// visited.
 class CountrySearchIndex {
-  CountrySearchIndex(List<Country> countries)
-    : _entries = [for (final country in countries) _Entry(country)];
+  CountrySearchIndex(
+    List<Country> countries, {
+    Map<String, int> arrivals = const {},
+  }) : _entries = [
+         for (final country in countries)
+           _Entry(country, arrivals[country.code]),
+       ];
 
   final List<_Entry> _entries;
 
@@ -66,6 +73,16 @@ class CountrySearchIndex {
       return result != 0 ? result : byName(a, b);
     }
 
+    // Countries without a figure follow the rest, in name order.
+    int byArrivals(_Entry a, _Entry b) {
+      final x = a.arrivals, y = b.arrivals;
+      if (x == null || y == null) {
+        return x == y ? byName(a, b) : (x == null ? 1 : -1);
+      }
+      final result = y.compareTo(x);
+      return result != 0 ? result : byName(a, b);
+    }
+
     int byPopulation(_Entry a, _Entry b, {required bool descending}) {
       final x = a.country.population, y = b.country.population;
       final result = descending ? y.compareTo(x) : x.compareTo(y);
@@ -73,6 +90,7 @@ class CountrySearchIndex {
     }
 
     return switch (sort) {
+      CountrySort.mostVisited => byArrivals,
       CountrySort.nameAsc => byName,
       CountrySort.nameDesc => (a, b) => byName(b, a),
       CountrySort.populationDesc => (a, b) => byPopulation(
@@ -92,7 +110,7 @@ class CountrySearchIndex {
 }
 
 class _Entry {
-  _Entry(this.country)
+  _Entry(this.country, this.arrivals)
     : sortKeyEn = normalizeForSearch(country.nameEn),
       sortKeyAr = normalizeForSearch(country.name(arabic: true)) {
     names = [
@@ -111,6 +129,9 @@ class _Entry {
   }
 
   final Country country;
+
+  /// International tourist arrivals; null without a figure.
+  final int? arrivals;
   final String sortKeyEn;
   final String sortKeyAr;
 

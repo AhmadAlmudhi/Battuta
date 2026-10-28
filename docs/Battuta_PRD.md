@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.20 |
+| Version | 1.21 |
 | Status | Ready for development |
 | Date | 28 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.21 | 28 Oct 2026 | Explore's default order is Most visited: countries ranked by international tourist arrivals, so the countries people have most likely been to come first (FR-EXP-08). The figures come from the World Bank and UN Tourism, bundled with the app (section 8.8), and About credits them (FR-SET-04). |
 | 1.20 | 28 Oct 2026 | Neighbor flags on Country details fly only when selected: the other neighbors' flags no longer fly to or from their Explore cards and My travels rows when the page opens or closes (FR-DET-03). |
 | 1.19 | 28 Oct 2026 | The tab bar on phones and medium screens floats: a rounded bar above the bottom edge with a teal highlight that slides to the selected tab. Pages scroll behind it, and their last items, empty states, snack bars, bottom sheets, and menus stay clear of it. On expanded screens the navigation rail sits on a rounded tinted panel (FR-PLT-02, section 10.1). Snack bars float. |
 | 1.18 | 28 Oct 2026 | A logo: the stamp mark beside the name, Battuta or بطوطة, drawn in the theme's colors (section 1.4). It replaces the name as text in every app bar (FR-PLT-09), on Welcome, where the mark sits among the flags with the name under it (FR-ONB-01), and in the Share my map image (FR-MAP-41). |
@@ -85,6 +86,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
     - [8.5 Local settings](#85-local-settings)
     - [8.6 Validation rules and messages](#86-validation-rules-and-messages)
     - [8.7 World map data](#87-world-map-data)
+    - [8.8 Tourism figures](#88-tourism-figures)
 - [9. Non-functional requirements](#9-non-functional-requirements)
 - [10. Experience and interface requirements](#10-experience-and-interface-requirements)
     - [10.1 Visual design](#101-visual-design)
@@ -370,7 +372,7 @@ Requirements are grouped by module. Each module lists its requirements, then the
 | FR-EXP-05 | Results whose name starts with the query rank above results that only contain it. Ties sort by name. | Should |
 | FR-EXP-06 | A filter panel offers region (multi-select), subregion (multi-select, limited to the selected regions), language (single, searchable), and currency (single, searchable). | Must |
 | FR-EXP-07 | Filters combine with AND across fields and OR within a field. The panel shows a live result count and a Clear all action. The toolbar shows the number of active filters. | Must |
-| FR-EXP-08 | Sort options: name A to Z (default), name Z to A, population high to low or low to high, area high to low or low to high. | Must |
+| FR-EXP-08 | Sort options: Most visited (default), name A to Z, name Z to A, population high to low or low to high, area high to low or low to high. Most visited ranks countries by international tourist arrivals, most first (section 8.8), so the countries a user has most likely been to come first; countries without a figure follow in name order. | Must |
 | FR-EXP-09 | Search text, filters, and sort stay applied while the user moves between screens, until the app or tab is closed. | Must |
 | FR-EXP-10 | When the device is offline, a non-blocking banner reads: You're offline. Showing saved data. | Must |
 | FR-EXP-11 | The user can refresh country data with pull to refresh on touch screens, or **Refresh data** in the Explore menu on web. Manual refresh calls the API at most once per hour (section 8.2). While the download runs, a message with a progress indicator reads: Updating country data. This can take up to a minute. The outcome replaces it. | Should |
@@ -490,7 +492,7 @@ Email and password is the only sign-in method in 1.0 (D-8).
 | FR-SET-01 | Theme: System (default), Light, or Dark. | Must |
 | FR-SET-02 | Language: System (default), English, or Arabic. A change applies instantly, including layout direction. | Must |
 | FR-SET-03 | Settings persist across restarts and page reloads. | Must |
-| FR-SET-04 | An About section shows the app version and the date of the country data. It credits REST Countries for the country data and Natural Earth for the world map, and notes that the map's borders follow the Saudi point of view (D-11). | Should |
+| FR-SET-04 | An About section shows the app version and the date of the country data. It credits REST Countries for the country data, the World Bank and UN Tourism for the tourism figures behind Most visited (section 8.8), and Natural Earth for the world map, and notes that the map's borders follow the Saudi point of view (D-11). | Should |
 
 ### 6.9 Platforms and responsive layout (PLT)
 
@@ -997,6 +999,16 @@ Coordinates are already projected, with y pointing down from 84° north, so the 
 ```
 
 Each shape is a list of rings, and each ring is a flat list of x, y pairs. Holes are rings too, so shapes fill with the even-odd rule. `unmatched` lists the rings of shapes that match no country, such as Bir Tawil (FR-MAP-07). The example is shortened.
+
+### 8.8 Tourism figures
+
+Explore's Most visited order (FR-EXP-08) ranks countries by international tourist arrivals: the number of visitors who arrive from abroad in a year.
+
+- **Source:** the World Bank's World Development Indicators, indicator `ST.INT.ARVL`, which publish UN Tourism's figures. The data is free, needs no key, and is licensed CC BY 4.0, so About credits it (FR-SET-04). It doesn't use the REST Countries quota (NFR-13).
+- **Which figure:** each country's most recent figure from 2012 onward, leaving out 2020 and 2021, when travel all but stopped. Today that means 2019 for most countries and an earlier year for some, because the World Bank has published no complete year since.
+- **Coverage:** 198 of the 249 countries have a figure. The others, mostly small territories and Antarctica, but also Taiwan and Vatican City, follow the ranked countries in name order.
+- **Caveat:** countries count arrivals in different ways. Some, such as Hungary and Croatia, include visitors who cross the border for the day, so they rank higher than their overnight tourism suggests. The order is a guide to where people travel, not an exact ranking.
+- **Bundling:** `tool/fetch_tourism.dart` downloads the figures in one request and writes them to `lib/features/countries/data/tourism_arrivals.dart` as a Dart map, so the app reads them with no network request and no loading step. The figures change rarely, so the script runs by hand, not in the deploy workflow.
 
 ## 9. Non-functional requirements
 

@@ -69,6 +69,7 @@
     }
   },
   "exploreSort": "Sort",
+  "exploreSortMostVisited": "Most visited",
   "exploreSortNameAsc": "Name, A to Z",
   "exploreSortNameDesc": "Name, Z to A",
   "exploreSortPopulationDesc": "Population, high to low",
@@ -549,6 +550,8 @@
   },
   "settingsDataSource": "Data source",
   "settingsDataSourceValue": "Country data and flags from REST Countries",
+  "settingsTourismSource": "Tourism figures",
+  "settingsTourismSourceValue": "Most visited follows international tourist arrivals from the World Bank, with UN Tourism data (CC BY 4.0).",
   "settingsMapSource": "Map data",
   "settingsMapSourceValue": "World map from Natural Earth. Disputed borders are shown as Saudi Arabia recognizes them.",
   "settingsLicenses": "Open-source licenses"

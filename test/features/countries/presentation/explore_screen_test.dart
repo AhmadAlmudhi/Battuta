@@ -27,14 +27,14 @@ void main() {
       await pumpApp(tester, prefs: returningUser);
 
       expect(find.text('8 countries'), findsOneWidget);
-      // Name order: Antarctica, Belgium | France, Germany | ...
-      final antarctica = tester.getTopLeft(card('Antarctica'));
-      final belgium = tester.getTopLeft(card('Belgium'));
+      // Most visited order: France, Spain | Germany, Japan | ...
       final france = tester.getTopLeft(card('France'));
-      expect(belgium.dy, antarctica.dy);
-      expect(belgium.dx, greaterThan(antarctica.dx));
-      expect(france.dy, greaterThan(antarctica.dy));
-      expect(france.dx, antarctica.dx);
+      final spain = tester.getTopLeft(card('Spain'));
+      final germany = tester.getTopLeft(card('Germany'));
+      expect(spain.dy, france.dy);
+      expect(spain.dx, greaterThan(france.dx));
+      expect(germany.dy, greaterThan(france.dy));
+      expect(germany.dx, france.dx);
     });
 
     testWidgets('shows at least 4 columns in a 1,440 px window (AC-PLT-02)', (
@@ -42,8 +42,8 @@ void main() {
     ) async {
       await pumpApp(tester, prefs: returningUser, size: const Size(1440, 900));
 
-      final firstRow = tester.getTopLeft(card('Antarctica')).dy;
-      for (final name in ['Belgium', 'France', 'Germany']) {
+      final firstRow = tester.getTopLeft(card('France')).dy;
+      for (final name in ['Spain', 'Germany', 'Japan']) {
         expect(tester.getTopLeft(card(name)).dy, firstRow, reason: name);
       }
     });
@@ -213,6 +213,30 @@ void main() {
     expect(tester.getTopLeft(card('France')).dy, greaterThan(japan.dy));
   });
 
+  testWidgets('the sort menu offers Most visited first, checked by default, '
+      'and Name, A to Z puts Antarctica first (FR-EXP-08)', (tester) async {
+    await pumpApp(tester, prefs: returningUser);
+
+    await tester.tap(find.byTooltip('Sort'));
+    await tester.pumpAndSettle();
+    final options = find.byType(MenuItemButton);
+    expect(
+      find.descendant(of: options.first, matching: find.text('Most visited')),
+      findsOneWidget,
+    );
+    final check = tester.widget<Icon>(
+      find.descendant(of: options.first, matching: find.byType(Icon)),
+    );
+    expect(check.color, isNot(Colors.transparent));
+
+    await tester.tap(find.text('Name, A to Z'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(card('Antarctica')).dy,
+      lessThan(tester.getTopLeft(card('France')).dy),
+    );
+  });
+
   testWidgets('Back from a country keeps the search (AC-PLT-03)', (
     tester,
   ) async {
@@ -263,13 +287,13 @@ void main() {
     ) async {
       final app = await pumpApp(tester, prefs: returningUser);
 
-      await tester.fling(card('Antarctica'), const Offset(0, 400), 1000);
+      await tester.fling(card('France'), const Offset(0, 400), 1000);
       await tester.pumpAndSettle();
       expect(app.refresher.manualCalls, 1);
       expect(find.text('Data is up to date.'), findsOneWidget);
 
       app.refresher.manualOutcome = RefreshOutcome.failed;
-      await tester.fling(card('Antarctica'), const Offset(0, 400), 1000);
+      await tester.fling(card('France'), const Offset(0, 400), 1000);
       await tester.pumpAndSettle();
       expect(
         find.text("Couldn't refresh. Showing saved data."),
@@ -282,14 +306,14 @@ void main() {
       final app = await pumpApp(tester, prefs: returningUser);
       const waiting = 'Updating country data. This can take up to a minute.';
 
-      await tester.fling(card('Antarctica'), const Offset(0, 400), 1000);
+      await tester.fling(card('France'), const Offset(0, 400), 1000);
       await tester.pumpAndSettle();
       expect(find.text(waiting), findsNothing);
 
       app.refresher
         ..manualOutcome = RefreshOutcome.refreshed
         ..download = Completer();
-      await tester.fling(card('Antarctica'), const Offset(0, 400), 1000);
+      await tester.fling(card('France'), const Offset(0, 400), 1000);
       // Frames for the indicator to settle and the earlier message to leave.
       for (var frame = 0; frame < 10; frame++) {
         await tester.pump(const Duration(milliseconds: 200));

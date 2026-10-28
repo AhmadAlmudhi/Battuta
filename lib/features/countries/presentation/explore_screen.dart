@@ -282,6 +282,7 @@ class _SortMenu extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final labels = {
+      CountrySort.mostVisited: l10n.exploreSortMostVisited,
       CountrySort.nameAsc: l10n.exploreSortNameAsc,
       CountrySort.nameDesc: l10n.exploreSortNameDesc,
       CountrySort.populationDesc: l10n.exploreSortPopulationDesc,

@@ -221,7 +221,7 @@ return $default(_that.search,_that.regions,_that.subregions,_that.language,_that
 
 
 class _ExploreQuery extends ExploreQuery {
-  const _ExploreQuery({this.search = '',  Set<String> regions = const <String>{},  Set<String> subregions = const <String>{}, this.language, this.currency, this.sort = CountrySort.nameAsc}): _regions = regions,_subregions = subregions,super._();
+  const _ExploreQuery({this.search = '',  Set<String> regions = const <String>{},  Set<String> subregions = const <String>{}, this.language, this.currency, this.sort = CountrySort.mostVisited}): _regions = regions,_subregions = subregions,super._();
   
 
 @override@JsonKey() final  String search;
