@@ -116,8 +116,27 @@ void main() {
   });
 
   group('sort (FR-EXP-08)', () {
+    test('Most visited is the default: arrivals, most first, then the '
+        'countries without a figure by name', () {
+      expect(const ExploreQuery().sort, CountrySort.mostVisited);
+      final ranked = CountrySearchIndex(
+        testCountries,
+        arrivals: const {'JPN': 30, 'FRA': 90, 'ESP': 60},
+      );
+      expect(
+        [
+          for (final country in ranked.apply(
+            const ExploreQuery(),
+            arabic: false,
+          ))
+            country.code,
+        ],
+        ['FRA', 'ESP', 'JPN', 'ATA', 'BEL', 'DEU', 'SAU', 'SEN'],
+      );
+    });
+
     test('name A to Z and Z to A in English', () {
-      expect(codes(const ExploreQuery()), [
+      expect(codes(const ExploreQuery(sort: CountrySort.nameAsc)), [
         'ATA',
         'BEL',
         'FRA',

@@ -30,6 +30,7 @@ flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # freezed, json_serializable, drift; generated files are committed
 dart run tool/fetch_snapshot.dart                          # refresh assets/data/countries_snapshot.json (3 API requests)
 dart run tool/fetch_flags.dart                             # download missing flags into assets/flags/ (no API quota; --force to redo all)
+dart run tool/fetch_tourism.dart                           # rewrite lib/features/countries/data/tourism_arrivals.dart from the World Bank (1 request, no key, no API quota)
 dart run tool/build_world_map.dart <ne_10m_admin_0_countries_sau.geojson>  # rebuild assets/data/world_map.json (needs Node.js for mapshaper; no API requests)
 dart format --set-exit-if-changed .
 flutter analyze                                            # must report zero issues (NFR-12)
@@ -97,6 +98,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 - `ensureSeeded` imports the snapshot when the DB is empty or older than the bundled snapshot (so a redeploy refreshes web visitors for free). Data age is `MAX(countries.fetched_at)`.
 - API refresh goes only through `CountryRefresher`: automatic when data is older than 7 days (attempted at most once per 7 days, `auto_refresh_at`), manual at most once per 60 minutes (`manual_refresh_at`). Overlapping calls share one refresh. Without `RC_API_KEY` the API client is null and refresh fails gracefully.
 - Manual refresh shows "can take up to a minute" through `refreshManually(onStart:)`, which runs only when a download starts (or one is already running), never for the instant "up to date" answer.
+- Explore's default sort is Most visited (FR-EXP-08, PRD 8.8): `CountrySearchIndex` takes `arrivals`, the generated `tourismArrivals` map (World Bank `ST.INT.ARVL`, each country's latest figure from 2012, skipping 2020 and 2021; 198 countries). Countries without a figure follow by name. The figures live in Dart, not an asset, so widget tests need no loader override; About credits them (CC BY 4.0).
 - Search/filter/sort run in memory in `CountrySearchIndex` (normalized once per data load). Starts-with matches rank above contains; an Arabic name also counts as starting with the text when ال is dropped. Name sort uses the app language's names.
 
 ## Core invariants

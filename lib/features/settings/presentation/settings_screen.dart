@@ -9,6 +9,7 @@ import '../../../core/widgets/battuta_logo.dart';
 import '../../../core/widgets/screen_title.dart';
 import '../../../core/widgets/up_button.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../countries/data/world_bank_tourism.dart';
 import '../domain/app_settings.dart';
 import 'about_providers.dart';
 import 'settings_controller.dart';
@@ -118,6 +119,7 @@ class _About extends ConsumerWidget {
 
   static final _restCountries = Uri.parse('https://restcountries.com');
   static final _naturalEarth = Uri.parse('https://www.naturalearthdata.com');
+  static final _worldBank = Uri.parse(worldBankArrivalsPage);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -155,6 +157,14 @@ class _About extends ConsumerWidget {
             subtitle: Text(l10n.settingsDataSourceValue),
             trailing: const Icon(Icons.open_in_new_rounded),
             onTap: () => ref.read(linkLauncherProvider)(_restCountries),
+          ),
+          // Explore's Most visited order (FR-EXP-08).
+          ListTile(
+            leading: const Icon(Icons.flight_land_rounded),
+            title: Text(l10n.settingsTourismSource),
+            subtitle: Text(l10n.settingsTourismSourceValue),
+            trailing: const Icon(Icons.open_in_new_rounded),
+            onTap: () => ref.read(linkLauncherProvider)(_worldBank),
           ),
           // The borders follow the edition chosen in D-11.
           ListTile(

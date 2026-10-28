@@ -4,6 +4,9 @@ part 'explore_query.freezed.dart';
 
 /// Sort options for Explore (FR-EXP-08).
 enum CountrySort {
+  /// By international tourist arrivals, most first; the default, so the
+  /// countries people have most likely been to come first.
+  mostVisited,
   nameAsc,
   nameDesc,
   populationDesc,
@@ -31,7 +34,7 @@ abstract class ExploreQuery with _$ExploreQuery {
 
     /// A currency code, for example EUR.
     String? currency,
-    @Default(CountrySort.nameAsc) CountrySort sort,
+    @Default(CountrySort.mostVisited) CountrySort sort,
   }) = _ExploreQuery;
 
   /// The number shown on the Filters button (FR-EXP-07).
