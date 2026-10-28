@@ -639,8 +639,9 @@ class _Neighbors extends ConsumerWidget {
 }
 
 /// A neighbor's round flag and name. Its flag opens into the header of the
-/// country it opens, as from an Explore card.
-class _Neighbor extends StatelessWidget {
+/// country it opens, as from an Explore card, and flies back on the way
+/// back.
+class _Neighbor extends StatefulWidget {
   const _Neighbor({required this.country});
 
   final Country country;
@@ -652,7 +653,38 @@ class _Neighbor extends StatelessWidget {
       _flag + 22 + MediaQuery.textScalerOf(context).scale(32);
 
   @override
+  State<_Neighbor> createState() => _NeighborState();
+}
+
+class _NeighborState extends State<_Neighbor> {
+  /// Whether the flag takes part in hero flights: only from the tap that
+  /// opens its country until it has flown back. Otherwise its tag would
+  /// match that country's Explore card or My travels row, or another
+  /// details page, and it would fly whenever this page opens or closes.
+  bool _flies = false;
+
+  Future<void> _open() async {
+    setState(() => _flies = true);
+    await context.push('/country/${widget.country.code}');
+    if (!mounted) return;
+    // The way back has started; the flag lands when this page is uncovered.
+    final returning = ModalRoute.of(context)?.secondaryAnimation;
+    if (returning == null || returning.isDismissed) {
+      setState(() => _flies = false);
+      return;
+    }
+    void landed(AnimationStatus status) {
+      if (!status.isDismissed) return;
+      returning.removeStatusListener(landed);
+      if (mounted) setState(() => _flies = false);
+    }
+
+    returning.addStatusListener(landed);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final country = widget.country;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -662,27 +694,30 @@ class _Neighbor extends StatelessWidget {
       width: 80,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => context.push('/country/${country.code}'),
+        onTap: _open,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
             children: [
               SizedBox.square(
-                dimension: _flag,
+                dimension: _Neighbor._flag,
                 child: Material(
                   color: scheme.surfaceContainerHighest,
                   clipBehavior: Clip.antiAlias,
                   shape: CircleBorder(
                     side: BorderSide(color: scheme.outlineVariant),
                   ),
-                  child: Hero(
-                    tag: flagHeroTag(country.code),
-                    flightShuttleBuilder: (_, animation, _, _, _) =>
-                        FlagFlight(country: country, progress: animation),
-                    child: FlagImage(
-                      country: country,
-                      fit: BoxFit.cover,
-                      excludeFromSemantics: true,
+                  child: HeroMode(
+                    enabled: _flies,
+                    child: Hero(
+                      tag: flagHeroTag(country.code),
+                      flightShuttleBuilder: (_, animation, _, _, _) =>
+                          FlagFlight(country: country, progress: animation),
+                      child: FlagImage(
+                        country: country,
+                        fit: BoxFit.cover,
+                        excludeFromSemantics: true,
+                      ),
                     ),
                   ),
                 ),

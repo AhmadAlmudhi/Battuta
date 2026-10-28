@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.19 |
+| Version | 1.20 |
 | Status | Ready for development |
 | Date | 28 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.20 | 28 Oct 2026 | Neighbor flags on Country details fly only when selected: the other neighbors' flags no longer fly to or from their Explore cards and My travels rows when the page opens or closes (FR-DET-03). |
 | 1.19 | 28 Oct 2026 | The tab bar on phones and medium screens floats: a rounded bar above the bottom edge with a teal highlight that slides to the selected tab. Pages scroll behind it, and their last items, empty states, snack bars, bottom sheets, and menus stay clear of it. On expanded screens the navigation rail sits on a rounded tinted panel (FR-PLT-02, section 10.1). Snack bars float. |
 | 1.18 | 28 Oct 2026 | A logo: the stamp mark beside the name, Battuta or بطوطة, drawn in the theme's colors (section 1.4). It replaces the name as text in every app bar (FR-PLT-09), on Welcome, where the mark sits among the flags with the name under it (FR-ONB-01), and in the Share my map image (FR-MAP-41). |
 | 1.17 | 27 Oct 2026 | Welcome redesigned: the app's logo lands among round flags, three short lines say what the app does, the buttons are larger, and a note says no account is needed (FR-ONB-01). On expanded screens the flags and the words sit side by side. A switch at the top changes between English and Arabic before the user starts (FR-ONB-05). |
@@ -390,7 +391,7 @@ Requirements are grouped by module. Each module lists its requirements, then the
 | --- | --- | --- |
 | FR-DET-01 | The header shows a large flag (animated in from the card, section 10.2), the common name, and the official name when it differs from the common name. Under them sit a tag with the region and subregion and **Open in Maps** (FR-DET-05). | Must |
 | FR-DET-02 | Facts, formatted for the app language: capital, population, and area as tiles, with population and area shortened (35.3M, 2.15M km²) and the exact figure under them; languages, currencies with symbols, and time zones in full, with more than two time zones shown as their range from west to east and a count. Region and subregion are in the header's tag. A missing value shows *Not available*; a missing subregion is left out of the tag. | Must |
-| FR-DET-03 | Neighboring countries appear as round flags with their names, in a row that scrolls sideways on phones and wraps onto more rows on wider screens. Selecting one opens that country, and its flag morphs into the header as from an Explore card. A country with no land borders shows *No land borders*. | Must |
+| FR-DET-03 | Neighboring countries appear as round flags with their names, in a row that scrolls sideways on phones and wraps onto more rows on wider screens. Selecting one opens that country, and its flag morphs into the header as from an Explore card, and back on Back. Only that flag flies: when Country details opens or closes, the other neighbors' flags stay in place and never fly to or from their Explore cards, My travels rows, or another country's page. A country with no land borders shows *No land borders*. | Must |
 | FR-DET-04 | If the country is not saved, show **Mark as visited** and **Add to wishlist** side by side, full width. If it is saved, show a card in its status color with the visit date or wishlist details, rating, and notes, with **Edit** and **Remove** in its corner; a wishlist country's card also offers **Mark as visited**. | Must |
 | FR-DET-05 | **Open in Maps** opens the country's map link in a new browser tab on web, or in an external app on mobile. It is disabled while offline. | Should |
 | FR-DET-06 | The route /country/:code opens directly. An unknown code shows a Country not found screen with a button back to Explore. | Must |

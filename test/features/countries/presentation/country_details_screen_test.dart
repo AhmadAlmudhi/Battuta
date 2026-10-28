@@ -1,3 +1,4 @@
+import 'package:battuta/features/countries/presentation/widgets/flag_image.dart';
 import 'package:battuta/features/countries/presentation/widgets/country_card.dart';
 import 'package:battuta/features/travels/domain/travel_entry.dart';
 import 'package:battuta/features/travels/presentation/travel_providers.dart';
@@ -136,6 +137,47 @@ void main() {
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(appBarOf('France'), findsOneWidget);
+    });
+
+    testWidgets('only the flag of the country being opened or closed flies; '
+        'the other neighbors\' flags stay put (FR-DET-03)', (tester) async {
+      // Tall enough that Explore shows France's neighbors too.
+      await pumpApp(tester, prefs: returningUser, size: _tall);
+      final flights = find.byType(FlagFlight);
+
+      /// Pumps into the middle of a page transition and its flights.
+      Future<void> midFlight() async {
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+
+      await tester.tap(
+        find.ancestor(
+          of: find.text('France'),
+          matching: find.byType(CountryCard),
+        ),
+      );
+      await midFlight();
+      expect(flights, findsOneWidget);
+      await tester.pumpAndSettle();
+
+      // Spain's flag flies into its page, and back.
+      await tester.tap(find.text('Spain'));
+      await midFlight();
+      expect(flights, findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(appBarOf('Spain'), findsOneWidget);
+      await tester.tap(find.byType(BackButton));
+      await midFlight();
+      expect(flights, findsOneWidget);
+      await tester.pumpAndSettle();
+
+      // Back to Explore, only France's flag flies to its card.
+      await tester.tap(find.byType(BackButton));
+      await midFlight();
+      expect(flights, findsOneWidget);
+      await tester.pumpAndSettle();
+      expect(flights, findsNothing);
     });
   });
 
