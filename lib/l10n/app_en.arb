@@ -70,6 +70,26 @@
   },
   "exploreSort": "Sort",
   "exploreSortMostVisited": "Most visited",
+  "exploreSelect": "Select countries",
+  "exploreStopSelecting": "Stop selecting",
+  "exploreSelectedCount": "{count, plural, =0{Tap the countries you've visited} =1{1 selected} other{{count} selected}}",
+  "@exploreSelectedCount": {
+    "description": "Quick select's bar (FR-EXP-13).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exploreMarkVisited": "Mark as visited",
+  "exploreMarkedVisited": "{count, plural, =1{1 country marked as visited.} other{{count} countries marked as visited.}}",
+  "@exploreMarkedVisited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "exploreSortNameAsc": "Name, A to Z",
   "exploreSortNameDesc": "Name, Z to A",
   "exploreSortPopulationDesc": "Population, high to low",

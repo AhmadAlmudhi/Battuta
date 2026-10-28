@@ -22,6 +22,13 @@ abstract interface class TravelRepository {
     String notes = '',
   });
 
+  /// Saves several countries as Visited at once, in one transaction, for
+  /// Explore's quick select (FR-EXP-13). A wishlist entry keeps its notes
+  /// (FR-TRV-03); countries already visited stay as they are. Returns each
+  /// changed country's entry from before, or null where it wasn't saved, so
+  /// Undo can put it back.
+  Future<Map<String, TravelEntry?>> markVisited(Iterable<String> countryCodes);
+
   /// Saves the country on the Wishlist (FR-TRV-04).
   Future<void> saveWishlist(
     String countryCode, {

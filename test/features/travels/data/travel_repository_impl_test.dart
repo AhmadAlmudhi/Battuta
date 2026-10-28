@@ -22,6 +22,35 @@ void main() {
     db.travelEntries,
   )..where((t) => t.countryCode.equals(code))).getSingle();
 
+  test(
+    'markVisited saves several countries in one go, keeps wishlist '
+    'notes, skips visited ones, and returns what was there (FR-EXP-13)',
+    () async {
+      await repo.saveVisit('JPN', rating: 5, notes: 'Kyoto');
+      await repo.saveWishlist('ITA', notes: 'Rome in spring');
+      await repo.saveVisit('ESP');
+      await repo.remove('ESP');
+      now = now.add(const Duration(minutes: 1));
+
+      final before = await repo.markVisited(['FRA', 'ITA', 'JPN', 'ESP']);
+
+      expect(before.keys, unorderedEquals(['FRA', 'ITA', 'ESP']));
+      expect(before['FRA'], isNull);
+      expect(before['ESP'], isNull); // Deleted counts as not saved.
+      expect(before['ITA']?.status, TravelStatus.wishlist);
+      final italy = await row('ITA');
+      expect(italy.status, TravelStatus.visited);
+      expect(italy.notes, 'Rome in spring');
+      expect(italy.priority, isNull);
+      expect((await row('FRA')).status, TravelStatus.visited);
+      expect((await row('ESP')).isDeleted, isFalse);
+      // Japan was already visited, so it's untouched.
+      final japan = await row('JPN');
+      expect(japan.rating, 5);
+      expect(japan.updatedAt, lessThan(now.millisecondsSinceEpoch));
+    },
+  );
+
   test('saveVisit stores the visit with an ISO date (PRD 8.3)', () async {
     await repo.saveVisit(
       'FRA',

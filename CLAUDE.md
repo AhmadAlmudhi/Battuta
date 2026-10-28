@@ -99,6 +99,7 @@ Stack: `flutter_riverpod`, `go_router`, `dio`, `freezed` + `json_serializable`, 
 - API refresh goes only through `CountryRefresher`: automatic when data is older than 7 days (attempted at most once per 7 days, `auto_refresh_at`), manual at most once per 60 minutes (`manual_refresh_at`). Overlapping calls share one refresh. Without `RC_API_KEY` the API client is null and refresh fails gracefully.
 - Manual refresh shows "can take up to a minute" through `refreshManually(onStart:)`, which runs only when a download starts (or one is already running), never for the instant "up to date" answer.
 - Explore's default sort is Most visited (FR-EXP-08, PRD 8.8): `CountrySearchIndex` takes `arrivals`, the generated `tourismArrivals` map (World Bank `ST.INT.ARVL`, each country's latest figure from 2012, skipping 2020 and 2021; 198 countries). Countries without a figure follow by name. The figures live in Dart, not an asset, so widget tests need no loader override; About credits them (CC BY 4.0).
+- Quick select on Explore (FR-EXP-13): `_ExploreScreenState._selected` (null when not selecting) drives `CountryGrid(selected:)` and `CountryCard(selected:)`; while selecting, taps toggle, visited cards get `onTap: null`, and Explore's `MediaQuery` bottom padding grows by the selection bar so the grid clears it. `markVisitedWithUndo` calls `TravelRepository.markVisited`, one read and one batch (web pays a worker round trip per call), and Undo removes or restores each country from the returned entries.
 - Search/filter/sort run in memory in `CountrySearchIndex` (normalized once per data load). Starts-with matches rank above contains; an Arabic name also counts as starting with the text when ال is dropped. Name sort uses the app language's names.
 
 ## Core invariants
@@ -205,6 +206,7 @@ Call `usePathUrlStrategy()` before `runApp` (no `#` in URLs). Every route must s
 - Chrome DevTools offline emulation (`Network.emulateNetworkConditions`) ends when the DevTools session disconnects, so do offline checks within one connected session.
 - To check web persistence, restart the browser, not just the page: drift's shared worker keeps the database in memory across reloads in one session, which hides unsaved writes. Launch headless Chrome with a fixed `--user-data-dir`, save, close it, start it again with the same directory, and check the data.
 - Headless Chrome has no WebGL by default, and Flutter's CPU fallback doesn't paint images. For screenshots, launch Chrome with `--use-angle=swiftshader --enable-unsafe-swiftshader`.
+- A tab opened over the DevTools protocol (`/json/new`) starts in the background, where Chrome pauses animation frames: Flutter then doesn't build or lay out between scripted inputs, so clicks hit the previous state and screenshots show half-finished animations. Send `Page.bringToFront` first.
 - The API key is visible in the browser; it is restricted by allowed origins (`localhost`, `battuta-travel.web.app`, `battuta-travel.firebaseapp.com`).
 
 ## CI and deploys
