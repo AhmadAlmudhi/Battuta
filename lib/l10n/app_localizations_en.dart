@@ -163,6 +163,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exploreSortMostVisited => 'Most visited';
 
   @override
+  String get exploreSelect => 'Select countries';
+
+  @override
+  String get exploreStopSelecting => 'Stop selecting';
+
+  @override
+  String exploreSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      one: '1 selected',
+      zero: 'Tap the countries you\'ve visited',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exploreMarkVisited => 'Mark as visited';
+
+  @override
+  String exploreMarkedVisited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count countries marked as visited.',
+      one: '1 country marked as visited.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get exploreSortNameAsc => 'Name, A to Z';
 
   @override

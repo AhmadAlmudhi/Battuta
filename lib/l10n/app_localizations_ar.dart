@@ -168,6 +168,44 @@ class AppLocalizationsAr extends AppLocalizations {
   String get exploreSortMostVisited => 'الأكثر زيارة';
 
   @override
+  String get exploreSelect => 'تحديد دول';
+
+  @override
+  String get exploreStopSelecting => 'إنهاء التحديد';
+
+  @override
+  String exploreSelectedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count دولة محددة',
+      many: '$count دولة محددة',
+      few: '$count دول محددة',
+      two: 'دولتان محددتان',
+      one: 'دولة واحدة محددة',
+      zero: 'اضغط على الدول التي زرتها',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exploreMarkVisited => 'سجّل زياراتك';
+
+  @override
+  String exploreMarkedVisited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'سُجّلت زيارة $count دولة.',
+      many: 'سُجّلت زيارة $count دولة.',
+      few: 'سُجّلت زيارة $count دول.',
+      two: 'سُجّلت زيارة دولتين.',
+      one: 'سُجّلت زيارة دولة واحدة.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get exploreSortNameAsc => 'الاسم، من أ إلى ي';
 
   @override

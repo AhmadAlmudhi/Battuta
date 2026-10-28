@@ -362,6 +362,36 @@ abstract class AppLocalizations {
   /// **'Most visited'**
   String get exploreSortMostVisited;
 
+  /// No description provided for @exploreSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select countries'**
+  String get exploreSelect;
+
+  /// No description provided for @exploreStopSelecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop selecting'**
+  String get exploreStopSelecting;
+
+  /// Quick select's bar (FR-EXP-13).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Tap the countries you\'ve visited} =1{1 selected} other{{count} selected}}'**
+  String exploreSelectedCount(int count);
+
+  /// No description provided for @exploreMarkVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as visited'**
+  String get exploreMarkVisited;
+
+  /// No description provided for @exploreMarkedVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 country marked as visited.} other{{count} countries marked as visited.}}'**
+  String exploreMarkedVisited(int count);
+
   /// No description provided for @exploreSortNameAsc.
   ///
   /// In en, this message translates to:

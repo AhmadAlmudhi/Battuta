@@ -16,17 +16,27 @@ String flagHeroTag(String code) => 'flag-$code';
 /// An Explore card (FR-EXP-01, FR-EXP-02): the flag filling a circle, the
 /// name and region over its lower part on a dark gradient, and a badge on
 /// its edge for saved countries. On web, hovering lifts it.
+///
+/// In quick select (FR-EXP-13) the badge shows whether the card is picked,
+/// and a picked card shrinks a little inside a teal ring. A visited country
+/// can't be picked, so it fades and keeps its badge.
 class CountryCard extends StatefulWidget {
   const CountryCard({
     super.key,
     required this.country,
     required this.status,
     required this.onTap,
+    this.selected,
+    this.onLongPress,
   });
 
   final Country country;
   final TravelStatus? status;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+
+  /// Whether the card is picked in quick select; null outside it.
+  final bool? selected;
+  final VoidCallback? onLongPress;
 
   @override
   State<CountryCard> createState() => _CountryCardState();
@@ -42,96 +52,154 @@ class _CountryCardState extends State<CountryCard> {
     final scheme = theme.colorScheme;
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
     final country = widget.country;
+    final selecting = widget.selected != null;
+    final picked = widget.selected ?? false;
+    final visitedWhileSelecting =
+        selecting && widget.status == TravelStatus.visited;
+    final still = MediaQuery.disableAnimationsOf(context);
 
     return MergeSemantics(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final diameter = math.min(
-            constraints.maxWidth,
-            constraints.maxHeight,
-          );
-          // Where the circle's edge crosses its top end diagonal, for the
-          // badge.
-          final corner = diameter / 2 * (1 - math.sqrt1_2);
-          return Center(
-            child: AnimatedScale(
-              scale: _hovered && !MediaQuery.disableAnimationsOf(context)
-                  ? 1.03
-                  : 1,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              child: SizedBox.square(
-                dimension: diameter,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned.fill(
-                      child: Material(
-                        color: scheme.surfaceContainerHighest,
-                        elevation: _hovered ? 6 : 1,
-                        clipBehavior: Clip.antiAlias,
-                        shape: CircleBorder(
-                          side: BorderSide(
-                            color: _hovered
-                                ? scheme.primary
-                                : scheme.outlineVariant,
-                            width: _hovered ? 2 : 1,
+      child: Semantics(
+        checked: selecting && !visitedWhileSelecting ? picked : null,
+        enabled: visitedWhileSelecting ? false : null,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final diameter = math.min(
+              constraints.maxWidth,
+              constraints.maxHeight,
+            );
+            // Where the circle's edge crosses its top end diagonal, for the
+            // badge.
+            final corner = diameter / 2 * (1 - math.sqrt1_2);
+            return Center(
+              child: AnimatedScale(
+                scale: picked
+                    ? 0.9
+                    : _hovered && !still
+                    ? 1.03
+                    : 1,
+                duration: still
+                    ? Duration.zero
+                    : const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                child: AnimatedOpacity(
+                  opacity: visitedWhileSelecting ? 0.4 : 1,
+                  duration: still
+                      ? Duration.zero
+                      : const Duration(milliseconds: 200),
+                  child: SizedBox.square(
+                    dimension: diameter,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned.fill(
+                          child: Material(
+                            color: scheme.surfaceContainerHighest,
+                            elevation: _hovered ? 6 : 1,
+                            clipBehavior: Clip.antiAlias,
+                            shape: CircleBorder(
+                              side: BorderSide(
+                                color: picked || _hovered
+                                    ? scheme.primary
+                                    : scheme.outlineVariant,
+                                width: picked
+                                    ? 4
+                                    : _hovered
+                                    ? 2
+                                    : 1,
+                              ),
+                            ),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Hero(
+                                  tag: flagHeroTag(country.code),
+                                  // Both ways, the circle opens into the
+                                  // flag's framed shape as it flies, or closes
+                                  // back into it.
+                                  flightShuttleBuilder:
+                                      (_, animation, _, _, _) => FlagFlight(
+                                        country: country,
+                                        progress: animation,
+                                      ),
+                                  child: FlagImage(
+                                    country: country,
+                                    fit: BoxFit.cover,
+                                    excludeFromSemantics: true,
+                                  ),
+                                ),
+                                Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: _Caption(
+                                    name: country.name(arabic: arabic),
+                                    region: regionName(l10n, country.region),
+                                    diameter: diameter,
+                                  ),
+                                ),
+                                // Above the flag, so the ripple shows over it.
+                                Material(
+                                  type: MaterialType.transparency,
+                                  child: InkWell(
+                                    customBorder: const CircleBorder(),
+                                    onTap: widget.onTap,
+                                    onLongPress: widget.onLongPress,
+                                    onHover: (hovered) =>
+                                        setState(() => _hovered = hovered),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Hero(
-                              tag: flagHeroTag(country.code),
-                              // Both ways, the circle opens into the
-                              // flag's framed shape as it flies, or closes
-                              // back into it.
-                              flightShuttleBuilder: (_, animation, _, _, _) =>
-                                  FlagFlight(
-                                    country: country,
-                                    progress: animation,
-                                  ),
-                              child: FlagImage(
-                                country: country,
-                                fit: BoxFit.cover,
-                                excludeFromSemantics: true,
-                              ),
-                            ),
-                            Align(
-                              alignment: Alignment.bottomCenter,
-                              child: _Caption(
-                                name: country.name(arabic: arabic),
-                                region: regionName(l10n, country.region),
-                                diameter: diameter,
-                              ),
-                            ),
-                            // Above the flag, so the ripple shows over it.
-                            Material(
-                              type: MaterialType.transparency,
-                              child: InkWell(
-                                customBorder: const CircleBorder(),
-                                onTap: widget.onTap,
-                                onHover: (hovered) =>
-                                    setState(() => _hovered = hovered),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                        if (selecting && !visitedWhileSelecting)
+                          PositionedDirectional(
+                            top: corner - _StatusBadge.size / 2,
+                            end: corner - _StatusBadge.size / 2,
+                            child: _PickBadge(picked: picked),
+                          )
+                        else if (widget.status case final status?)
+                          PositionedDirectional(
+                            top: corner - _StatusBadge.size / 2,
+                            end: corner - _StatusBadge.size / 2,
+                            child: _StatusBadge(status: status),
+                          ),
+                      ],
                     ),
-                    if (widget.status case final status?)
-                      PositionedDirectional(
-                        top: corner - _StatusBadge.size / 2,
-                        end: corner - _StatusBadge.size / 2,
-                        child: _StatusBadge(status: status),
-                      ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
+    );
+  }
+}
+
+/// Quick select's badge: a teal check when the card is picked, an empty
+/// ring when it isn't (FR-EXP-13).
+class _PickBadge extends StatelessWidget {
+  const _PickBadge({required this.picked});
+
+  final bool picked;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: _StatusBadge.size,
+      height: _StatusBadge.size,
+      decoration: BoxDecoration(
+        color: picked ? scheme.primary : scheme.surface.withValues(alpha: 0.9),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: picked ? scheme.surface : scheme.outline,
+          width: 2,
+        ),
+      ),
+      child: picked
+          ? Icon(Icons.check_rounded, size: 18, color: scheme.onPrimary)
+          : null,
     );
   }
 }

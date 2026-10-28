@@ -24,12 +24,24 @@ class CountryGrid extends StatelessWidget {
     required this.countries,
     required this.statuses,
     required this.onOpen,
+    this.selected,
+    this.onToggle,
+    this.onLongPress,
     this.playEntrance = false,
   });
 
   final List<Country> countries;
   final Map<String, TravelStatus> statuses;
   final ValueChanged<Country> onOpen;
+
+  /// The countries picked in quick select, or null outside it (FR-EXP-13).
+  /// While selecting, a tap picks or unpicks a card instead of opening it,
+  /// and visited countries can't be picked.
+  final Set<String>? selected;
+  final ValueChanged<Country>? onToggle;
+
+  /// Starts quick select from a card on touch screens.
+  final ValueChanged<Country>? onLongPress;
 
   /// Fade the first visible cards in on the first Explore load (PRD 10.2).
   final bool playEntrance;
@@ -67,7 +79,15 @@ class CountryGrid extends StatelessWidget {
               child: CountryCard(
                 country: country,
                 status: statuses[country.code],
-                onTap: () => onOpen(country),
+                selected: selected?.contains(country.code),
+                onTap: switch (selected) {
+                  null => () => onOpen(country),
+                  _ when statuses[country.code] == TravelStatus.visited => null,
+                  _ => () => onToggle?.call(country),
+                },
+                onLongPress: onLongPress == null
+                    ? null
+                    : () => onLongPress!(country),
               ),
             );
           },

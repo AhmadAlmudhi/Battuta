@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.21 |
+| Version | 1.22 |
 | Status | Ready for development |
 | Date | 28 October 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.22 | 28 Oct 2026 | Quick select on Explore: pick several countries and mark them all as visited at once, with one Undo (FR-EXP-13, AC-EXP-07). |
 | 1.21 | 28 Oct 2026 | Explore's default order is Most visited: countries ranked by international tourist arrivals, so the countries people have most likely been to come first (FR-EXP-08). The figures come from the World Bank and UN Tourism, bundled with the app (section 8.8), and About credits them (FR-SET-04). |
 | 1.20 | 28 Oct 2026 | Neighbor flags on Country details fly only when selected: the other neighbors' flags no longer fly to or from their Explore cards and My travels rows when the page opens or closes (FR-DET-03). |
 | 1.19 | 28 Oct 2026 | The tab bar on phones and medium screens floats: a rounded bar above the bottom edge with a teal highlight that slides to the selected tab. Pages scroll behind it, and their last items, empty states, snack bars, bottom sheets, and menus stay clear of it. On expanded screens the navigation rail sits on a rounded tinted panel (FR-PLT-02, section 10.1). Snack bars float. |
@@ -377,6 +378,7 @@ Requirements are grouped by module. Each module lists its requirements, then the
 | FR-EXP-10 | When the device is offline, a non-blocking banner reads: You're offline. Showing saved data. | Must |
 | FR-EXP-11 | The user can refresh country data with pull to refresh on touch screens, or **Refresh data** in the Explore menu on web. Manual refresh calls the API at most once per hour (section 8.2). While the download runs, a message with a progress indicator reads: Updating country data. This can take up to a minute. The outcome replaces it. | Should |
 | FR-EXP-12 | Loading, empty, and error states follow section 10.3. | Must |
+| FR-EXP-13 | **Quick select:** a Select button in Explore's toolbar, or a long press on a card, starts selecting. Each tap then picks or unpicks a card instead of opening it; countries already visited can't be picked. Picks stay while the search, filters, and sort change. A bar above the tab bar shows how many are picked and offers **Mark as visited**, which saves them all at once (a wishlist entry keeps its notes) and shows an Undo snack bar for 4 seconds that puts every country back as it was. The bar's ✕, the Select button, Esc, and Back stop selecting. | Should |
 
 | ID | Given | When | Then |
 | --- | --- | --- | --- |
@@ -386,6 +388,7 @@ Requirements are grouped by module. Each module lists its requirements, then the
 | AC-EXP-04 | the selected filters match no country | the grid updates | the empty state appears with a Clear filters button. |
 | AC-EXP-05 | a fresh install of a mobile app with no network | Explore opens | all countries from the bundled data are shown with the offline banner. |
 | AC-EXP-06 | filters are applied on Explore | the user opens Stats and returns | the same filters are still applied. |
+| AC-EXP-07 | Japan is on the wishlist with notes | the user selects France and Japan with quick select and chooses Mark as visited | both are Visited, Japan keeps its notes, and Undo returns France to unsaved and Japan to the wishlist. |
 
 ### 6.3 Country details (DET)
 
@@ -1041,6 +1044,7 @@ Explore's Most visited order (FR-EXP-08) ranks countries by international touris
 - Grouped content on Country details, My travels, and Stats, including the world map card, sits on flat panels: a tinted surface with a hairline edge and 16 dp corners, without a shadow. Facts and highlights are tiles on these panels, each led by an icon in a tinted circle.
 - Country details on expanded screens has two columns: the header and save actions on the start side, which stay in place, and the facts and neighbors beside them. On phones and medium screens it is one column with the header across the full width.
 - The visit and wishlist forms open with the country's round flag, the title, and the line Everything here is optional, with a ✕ to close. Fields scroll; a full-width Save stays below them and above the on-screen keyboard. Notes use a filled field whose character count appears from 400 characters. Sections that can be emptied, the visit date and the rating, have their Clear action at the end of their title.
+- In quick select, each card shows an empty ring in its badge spot; a picked card shrinks a little inside a 4 dp Lagoon Teal ring with a teal check badge, and a visited card fades to 40% with its visited badge. The selection bar floats above the tab bar like it: a pill with ✕, the count, and a filled Mark as visited button.
 - Explore cards are circles filled with the flag, cropped to fit. The name and region sit over the lower part in white, on a black gradient that is clear above the text, 55% opaque where the text starts, which keeps white text readable over white flags, and 70% at the bottom. The caption is the same height on every card, with room for a two-line name, so names and regions line up across a row.
 - Flags on Country details keep their own shape and are framed like printed cards: rounded corners, a hairline edge so white flags stand out, and a soft shadow. A flag flying from an Explore card or a My travels row to Country details morphs from the circle into that frame, and back.
 - My travels rows sit in rounded panels, one per group, separated by hairlines. Each row shows the round flag, the name, the rating stars (Visited) or a priority tag (Wishlist), the region with the visit date or target year, and the first line of the notes. Notes are shown in their own writing direction, lined up with the screen's start edge.

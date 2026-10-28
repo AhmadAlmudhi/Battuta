@@ -63,6 +63,47 @@ class TravelRepositoryImpl implements TravelRepository {
     ),
   );
 
+  // One read and one batch, however many countries: on web each database
+  // call is a round trip to the worker.
+  @override
+  Future<Map<String, TravelEntry?>> markVisited(
+    Iterable<String> countryCodes,
+  ) => _db.transaction(() async {
+    final codes = countryCodes.toSet();
+    final rows = await (_db.select(
+      _entries,
+    )..where((t) => t.countryCode.isIn(codes))).get();
+    final existing = {for (final row in rows) row.countryCode: row};
+    final now = _millis();
+    final before = <String, TravelEntry?>{};
+    final changes = <TravelEntriesCompanion>[];
+    for (final code in codes) {
+      final row = existing[code];
+      final saved = row == null || row.isDeleted ? null : _toEntry(row);
+      if (saved?.status == TravelStatus.visited) continue;
+      before[code] = saved;
+      changes.add(
+        TravelEntriesCompanion(
+          countryCode: Value(code),
+          status: const Value(TravelStatus.visited),
+          visitedOn: const Value(null),
+          rating: const Value(null),
+          priority: const Value(null),
+          targetYear: const Value(null),
+          notes: Value(saved?.notes ?? ''),
+          // As in _upsert: saving after a deletion counts as a new entry.
+          createdAt: Value(saved == null ? now : row!.createdAt),
+          updatedAt: Value(now),
+          isDeleted: const Value(false),
+        ),
+      );
+    }
+    await _db.batch(
+      (batch) => batch.insertAllOnConflictUpdate(_entries, changes),
+    );
+    return before;
+  });
+
   @override
   Future<void> saveWishlist(
     String countryCode, {
