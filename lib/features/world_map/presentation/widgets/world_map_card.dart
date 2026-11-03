@@ -107,7 +107,10 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
   /// shows no hover highlight until the pointer leaves it, so it doesn't
   /// look selected (FR-MAP-14).
   String? _hoverHidden;
-  Offset? _pointer;
+
+  /// Where the pointer is over the map, for the hover label. Moving within
+  /// a country only moves the label, so it doesn't rebuild the card.
+  final _pointer = ValueNotifier<Offset?>(null);
 
   /// The view at rest, or where the current flight started.
   MapView _view = MapView.world;
@@ -173,6 +176,7 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
     _replay.dispose();
     _mapFocus.dispose();
     _cardFocus.dispose();
+    _pointer.dispose();
     super.dispose();
   }
 
@@ -841,24 +845,33 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                     ),
                   ),
                 ),
-                CustomPaint(
-                  size: size,
-                  painter: WorldMapPainter(
-                    geometry: geometry,
-                    statuses: statuses,
-                    colors: colors,
-                    view: view,
-                    selected: _selected,
-                    hovered: _hovered,
-                    motion: _currentMotion(geometry),
-                    outside: faded == null
-                        ? null
-                        : geometry.outside(faded, regions),
-                    fade: _currentFade,
+                // Its own layer, so the moving hover label doesn't repaint
+                // every country.
+                RepaintBoundary(
+                  child: CustomPaint(
+                    size: size,
+                    painter: WorldMapPainter(
+                      geometry: geometry,
+                      statuses: statuses,
+                      colors: colors,
+                      view: view,
+                      selected: _selected,
+                      hovered: _hovered,
+                      motion: _currentMotion(geometry),
+                      outside: faded == null
+                          ? null
+                          : geometry.outside(faded, regions),
+                      fade: _currentFade,
+                    ),
                   ),
                 ),
-                if ((_hovered, _pointer) case (final code?, final pointer?))
-                  _HoverLabel(code: code, pointer: pointer, map: size),
+                if (_hovered case final code?)
+                  ValueListenableBuilder(
+                    valueListenable: _pointer,
+                    builder: (context, pointer, _) => pointer == null
+                        ? const SizedBox.shrink()
+                        : _HoverLabel(code: code, pointer: pointer, map: size),
+                  ),
               ],
             );
           },
@@ -913,17 +926,31 @@ class _WorldMapCardState extends ConsumerState<WorldMapCard>
                           cursor: _hovered == null
                               ? MouseCursor.defer
                               : SystemMouseCursors.click,
-                          onHover: (event) => setState(() {
+                          onHover: (event) {
                             final hit = _hit(event.localPosition);
-                            if (hit != _hoverHidden) _hoverHidden = null;
-                            _hovered = hit == _hoverHidden ? null : hit;
-                            _pointer = event.localPosition;
-                          }),
-                          onExit: (_) => setState(() {
-                            _hovered = null;
-                            _hoverHidden = null;
-                            _pointer = null;
-                          }),
+                            final hidden = hit == _hoverHidden
+                                ? _hoverHidden
+                                : null;
+                            final hovered = hit == hidden ? null : hit;
+                            _pointer.value = event.localPosition;
+                            // Only a new country changes the highlight and
+                            // the cursor; within one, the label just moves.
+                            if (hidden != _hoverHidden || hovered != _hovered) {
+                              setState(() {
+                                _hoverHidden = hidden;
+                                _hovered = hovered;
+                              });
+                            }
+                          },
+                          onExit: (_) {
+                            _pointer.value = null;
+                            if (_hovered != null || _hoverHidden != null) {
+                              setState(() {
+                                _hovered = null;
+                                _hoverHidden = null;
+                              });
+                            }
+                          },
                           child: ClipRect(key: WorldMapCard.mapKey, child: map),
                         ),
                       ),

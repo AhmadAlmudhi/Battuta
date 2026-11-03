@@ -33,6 +33,31 @@
 
   <title>Battuta</title>
   <link rel="manifest" href="manifest.json">
+
+  <!--
+    Draws at most 2 pixels per CSS pixel (PRD D-13). On sharper screens,
+    most phones at 2.6x to 3.5x, Flutter would otherwise paint up to three
+    times as many pixels each frame, which browsers without a fast GPU can't
+    keep up with; the browser scales the canvas up instead. Flutter reads
+    window.devicePixelRatio when it starts, so this runs first.
+  -->
+  <script>
+    (function () {
+      var max = 2;
+      var descriptor =
+        Object.getOwnPropertyDescriptor(window, 'devicePixelRatio') ||
+        Object.getOwnPropertyDescriptor(Window.prototype, 'devicePixelRatio');
+      if (!descriptor || !descriptor.get || !descriptor.configurable) return;
+      var read = descriptor.get;
+      Object.defineProperty(window, 'devicePixelRatio', {
+        configurable: true,
+        enumerable: descriptor.enumerable,
+        get: function () {
+          return Math.min(read.call(window), max);
+        },
+      });
+    })();
+  </script>
 </head>
 <body>
   <!--
