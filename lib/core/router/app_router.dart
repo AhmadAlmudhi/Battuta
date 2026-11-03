@@ -14,6 +14,7 @@ import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/stats/presentation/stats_screen.dart';
 import '../../features/travels/presentation/travels_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../../web_shader_warm_up.dart';
 import '../layout/app_shell.dart';
 import '../widgets/app_title.dart';
 import '../widgets/message_view.dart';
@@ -54,8 +55,9 @@ final routerProvider = Provider<GoRouter>((ref) {
             WelcomeScreen(from: state.uri.queryParameters['from']),
       ),
       StatefulShellRoute(
+        // The warm-up draws beneath the tabs, once per visit (D-14).
         builder: (context, state, navigationShell) =>
-            AppShell(navigationShell: navigationShell),
+            WebShaderWarmUp(child: AppShell(navigationShell: navigationShell)),
         navigatorContainerBuilder: (context, navigationShell, children) =>
             BranchStack(
               currentIndex: navigationShell.currentIndex,
