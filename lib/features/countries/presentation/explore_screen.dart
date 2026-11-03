@@ -163,7 +163,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final statuses = ref.watch(travelStatusesProvider).valueOrNull ?? const {};
     final online = ref.watch(isOnlineProvider).valueOrNull ?? true;
     final selected = _selected;
-    final media = MediaQuery.of(context);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return ScreenTitle(
       screen: l10n.navExplore,
@@ -206,17 +206,10 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     children: [
                       // While selecting, the grid leaves room for the bar.
                       Positioned.fill(
-                        child: MediaQuery(
-                          data: selected == null
-                              ? media
-                              : media.copyWith(
-                                  padding: media.padding.copyWith(
-                                    bottom:
-                                        media.padding.bottom +
-                                        _SelectionBar.height +
-                                        12,
-                                  ),
-                                ),
+                        child: _ExtraBottomPadding(
+                          extra: selected == null
+                              ? 0
+                              : _SelectionBar.height + 12,
                           child: results.when(
                             loading: () => const _SkeletonGrid(),
                             error: (_, _) => MessageView(
@@ -266,7 +259,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           end: 16,
                           // Above the floating tab bar, which the padding
                           // includes.
-                          bottom: media.padding.bottom + 12,
+                          bottom: bottomInset + 12,
                           child: _SelectionBar(
                             count: selected.length,
                             onClose: _stopSelecting,
@@ -392,6 +385,29 @@ class _Toolbar extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Adds [extra] to the bottom padding [child] sees, for quick select's bar.
+///
+/// Only this widget reads the whole MediaQuery, so a change such as the
+/// on-screen keyboard opening rebuilds it, not Explore: [child] is built once
+/// by Explore, and only what depends on the changed values rebuilds.
+class _ExtraBottomPadding extends StatelessWidget {
+  const _ExtraBottomPadding({required this.extra, required this.child});
+
+  final double extra;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final media = MediaQuery.of(context);
+    return MediaQuery(
+      data: media.copyWith(
+        padding: media.padding.copyWith(bottom: media.padding.bottom + extra),
+      ),
+      child: child,
     );
   }
 }

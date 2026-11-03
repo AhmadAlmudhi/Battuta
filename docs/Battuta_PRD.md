@@ -6,9 +6,9 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.22 |
+| Version | 1.23 |
 | Status | Ready for development |
-| Date | 28 October 2026 |
+| Date | 4 November 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
 | Also built and tested | Android and iOS (not published in 1.0) |
 | Technology | Flutter, Firebase |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.23 | 4 Nov 2026 | Smoother on devices without a fast GPU. The web app draws at most 2 pixels per CSS pixel (D-13); hovering over the world map moves only the country's label instead of repainting the map; and Explore no longer rebuilds when the screen's size or the keyboard changes. A performance test level is added (section 12.1). |
 | 1.22 | 28 Oct 2026 | Quick select on Explore: pick several countries and mark them all as visited at once, with one Undo (FR-EXP-13, AC-EXP-07). |
 | 1.21 | 28 Oct 2026 | Explore's default order is Most visited: countries ranked by international tourist arrivals, so the countries people have most likely been to come first (FR-EXP-08). The figures come from the World Bank and UN Tourism, bundled with the app (section 8.8), and About credits them (FR-SET-04). |
 | 1.20 | 28 Oct 2026 | Neighbor flags on Country details fly only when selected: the other neighbors' flags no longer fly to or from their Explore cards and My travels rows when the page opens or closes (FR-DET-03). |
@@ -246,6 +247,7 @@ Release 1.0 is accepted when all of the following are true:
 | D-10 | The web app is served from the free Firebase Hosting address, battuta-travel.web.app. | No domain cost or DNS setup. A custom domain can be added later without code changes. |
 | D-11 | The world map is drawn by the app from Natural Earth's 1:10m Saudi point-of-view edition, bundled with each build (section 8.7). | No map service, API key, or network use, so the map works offline and stays free. This edition includes every small country tested, makes the smallest complete map file, and draws disputed borders as recognized in the app's main region. Somaliland and Northern Cyprus are part of Somalia and Cyprus, which matches the dataset (section 8.1). Western Sahara is drawn as part of Morocco, so it has no shape of its own, though it still counts in Stats when marked as visited. Israel's area is drawn as Palestine (D-12). |
 | D-12 | The app leaves out Israel. It isn't in the country data, Explore, Stats, or any country's neighbors, and the map draws its area as Palestine. | Follows the map's point of view (D-11). The parser skips Israel the way it skips records without ISO codes (section 8.1), so neither the bundled data nor a refresh brings it back, and data saved before this decision loses it at the next launch. The Israeli new shekel, which the data lists among Palestine's currencies, is left out too, so no screen or filter shows it. |
+| D-13 | The web app draws at most 2 device pixels per CSS pixel, on every device. On sharper screens, most phones at 2.6× to 3.5×, the browser scales the canvas up. | Painting cost grows with pixels. Measured in Chrome without a GPU, scrolling Explore on a 2.6× to 3× phone screen had 24 to 42% of frames late (40 to 48 fps); capped at 2×, 0 to 2% (58 to 60 fps). Text on screens sharper than 2× is slightly softer. |
 
 ## 4. Users
 
@@ -1285,6 +1287,7 @@ flowchart LR
 | Map data | The committed map file against the snapshot | Every dataset country has a shape or a dot except Antarctica and Western Sahara; no shape is coded -99; overseas parts belong to their own countries, so Réunion isn't part of France |
 | Widget | Screens | Explore loading, empty, error, and data states; visit form validation; Arabic layout mirrors; compact and expanded layouts; map colors by status in both themes; the map's tap card actions; zoom by buttons, pinch, double tap, keys, and Ctrl with the wheel; the page scrolling at 1×; region chips, fading, and region bars; the reveal's order, once per session, reduced motion, and tap to skip; the spread from the tap point and the stamp on the tap card; the replay's order, years, and Skip; the shared image's size, file name, theme, and language |
 | Manual | End-to-end flows | Sync between a browser and a phone; airplane mode on mobile; keyboard-only use on web; a full Arabic and dark-mode walkthrough; map smoothness on a mid-range phone, in a phone browser, and in desktop Chrome, Safari, and Firefox |
+| Performance | Frame pacing on web | Scripted sessions in Chrome, timing every frame: scrolling Explore, opening a country and going back, opening Stats, and hovering over the map. Run with the GPU off (software rendering, the worst case), at 4× CPU slowdown, and at phone pixel densities. Target: fewer than 5% of frames over 25 ms while scrolling Explore or hovering over the map. Before a release that changes drawing, also check on a real mid-range Android phone through Chrome remote debugging. |
 
 > **Note:** The world map is tested through its logic and widgets, not golden images, because Flutter renders golden images slightly differently on macOS and on the Linux CI runner.
 

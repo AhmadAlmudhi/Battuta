@@ -9,6 +9,7 @@ import 'package:battuta/features/world_map/presentation/world_map_colors.dart';
 import 'package:battuta/features/world_map/presentation/world_map_painter.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -339,6 +340,43 @@ void main() {
     await mouse.moveTo(onMap(tester, ocean));
     await tester.pump();
     expect(painter(tester).hovered, isNull);
+  });
+
+  testWidgets('moving the pointer within a country moves its name without '
+      'repainting the map', (tester) async {
+    await openStats(tester, size: desktop);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: Offset.zero);
+    await mouse.moveTo(onMap(tester, spain));
+    await tester.pump();
+
+    final label = find.descendant(
+      of: find.byKey(WorldMapCard.mapKey),
+      matching: find.text('Spain'),
+    );
+    final statusLayer = tester.renderObject<RenderRepaintBoundary>(
+      find
+          .ancestor(
+            of: find.byWidgetPredicate(
+              (widget) =>
+                  widget is CustomPaint && widget.painter is WorldMapPainter,
+            ),
+            matching: find.byType(RepaintBoundary),
+          )
+          .first,
+    );
+    // A repaint records a new picture; a reused layer keeps the old one.
+    Layer? picture() => statusLayer.debugLayer?.firstChild;
+    final before = (tester.getTopLeft(label), picture());
+    expect(before.$2, isNotNull);
+
+    await mouse.moveTo(onMap(tester, spain) + const Offset(3, 2));
+    await tester.pump();
+
+    expect(painter(tester).hovered, 'ESP');
+    expect(tester.getTopLeft(label), before.$1 + const Offset(3, 2));
+    expect(identical(picture(), before.$2), isTrue);
   });
 
   testWidgets('screen readers get one summary and a View as list action '
