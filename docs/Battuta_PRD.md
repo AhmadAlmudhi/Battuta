@@ -6,7 +6,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Field | Value |
 | --- | --- |
-| Version | 1.23 |
+| Version | 1.24 |
 | Status | Ready for development |
 | Date | 4 November 2026 |
 | Production platform | Web, at `battuta-travel.web.app` |
@@ -17,6 +17,7 @@ A local-first app for exploring countries, recording trips, and planning the nex
 
 | Version | Date | Change |
 | --- | --- | --- |
+| 1.24 | 4 Nov 2026 | Shorter first-time freezes on web. Once per visit, while the app is idle, it draws what opening a country draws, too faint to see, so the browser compiles those shaders before the first tap (D-14). |
 | 1.23 | 4 Nov 2026 | Smoother on devices without a fast GPU. The web app draws at most 2 pixels per CSS pixel (D-13); hovering over the world map moves only the country's label instead of repainting the map; and Explore no longer rebuilds when the screen's size or the keyboard changes. A performance test level is added (section 12.1). |
 | 1.22 | 28 Oct 2026 | Quick select on Explore: pick several countries and mark them all as visited at once, with one Undo (FR-EXP-13, AC-EXP-07). |
 | 1.21 | 28 Oct 2026 | Explore's default order is Most visited: countries ranked by international tourist arrivals, so the countries people have most likely been to come first (FR-EXP-08). The figures come from the World Bank and UN Tourism, bundled with the app (section 8.8), and About credits them (FR-SET-04). |
@@ -248,6 +249,7 @@ Release 1.0 is accepted when all of the following are true:
 | D-11 | The world map is drawn by the app from Natural Earth's 1:10m Saudi point-of-view edition, bundled with each build (section 8.7). | No map service, API key, or network use, so the map works offline and stays free. This edition includes every small country tested, makes the smallest complete map file, and draws disputed borders as recognized in the app's main region. Somaliland and Northern Cyprus are part of Somalia and Cyprus, which matches the dataset (section 8.1). Western Sahara is drawn as part of Morocco, so it has no shape of its own, though it still counts in Stats when marked as visited. Israel's area is drawn as Palestine (D-12). |
 | D-12 | The app leaves out Israel. It isn't in the country data, Explore, Stats, or any country's neighbors, and the map draws its area as Palestine. | Follows the map's point of view (D-11). The parser skips Israel the way it skips records without ISO codes (section 8.1), so neither the bundled data nor a refresh brings it back, and data saved before this decision loses it at the next launch. The Israeli new shekel, which the data lists among Palestine's currencies, is left out too, so no screen or filter shows it. |
 | D-13 | The web app draws at most 2 device pixels per CSS pixel, on every device. On sharper screens, most phones at 2.6× to 3.5×, the browser scales the canvas up. | Painting cost grows with pixels. Measured in Chrome without a GPU, scrolling Explore on a 2.6× to 3× phone screen had 24 to 42% of frames late (40 to 48 fps); capped at 2×, 0 to 2% (58 to 60 fps). Text on screens sharper than 2× is slightly softer. |
+| D-14 | On web, once per visit and while nobody is touching the app, it draws for one frame each, at 1/255 opacity, Country details in its page transition and settled, a flag mid-flight, and Explore's cards in quick select and under a transition. The browser compiles their shaders then, not on the first tap. The world map is left out. | A browser compiles each graphics shader the first time it's used. Measured without a GPU, the first open of a country froze for 333 to 467 ms; with the warm-up, 100 to 183 ms, and going back fell from 150 to 200 ms to 100 to 117 ms. Drawn this way the map compiles other shaders than on screen, and loading it early made Stats' first frame slower. Browsers with a GPU keep compiled shaders between visits, so for them it mainly helps the first visit; Android and iOS compile shaders ahead of time and skip it. |
 
 ## 4. Users
 
